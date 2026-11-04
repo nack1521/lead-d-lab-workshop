@@ -121,6 +121,16 @@ C0 setup/research เสร็จในขอบเขตนี้; application 
 - Direct Product Figma setup remains incomplete: connection approval settled interrupted. Completing it needs user action in Product profile; Coordinator read access and local Product draft are verified separately
 - No Figma canvas write, app code, Docker/DB setup or cloud deployment in this phase
 
+## Product Figma direct read — verified after user authorization
+- User reported Product Figma connection completed; no new install/login flow was initiated by AI
+- Coordinator ran actual profile-scoped checks at 2026-11-04T15:01:56+07:00: enabled Figma configuration and successful connection/tool discovery in lead-d-product
+- Product canonical Bot Chat directly listed pages and read metadata of 0:1, 1:2 and 1:3 in exact file RUOnC9Q15LA7DCc6rzhZtN at 15:02 (+07). All succeeded; XML showed canvases without child elements in this observation
+- Product wrote docs/product/FIGMA-READ-VERIFICATION.md with arguments, direct results, request IDs and observed timestamps. Coordinator read the report and audited the last-turn session export: exactly four Figma calls, all get_metadata on the correct file, no canvas write calls
+- Resolved the direct-read blocker in INSTALLATION-VERIFICATION and the current-status banner of FIGMA-DISCOVERY. Preserved the historical failure context rather than pretending the first attempt succeeded
+- Raw session export remains ignored in .research; no tokens or raw private transcript added to Git
+- Design flow remains DRAFT; no screenshot/visual inspection, Figma canvas writes, application implementation, DB/realtime tests or deployment in this turn
+- Next human gate: approve low-fidelity frame scope/flow and explicitly authorize writing to the selected Figma page before drawing there
+
 ## Template สำหรับรอบถัดไป
 - Cycle/task ID และ timestamp
 - คำขอ/ปัญหา

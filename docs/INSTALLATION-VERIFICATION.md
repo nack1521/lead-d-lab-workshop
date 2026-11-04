@@ -22,9 +22,10 @@ The supported connection tool installed Figma into the current Coordinator profi
 - 1:3 — 03 UI & Handoff
 Each queried page returned a canvas with no child elements in metadata. No implemented UI design was inspected, generated or written. No use_figma/create_session or other canvas write was called.
 
-## Product connection blocker
-Coordinator installation does not provision Product profile automatically. A separate Product Bot invocation correctly called the supported connection tool for its own profile, but that approval operation settled as interrupted/not_connected; CLI call timed out. Read-back still shows no native MCP in lead-d-product. This is NOT a completed Product Figma setup. Do not copy OAuth token files or hand-edit mcp_servers to bypass it.
-Product may analyse this verified local metadata as Coordinator-provided evidence, but must not claim it called Figma itself. Completing Product's direct connection requires a fresh user-requested connection step in Product's profile/UI.
+## Product connection — blocker resolved
+Earlier Product provisioning was interrupted/not_connected; Coordinator installation did not provision Product automatically. The user subsequently completed Product authorization.
+Verification on 2026-11-04 (+07): `hermes -p lead-d-product mcp list` lists enabled Figma; `mcp test figma` connected and discovered 43 tools. Product canonical Bot Chat then directly called get_metadata four times: list pages, then 0:1, 1:2 and 1:3 in file RUOnC9Q15LA7DCc6rzhZtN. All reads succeeded. Coordinator audited the exported last-turn tool calls and read back the generated report.
+Evidence: docs/product/FIGMA-READ-VERIFICATION.md. The read-only access blocker is resolved for this file; no write capability/permission or canvas-edit approval is asserted. No credential files were copied or config hand-edited.
 
 ## GitHub MCP attempt
 User asked whether their GitHub MCP could be used. Tool search and inspected profiles did not expose it. A supported MCP installation attempt for `github` returned unknown catalog entry. Do not install a guessed community server. Authenticated gh is available and sufficient for the authorized repository operations; GitHub MCP remains not installed in this profile.

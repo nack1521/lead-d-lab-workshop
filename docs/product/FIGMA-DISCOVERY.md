@@ -1,7 +1,7 @@
 # Figma Discovery — Local Design Brief
 
 สถานะ: DRAFT — รอผู้ใช้อนุมัติ flow และขอบเขต frame ก่อนดำเนินการออกแบบใน canvas
-Product direct Figma: **BLOCKED**
+Product direct Figma: **READ VERIFIED** เมื่อ 2026-11-04 เวลา 15:02 (+07) — ดู [หลักฐานการอ่านโดย Product โดยตรง](FIGMA-READ-VERIFICATION.md). Design brief ยังเป็น DRAFT และยังไม่อนุมัติ canvas writes
 
 เอกสารนี้เป็น local design brief เท่านั้น ไม่ใช่ผลตรวจ canvas โดย Product ไม่ใช่ UI ที่สร้างแล้ว และไม่ใช่ผลทดสอบ application
 
@@ -24,7 +24,7 @@ Product direct Figma: **BLOCKED**
 
 URL node-id `1-3` ถูกแทนด้วย `1:3` ตาม schema ในการตรวจที่เอกสารบันทึกไว้ ทั้งสาม page ว่างตาม metadata ที่ Coordinator อ่านในครั้งนั้น ไม่ใช่ข้อยืนยันสภาพไฟล์ปัจจุบันจากการเรียกใหม่ และไม่ใช่การตรวจ screenshot
 
-Product ไม่ได้เรียก Figma สำเร็จด้วยตนเอง: รอบเชื่อมต่อก่อนหน้าจบแบบ interrupted/not_connected และเอกสารระบุว่ายังไม่มี native MCP ใน profile `lead-d-product` จึงยัง **BLOCKED** สำหรับ direct access การเชื่อมของ Coordinator ไม่ได้ provision Product อัตโนมัติ
+สถานะตอนจัดทำ brief ครั้งแรก: Product direct access เคย **BLOCKED** เพราะรอบเชื่อมต่อ interrupted/not_connected. ต่อมาผู้ใช้เชื่อม profile `lead-d-product` สำเร็จ และ Product เรียก get_metadata ของไฟล์/pages โดยตรงผ่านแล้วตาม FIGMA-READ-VERIFICATION.md; ไม่ได้คัดลอก credentials จาก Coordinator และยังไม่มี canvas writes
 
 ### การดำเนินการในงานนี้
 

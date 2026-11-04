@@ -113,7 +113,12 @@ C0 setup/research เสร็จในขอบเขตนี้; application 
 - Separate Product profile installation was interrupted/not_connected and CLI timed out. Direct Product Figma remains BLOCKED; do not claim it is configured. No repeat connection prompt or credential-copy workaround
 - Product subsequently wrote docs/product/FIGMA-DISCOVERY.md from Coordinator-supplied local evidence, distinguishing its own lack of direct access and drafting flows/states only
 - GitHub MCP catalog install returned unknown entry; used authenticated gh for repository operations instead of an unreviewed server
-- Evidence: docs/INSTALLATION-VERIFICATION.md. External repo URL/commit verification will be recorded after actual create/push and read-back
+- Evidence: docs/INSTALLATION-VERIFICATION.md. Created public repository https://github.com/nack1521/lead-d-lab-workshop after explicit user selection; pushed actual foundation and Product draft commits
+- Verified GitHub visibility PUBLIC, default branch main and exact remote SHA matching local HEAD at 04c6ebdd8e83aa7ef9f48bae7d027645d2c520fa after first push. Commits: 0938fc9 foundation; 04c6ebd Product discovery. Subsequent verification-log commit is expected, not a rewritten history
+- Checked tracked inventory: 65 paths after Product commit; no interview PDF, .research, .env/auth files tracked. High-confidence secret-pattern scan reported no matches; this is not a comprehensive security certification
+- git diff --check flagged an existing extra blank line in vendored Unslop license; retained upstream license bytes to preserve provenance/hash rather than changing legal text for formatting
+- GitHub MCP could not be installed from current managed catalog (unknown entry); gh user-authenticated path created/verified the repo successfully
+- Direct Product Figma setup remains incomplete: connection approval settled interrupted. Completing it needs user action in Product profile; Coordinator read access and local Product draft are verified separately
 - No Figma canvas write, app code, Docker/DB setup or cloud deployment in this phase
 
 ## Template สำหรับรอบถัดไป

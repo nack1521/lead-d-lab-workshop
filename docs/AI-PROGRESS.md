@@ -131,6 +131,13 @@ C0 setup/research เสร็จในขอบเขตนี้; application 
 - Design flow remains DRAFT; no screenshot/visual inspection, Figma canvas writes, application implementation, DB/realtime tests or deployment in this turn
 - Next human gate: approve low-fidelity frame scope/flow and explicitly authorize writing to the selected Figma page before drawing there
 
+## Product Figma connection reconfirmation
+- 2026-11-04T17:09:07+07:00: Coordinator reconfirmed enabled Figma MCP in lead-d-product and successful connection discovery
+- Product canonical Bot Chat made one fresh get_metadata call on file RUOnC9Q15LA7DCc6rzhZtN, node 1:3; returned exact page name 03 UI & Handoff with no child elements in metadata. Request ID: 608a971d-af14-498b-83f2-483e7c039d23
+- Coordinator audited the last-turn exported tool result rather than relying only on the bot summary. Raw export remains ignored under .research
+- Existing verification commit 84c1dac was already present and matched GitHub main when checked; preserved prior work and added only this reconfirmation
+- No installation, credential edits, Figma canvas writes or app implementation. Next gate remains user approval of low-fidelity scope and explicit canvas-write authorization
+
 ## Template สำหรับรอบถัดไป
 - Cycle/task ID และ timestamp
 - คำขอ/ปัญหา

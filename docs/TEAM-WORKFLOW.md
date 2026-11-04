@@ -1,6 +1,6 @@
 # Lean team — Cycle-based workflow
 
-สถานะ: ผู้ใช้เลือกทีม A และ stack ตาม docs/STACK-DECISION.md แล้ว; อนุมัติ public repository nack1521/lead-d-lab-workshop และอ่าน Figma เท่านั้น ยังไม่อนุมัติ cloud resource/deployment หรือ canvas writes
+สถานะ: ผู้ใช้เลือกทีม A และ stack ตาม docs/STACK-DECISION.md แล้ว; อนุมัติ public repository nack1521/lead-d-lab-workshop และ canvas writes เฉพาะ WF-01 บนหน้า 1:2 ตาม docs/handoffs/product-WF-01.md แล้ว; สร้างแล้ว รอ human review/acceptance ยังไม่อนุมัติ cloud resource/deployment หรือการเขียนหน้าอื่น
 
 ## Ownership
 | ผู้รับผิดชอบ | หน้าที่ | ผลลัพธ์/พื้นที่เขียน |

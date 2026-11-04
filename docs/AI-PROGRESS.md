@@ -138,6 +138,20 @@ C0 setup/research เสร็จในขอบเขตนี้; application 
 - Existing verification commit 84c1dac was already present and matched GitHub main when checked; preserved prior work and added only this reconfirmation
 - No installation, credential edits, Figma canvas writes or app implementation. Next gate remains user approval of low-fidelity scope and explicit canvas-write authorization
 
+## WF-01 — Native wireframes, review → fix → retest
+- Human decision: ผู้ใช้อนุมัติ wireframes ขาวดำเฉพาะ page 1:2; ไม่อนุมัติหน้าอื่น, global libraries/styles, application coding หรือ deployment
+- Product สร้าง native editable Figma root 7:2 ใน file RUOnC9Q15LA7DCc6rzhZtN: P01–P10, F01–F06, H01–H03. F04 overflow ถูกแก้ในรอบสร้างก่อน export; Figma session 5f055c96-aa57-4ffc-9aa9-107485c70985
+- Product build command timeout ไม่ได้แปลว่า canvas ว่าง: Coordinator อ่าน actual metadata และ raw tool returns ก่อนดำเนินการต่อ ไม่สั่งสร้างซ้ำ. Product documentation subprocess ภายหลังถูก interrupt โดยไม่มี delivery files; Coordinator รวมเอกสารเองโดยระบุ authorship ตามจริง
+- Coordinator parse actual tool results เป็น structure.json; แก้ derived role counter จาก substring ที่ได้ P12 ผิด เป็น anchored screen-code regex ได้ P10/F6/H3 รวม19; เก็บ actual created IDs330. ไม่แก้ raw tool outputเพื่อให้ตัวเลขดูตรง
+- Senior Tester อ่าน checklist/structure และโหลดภาพจริงสาม role; พบ2 Should fix: inventory mismatch และ closed/reconnect outcome specification ไม่ครบ. คงรายงานแรกไว้เป็นประวัติ ไม่ลบ findings ย้อนหลัง
+- Coordinator แก้ annotation เฉพาะ text nodes7:124 และ7:136 ภายใน scopeเดิม: closed+confirmed saved / confirmed no answer / unknown; ห้ามส่งซ้ำอัตโนมัติ. Mutation request7d2608d7-c1fb-4fba-a4e0-d6536f7d27a5
+- อ่าน Figma กลับจริงหลังแก้ (request1a2cd083-6151-467e-8582-55aa9dc83b67): root parent1:2,19screens,330nodes,0image-filled nodes; P08/P09 descendant bounds overflow[]. นับชนิดได้101FRAME/195TEXT/3COMPONENT/22INSTANCE/9RECTANGLE. เป็น structural/design evidence ไม่ใช่ app runtime
+- หลังแก้อ่าน pages0:1/1:3 ยังไม่มี child elements เช่นเดียวกับก่อนสร้าง; ไม่มี full before/after property/global-style audit จึงยังมีขอบเขต NOT REVIEWED ตรงนี้ ไม่อ้างว่าพิสูจน์ทุก property
+- 2026-11-04 17:38:04+07: Senior Tester targeted retest ด้วยภาพหลังแก้และ cropsP08/P09 + read-back summary สรุป finding1–2 RESOLVED เฉพาะ design artifact. Coordinator อ่านรายงานและ audit actual vision tool calls จาก canonical QA sessionแล้ว
+- Artifacts: docs/handoffs/product-WF-01.md; docs/product/WF-01-DELIVERY.md; WF-01-NODES.json; evidence/WF-01/{structure.json,qa-fix-readback.json,participant.png,participant-after-fix.png,facilitator.png,hr-summary.png}; docs/qa/WF-01-DESIGN-{CHECKLIST,REVIEW,RETEST}.md
+- Screens เป็น annotated flows ไม่ใช่ clickable prototype. ตัวเลขในภาพเป็น design examples; ไม่มีผู้ร่วมจริงหรือ fake runtime success. ยังไม่มีแอป/DB/realtime/load/security/mobile/accessibility execution, live URL หรือวิดีโอ
+- Next gate: ผู้ใช้ review/accept direction และ policy decisions; ไม่เริ่ม visual polish หรือ Antigravity coding อัตโนมัติ. เตรียม coherent checkpoint commit/push ตามคำขอเก็บประวัติ; ผล remote verification ตรวจแยกหลัง commit ไม่แต่ง hash ล่วงหน้า
+
 ## Template สำหรับรอบถัดไป
 - Cycle/task ID และ timestamp
 - คำขอ/ปัญหา

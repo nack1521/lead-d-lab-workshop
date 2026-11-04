@@ -13,6 +13,6 @@ Read-back after initial push: GitHub main SHA 04c6ebdd8e83aa7ef9f48bae7d027645d2
 
 Excluded from tracked files: interview PDF, .research reference clones/install downloads/session trace, secrets and raw private artifacts. A pattern scan found no high-confidence credential strings; no claim of exhaustive security review.
 
-This repository currently contains project foundation, curated skill snapshots, verified setup notes and a draft Product flow inventory. It is not yet a running app, deployed service or approved Figma design.
+This repository contains project foundation, curated skill snapshots, verified setup notes, WF-01 native Figma wireframe inventory/screenshots and Senior Tester design review/retest. Wireframes are ready for human review, not user-accepted final UI. It is not yet a running app or deployed service. See docs/product/WF-01-DELIVERY.md for exact links and evidence limitations.
 
 Backup rule: commit coherent work batches and push/read back exact target SHA. Local-only commits are not off-device backup. No force-push/squash of development history.

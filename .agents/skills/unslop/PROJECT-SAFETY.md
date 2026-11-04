@@ -1,0 +1,4 @@
+# Project safety and adaptation
+Unslop by Damir Sokolovsky (@heydamir), https://github.com/heydamir/unslop, CC BY 4.0.
+This copy preserves upstream instructions, references and artwork. Executable helpers and host-specific agents metadata are excluded deliberately. Do not execute snapshot.mjs/story.mjs: they are not installed or approved. Use the IDE browser tools for existing app screenshots. Installing helpers, dependencies or paid image services requires a separate review/approval.
+Use real application data or explicitly labelled design fixtures, never fictional runtime evidence. Keep Thai typography readable and mobile touch targets practical; aesthetic rules never override accessibility. Hermes audits only; Antigravity edits code. The optional short Unslop story is NOT the required unedited 5–8 minute interview video.

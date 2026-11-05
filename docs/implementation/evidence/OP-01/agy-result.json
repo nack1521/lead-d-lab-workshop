@@ -1,0 +1,16 @@
+{
+  "conversation_id": "9b5e0289-c9f1-4b9a-a74b-9fbfa8ede331",
+  "status": "ERROR",
+  "response": "",
+  "error": "failed to send message: not_found: trajectory not found: 9b5e0289-c9f1-4b9a-a74b-9fbfa8ede331: not found",
+  "duration_seconds": 0,
+  "num_turns": 0,
+  "usage": {
+    "input_tokens": 0,
+    "output_tokens": 0,
+    "thinking_tokens": 0,
+    "cache_read_tokens": 0,
+    "total_tokens": 0
+  },
+  "finished_reason": "error"
+}

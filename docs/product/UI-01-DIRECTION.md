@@ -5,6 +5,8 @@
 
 ผู้จัดทำ: lead-d-setup / Coordinator. เป็น Coordinator draft ไม่อ้างว่า Product Bot หรือ Senior Tester รับรองแล้ว
 
+**เกณฑ์เพิ่มจากผู้ใช้:** ออกแบบให้มนุษย์ใช้และชอบ ไม่ตาม template ที่ AI ถนัด. ใช้ [Unslop + human-validation addendum](UI-01-UNSLOP-HUMAN-CENTERED.md) ก่อนเลือก direction; A/B/C ยังเป็น exploration ไม่ใช่ผล user validation หรือการอนุมัติให้เลือกสีแล้วเริ่มสร้าง
+
 ## 1. Outcome และฐานที่คงไว้
 เลือก character, visual hierarchy และ component language ที่ใช้ร่วมกันใน participant mobile, facilitator desktop และ HR summary โดยไม่เปลี่ยน flow ที่ผู้ใช้ยืนยันแล้ว
 

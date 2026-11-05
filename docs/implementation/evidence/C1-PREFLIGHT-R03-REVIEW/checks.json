@@ -1,0 +1,83 @@
+{
+  "review_id": "C1-PREFLIGHT-R03-REVIEW",
+  "observed_at": "2026-11-05T14:11:17+07:00",
+  "head_at_review": "69be2aa13139c730ad3c26172a03bd9ecfe36346",
+  "source_run": "R03",
+  "case_count": 16,
+  "all_runtime_cases": "NOT RUN",
+  "head_matches_report": true,
+  "protected_hashes": {
+    "docs/AI-PROGRESS.md": "d28a75f17c43a7d7a48709e546d6125ec777d72f04b10fa83f401b0fcb384754",
+    "docs/handoffs/ANTIGRAVITY-C1.md": "d361d2deac8b7fccf1e2f365372d8318c5b11b470722c052e197e10231b5770b"
+  },
+  "network_metadata": {
+    "plugin": {
+      "url": "https://registry.npmjs.org/%40vitejs%2Fplugin-react/4.7.0",
+      "version": "4.7.0",
+      "peerDependencies": {
+        "vite": "^4.2.0 || ^5.0.0 || ^6.0.0 || ^7.0.0"
+      },
+      "engines": {
+        "node": "^14.18.0 || >=16.0.0"
+      }
+    },
+    "vite": {
+      "url": "https://registry.npmjs.org/vite/6.4.5",
+      "version": "6.4.5",
+      "peerDependencies": {
+        "tsx": "^4.8.1",
+        "jiti": ">=1.21.0",
+        "less": "*",
+        "sass": "*",
+        "yaml": "^2.4.2",
+        "stylus": "*",
+        "terser": "^5.16.0",
+        "sugarss": "*",
+        "@types/node": "^18.0.0 || ^20.0.0 || >=22.0.0",
+        "lightningcss": "^1.21.0",
+        "sass-embedded": "*"
+      },
+      "engines": {
+        "node": "^18.0.0 || ^20.0.0 || >=22.0.0"
+      }
+    },
+    "postgres_image": {
+      "url": "https://hub.docker.com/v2/repositories/library/postgres/tags/16.15-alpine",
+      "tag": "16.15-alpine",
+      "status": "active",
+      "target_platforms": [
+        {
+          "os": "linux",
+          "architecture": "amd64",
+          "variant": null
+        },
+        {
+          "os": "linux",
+          "architecture": "arm64",
+          "variant": "v8"
+        }
+      ]
+    },
+    "plugin_advisories": {
+      "url": "https://api.github.com/advisories?ecosystem=npm&affects=%40vitejs%2Fplugin-react%404.7.0&per_page=100",
+      "count": 0,
+      "pagination_link": "",
+      "ids": []
+    }
+  },
+  "root_app_manifests_present": {
+    "package.json": false,
+    "bun.lock": false,
+    "compose.yaml": false
+  },
+  "skill_usage_count": 5,
+  "skill_activation_independently_verified": false,
+  "review_outcome": "READY_FOR_HUMAN_BUILD_APPROVAL",
+  "human_build_approved": false,
+  "limitations": [
+    "no install/build/runtime tests",
+    "no full transitive/container scan",
+    "no pulled image digest",
+    "skill activation evidence is self-referential report, not an independent IDE trace"
+  ]
+}

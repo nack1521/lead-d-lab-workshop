@@ -1,0 +1,197 @@
+{
+  "schema_version": 1,
+  "task_id": "C1-PREFLIGHT-FOLLOWUP",
+  "run_id": "R03",
+  "reported_at": "2026-11-05T14:10:00+07:00",
+  "producer": "Antigravity IDE (model: gemini-3.8-flash-high)",
+  "source_kind": "direct",
+  "task_baseline_commit": "29b40dbdb55c518546dac266911e2d18a6ef7fa2",
+  "baseline_commit": "69be2aa13139c730ad3c26172a03bd9ecfe36346",
+  "observed_head": "69be2aa13139c730ad3c26172a03bd9ecfe36346",
+  "dirty_paths": [
+    "docs/AI-PROGRESS.md",
+    "docs/handoffs/ANTIGRAVITY-C1.md"
+  ],
+  "work_kind": "preflight_revision",
+  "status": "READY_FOR_REVIEW",
+  "summary": "แก้ findings C1-PF-REV-05 (plugin-react@4.7.0 peer กับ Vite 6), REV-06 (postgres:16.15-alpine ปิด CVE-2025-4207), REV-07 (บันทึก Git HEAD จริง 69be2aa แยกจาก task baseline เดิม), บันทึก skill_usage (ponytail applied, อื่นๆ deferred); runtime C1-01–C1-16 ยังคง NOT RUN",
+  "detail_path": "docs/results/C1-PREFLIGHT-FOLLOWUP/R03/result.md",
+  "cases": [
+    {
+      "case_id": "C1-01",
+      "mode_a": "NOT RUN",
+      "mode_b": "NOT RUN",
+      "evidence_paths": []
+    },
+    {
+      "case_id": "C1-02",
+      "mode_a": "NOT RUN",
+      "mode_b": "NOT RUN",
+      "evidence_paths": []
+    },
+    {
+      "case_id": "C1-03",
+      "mode_a": "NOT RUN",
+      "mode_b": "NOT RUN",
+      "evidence_paths": []
+    },
+    {
+      "case_id": "C1-04",
+      "mode_a": "NOT RUN",
+      "mode_b": "NOT RUN",
+      "evidence_paths": []
+    },
+    {
+      "case_id": "C1-05",
+      "mode_a": "NOT RUN",
+      "mode_b": "NOT RUN",
+      "evidence_paths": []
+    },
+    {
+      "case_id": "C1-06",
+      "mode_a": "NOT RUN",
+      "mode_b": "NOT RUN",
+      "evidence_paths": []
+    },
+    {
+      "case_id": "C1-07",
+      "mode_a": "NOT RUN",
+      "mode_b": "NOT RUN",
+      "evidence_paths": []
+    },
+    {
+      "case_id": "C1-08",
+      "mode_a": "NOT RUN",
+      "mode_b": "NOT RUN",
+      "evidence_paths": []
+    },
+    {
+      "case_id": "C1-09",
+      "mode_a": "NOT RUN",
+      "mode_b": "NOT RUN",
+      "evidence_paths": []
+    },
+    {
+      "case_id": "C1-10",
+      "mode_a": "NOT RUN",
+      "mode_b": "NOT RUN",
+      "evidence_paths": []
+    },
+    {
+      "case_id": "C1-11",
+      "mode_a": "NOT RUN",
+      "mode_b": "NOT RUN",
+      "evidence_paths": []
+    },
+    {
+      "case_id": "C1-12",
+      "mode_a": "NOT RUN",
+      "mode_b": "NOT RUN",
+      "evidence_paths": []
+    },
+    {
+      "case_id": "C1-13",
+      "mode_a": "NOT RUN",
+      "mode_b": "NOT RUN",
+      "evidence_paths": []
+    },
+    {
+      "case_id": "C1-14",
+      "mode_a": "NOT RUN",
+      "mode_b": "NOT RUN",
+      "evidence_paths": []
+    },
+    {
+      "case_id": "C1-15",
+      "mode_a": "NOT RUN",
+      "mode_b": "NOT RUN",
+      "evidence_paths": []
+    },
+    {
+      "case_id": "C1-16",
+      "mode_a": "NOT RUN",
+      "mode_b": "NOT RUN",
+      "evidence_paths": []
+    }
+  ],
+  "review_findings_resolved": [
+    "C1-PF-REV-01",
+    "C1-PF-REV-02",
+    "C1-PF-REV-03",
+    "C1-PF-REV-04",
+    "C1-PF-REV-05",
+    "C1-PF-REV-06",
+    "C1-PF-REV-07"
+  ],
+  "skill_usage": [
+    {
+      "name": "ponytail",
+      "path": ".agents/skills/ponytail/SKILL.md",
+      "load_status": "ACTIVATED_WITH_EVIDENCE",
+      "applied_to": "C1-PF-REV-05, C1-PF-REV-06, C1-PF-REV-07 (minimal targeted revision)",
+      "evidence_paths": [
+        "docs/results/C1-PREFLIGHT-FOLLOWUP/R03/result.md"
+      ],
+      "limitation": "ใช้กับ preflight specification/decision เท่านั้น ยังไม่ใช่ application code diff"
+    },
+    {
+      "name": "tdd",
+      "path": ".agents/skills/tdd/SKILL.md",
+      "load_status": "READ_LOADED",
+      "applied_to": "ยังไม่ apply ใน R03",
+      "evidence_paths": [],
+      "limitation": "รอขั้นตอน Local Build ที่ได้รับอนุมัติ เพื่อเริ่มเขียน failing tests ตามลำดับ"
+    },
+    {
+      "name": "codebase-design",
+      "path": ".agents/skills/codebase-design/SKILL.md",
+      "load_status": "READ_LOADED",
+      "applied_to": "ยังไม่ apply ใน R03",
+      "evidence_paths": [],
+      "limitation": "ใช้จัดวาง module seams เมื่อเริ่มสร้าง apps/api และ apps/web"
+    },
+    {
+      "name": "diagnosing-bugs",
+      "path": ".agents/skills/diagnosing-bugs/SKILL.md",
+      "load_status": "READ_LOADED",
+      "applied_to": "ยังไม่ apply ใน R03",
+      "evidence_paths": [],
+      "limitation": "ใช้เมื่อพบข้อผิดพลาดหรือ bug runtime ในการรันแอป"
+    },
+    {
+      "name": "unslop",
+      "path": ".agents/skills/unslop/SKILL.md",
+      "load_status": "READ_LOADED",
+      "applied_to": "ยังไม่ apply ใน R03",
+      "evidence_paths": [],
+      "limitation": "พักไว้จนกว่าจะมี UI จริงและได้รับ visual direction"
+    }
+  ],
+  "blockers": [
+    "ยังไม่มี human approval ให้เริ่ม local build"
+  ],
+  "next_gate": "ผู้ใช้อนุมัติ technical choices / เริ่ม local build ใน IDE",
+  "independent_checks": [
+    {
+      "name": "git HEAD/status",
+      "outcome": "Observed HEAD 69be2aa13139c730ad3c26172a03bd9ecfe36346; dirty: docs/AI-PROGRESS.md, docs/handoffs/ANTIGRAVITY-C1.md",
+      "exit_code": 0
+    },
+    {
+      "name": "plugin-react 4.7.0 peerDependencies check",
+      "outcome": "peerDependencies.vite = '^4.2.0 || ^5.0.0 || ^6.0.0 || ^7.0.0', 0 advisories",
+      "exit_code": 0
+    },
+    {
+      "name": "Docker Hub postgres:16.15-alpine check",
+      "outcome": "tag active, multi-arch linux/amd64 and linux/arm64 verified, PostgreSQL CVE-2025-4207 fixed in 16.15",
+      "exit_code": 0
+    }
+  ],
+  "not_verified": [
+    "actual image sha256 digests (to be pulled and recorded upon build approval)",
+    "application runtime / tests (NOT RUN until build phase)"
+  ],
+  "human_build_approved": false,
+  "published": false
+}

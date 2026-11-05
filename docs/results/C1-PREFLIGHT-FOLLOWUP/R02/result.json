@@ -1,0 +1,154 @@
+{
+  "schema_version": 1,
+  "task_id": "C1-PREFLIGHT-FOLLOWUP",
+  "run_id": "R02",
+  "reported_at": "2026-11-05T13:42:00+07:00",
+  "producer": "Antigravity IDE",
+  "source_kind": "direct",
+  "baseline_commit": "29b40dbdb55c518546dac266911e2d18a6ef7fa2",
+  "work_kind": "preflight_revision",
+  "status": "READY_FOR_REVIEW",
+  "summary": "ตอบ findings C1-PF-REV-01 ถึง 04 ครบถ้วน: เสนอ exact safe pins ที่ตรวจ security advisory จริง (Vite 6.4.5, Elysia 1.4.31, Drizzle 0.45.4), กำหนด receipt access และ 15-min grace period หลัง session end, Unicode client fallback แบบไม่ block และ server-authoritative, structured application contract สำหรับ terminal non-save; C1 runtime ทุกเคสคง NOT RUN",
+  "detail_path": "docs/results/C1-PREFLIGHT-FOLLOWUP/R02/result.md",
+  "cases": [
+    {
+      "case_id": "C1-01",
+      "mode_a": "NOT RUN",
+      "mode_b": "NOT RUN",
+      "evidence_paths": []
+    },
+    {
+      "case_id": "C1-02",
+      "mode_a": "NOT RUN",
+      "mode_b": "NOT RUN",
+      "evidence_paths": []
+    },
+    {
+      "case_id": "C1-03",
+      "mode_a": "NOT RUN",
+      "mode_b": "NOT RUN",
+      "evidence_paths": []
+    },
+    {
+      "case_id": "C1-04",
+      "mode_a": "NOT RUN",
+      "mode_b": "NOT RUN",
+      "evidence_paths": []
+    },
+    {
+      "case_id": "C1-05",
+      "mode_a": "NOT RUN",
+      "mode_b": "NOT RUN",
+      "evidence_paths": []
+    },
+    {
+      "case_id": "C1-06",
+      "mode_a": "NOT RUN",
+      "mode_b": "NOT RUN",
+      "evidence_paths": []
+    },
+    {
+      "case_id": "C1-07",
+      "mode_a": "NOT RUN",
+      "mode_b": "NOT RUN",
+      "evidence_paths": []
+    },
+    {
+      "case_id": "C1-08",
+      "mode_a": "NOT RUN",
+      "mode_b": "NOT RUN",
+      "evidence_paths": []
+    },
+    {
+      "case_id": "C1-09",
+      "mode_a": "NOT RUN",
+      "mode_b": "NOT RUN",
+      "evidence_paths": []
+    },
+    {
+      "case_id": "C1-10",
+      "mode_a": "NOT RUN",
+      "mode_b": "NOT RUN",
+      "evidence_paths": []
+    },
+    {
+      "case_id": "C1-11",
+      "mode_a": "NOT RUN",
+      "mode_b": "NOT RUN",
+      "evidence_paths": []
+    },
+    {
+      "case_id": "C1-12",
+      "mode_a": "NOT RUN",
+      "mode_b": "NOT RUN",
+      "evidence_paths": []
+    },
+    {
+      "case_id": "C1-13",
+      "mode_a": "NOT RUN",
+      "mode_b": "NOT RUN",
+      "evidence_paths": []
+    },
+    {
+      "case_id": "C1-14",
+      "mode_a": "NOT RUN",
+      "mode_b": "NOT RUN",
+      "evidence_paths": []
+    },
+    {
+      "case_id": "C1-15",
+      "mode_a": "NOT RUN",
+      "mode_b": "NOT RUN",
+      "evidence_paths": []
+    },
+    {
+      "case_id": "C1-16",
+      "mode_a": "NOT RUN",
+      "mode_b": "NOT RUN",
+      "evidence_paths": []
+    }
+  ],
+  "review_findings_resolved": [
+    "C1-PF-REV-01",
+    "C1-PF-REV-02",
+    "C1-PF-REV-03",
+    "C1-PF-REV-04"
+  ],
+  "blockers": [
+    "ยังไม่มี human approval ให้เริ่ม local build"
+  ],
+  "next_gate": "ผู้ใช้อนุมัติ technical choices / เริ่ม local build ใน IDE",
+  "independent_checks": [
+    {
+      "name": "Vite GitHub Advisory scan",
+      "outcome": "vite@6.4.5 has 0 advisories (GHSA-356w-63v5-8wf4, GHSA-9jrq-w75r-8gcw, GHSA-8g5g-mxqh-grgj fixed)",
+      "exit_code": 0
+    },
+    {
+      "name": "Elysia GitHub Advisory scan",
+      "outcome": "elysia@1.4.31 has 0 advisories (GHSA-9643-4qgh-g8mx, GHSA-8hq9-phh3-p2wp, GHSA-f45g-68q3-5w8x, GHSA-8vch-m3f4-q8jf fixed)",
+      "exit_code": 0
+    },
+    {
+      "name": "Drizzle ORM GitHub Advisory scan",
+      "outcome": "drizzle-orm@0.45.4 has 0 advisories (GHSA-gpj5-g38j-94v9 fixed)",
+      "exit_code": 0
+    },
+    {
+      "name": "Supporting packages Advisory scan",
+      "outcome": "react@18.3.1 (0), react-dom@18.3.1 (0), @vitejs/plugin-react@6.2.1 (0), @elysiajs/cors@1.4.2 (0), postgres@3.4.5 (0)",
+      "exit_code": 0
+    },
+    {
+      "name": "Docker Hub multi-arch check",
+      "outcome": "postgres:16.8-alpine (arm64, amd64) and oven/bun:1.4.4-alpine (arm64, amd64) confirmed on Docker Hub registry",
+      "exit_code": 0
+    }
+  ],
+  "not_verified": [
+    "actual image sha256 digests (to be pulled and recorded upon build approval)",
+    "application runtime / tests (NOT RUN until build phase)"
+  ],
+  "human_build_approved": false,
+  "published": false
+}

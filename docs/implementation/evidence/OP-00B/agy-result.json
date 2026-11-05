@@ -1,0 +1,14 @@
+{
+  "conversation_id": "945b5285-f01d-48e2-a725-0e7dac41f4f5",
+  "status": "SUCCESS",
+  "response": "### Read-only OP-00B Smoke Verification\n\n- **Nonce**: `OP00B-LEADD-RO-1`\n- **Actual Working Directory**: `/Users/aiink/Nack/Lead+D-Lab`\n- **First Heading of [AGENTS.md](file:///Users/aiink/Nack/Lead+D-Lab/AGENTS.md#L1)**:\n  ```markdown\n  # Lead+D Lab — ข้อตกลงการทำงานร่วมกับ AI\n  ```\n- **Operational Status**: Strictly read-only smoke verification. No code generation, no package installation, and no file edits or modifications were performed. This is a standalone smoke conversation.\n",
+  "duration_seconds": 20.918206,
+  "num_turns": 1,
+  "usage": {
+    "input_tokens": 19961,
+    "output_tokens": 2287,
+    "thinking_tokens": 2093,
+    "cache_read_tokens": 0,
+    "total_tokens": 22248
+  }
+}

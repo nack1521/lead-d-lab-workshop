@@ -1,0 +1,46 @@
+{
+  "task": "OP-00/OP-00B",
+  "profile": "lead-d-impl",
+  "profileHome": "/Users/aiink/.hermes/profiles/lead-d-impl",
+  "workspace": "/Users/aiink/Nack/Lead+D-Lab",
+  "operatorSessionId": "local-ac9339f375542d16fc73efeeb1e5daf8096989074e7671b311ba3bf2fc5dd242",
+  "trial": "read-only CLI, not C1 implementation",
+  "initialAttempt": {
+    "exitCode": 2,
+    "reason": "--print-timeout 90 rejected before dispatch; missing duration unit"
+  },
+  "correctedAttempt": {
+    "exitCode": 0,
+    "requestedModel": "gemini-3.8-flash-high",
+    "durationFlag": "90s",
+    "mode": "plan",
+    "returnedStatus": "SUCCESS",
+    "conversationId": "945b5285-f01d-48e2-a725-0e7dac41f4f5",
+    "nonce": "OP00B-LEADD-RO-1",
+    "returnedWorkingDirectory": "/Users/aiink/Nack/Lead+D-Lab",
+    "returnedAgentsHeading": "# Lead+D Lab — ข้อตกลงการทำงานร่วมกับ AI",
+    "stdoutModelFieldPresent": false,
+    "modelEvidence": "Coordinator inspected raw CLI log: model=\"gemini-3.8-flash-high\" and Resolving model gemini-3.8-flash-high",
+    "projectEvidence": "CLI default project, not verified IDE C1 project/conversation binding"
+  },
+  "verification": {
+    "actualRawStdoutRead": true,
+    "actualCliLogReadFiltered": true,
+    "operatorCanonicalToolCallsAudited": true,
+    "preExistingFileHashesComparedAtSmokeEnd": 92,
+    "changedAtSmokeEnd": [],
+    "postVerificationCoordinatorEdit": "docs/team/lead-d-impl.md only among baseline files",
+    "existingDirtyHandoffAndProgressPreserved": true
+  },
+  "limitations": [
+    "Hermes wrapper returned timeout exit124 after evidence/report writes; raw agy subprocess completed exit0 and no matching operator process remained when checked.",
+    "No complete inner agy tool trace was available; response text and CLI config logs are not upstream model attestation or a permission sandbox.",
+    "No IDE C1 attach, coding, app tests, deployment or Group Chat membership change was performed by this trial.",
+    "Raw session/CLI logs remain ignored; account identifiers/auth metadata excluded from sanitized deliverables."
+  ],
+  "documents": [
+    "docs/team/lead-d-impl.md",
+    "docs/implementation/OP-00-SMOKE.md",
+    "docs/implementation/OP-00B-SMOKE.md"
+  ]
+}

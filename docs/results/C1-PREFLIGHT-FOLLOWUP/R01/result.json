@@ -1,0 +1,191 @@
+{
+  "schema_version": 1,
+  "task_id": "C1-PREFLIGHT-FOLLOWUP",
+  "run_id": "R01",
+  "reported_at": "2026-11-05T13:32:29+07:00",
+  "producer": "lead-d-setup (import and static review); source reporter: Antigravity IDE",
+  "source_kind": "imported_user_report",
+  "baseline_commit": "29b40dbdb55c518546dac266911e2d18a6ef7fa2",
+  "work_kind": "preflight",
+  "status": "CHANGES_REQUESTED",
+  "summary": "ได้รับคำตอบส่วนเติมครบ 6 หัวข้อ; ต้องแก้ version/security และระบุ receipt access หลังปิด session ก่อน build; C1 runtime ทุกเคส NOT RUN",
+  "detail_path": "docs/results/C1-PREFLIGHT-FOLLOWUP/R01/result.md",
+  "source_report_path": "docs/results/C1-PREFLIGHT-FOLLOWUP/R01/source-report.md",
+  "cases": [
+    {
+      "case_id": "C1-01",
+      "mode_a": "NOT RUN",
+      "mode_b": "NOT RUN",
+      "evidence_paths": []
+    },
+    {
+      "case_id": "C1-02",
+      "mode_a": "NOT RUN",
+      "mode_b": "NOT RUN",
+      "evidence_paths": []
+    },
+    {
+      "case_id": "C1-03",
+      "mode_a": "NOT RUN",
+      "mode_b": "NOT RUN",
+      "evidence_paths": []
+    },
+    {
+      "case_id": "C1-04",
+      "mode_a": "NOT RUN",
+      "mode_b": "NOT RUN",
+      "evidence_paths": []
+    },
+    {
+      "case_id": "C1-05",
+      "mode_a": "NOT RUN",
+      "mode_b": "NOT RUN",
+      "evidence_paths": []
+    },
+    {
+      "case_id": "C1-06",
+      "mode_a": "NOT RUN",
+      "mode_b": "NOT RUN",
+      "evidence_paths": []
+    },
+    {
+      "case_id": "C1-07",
+      "mode_a": "NOT RUN",
+      "mode_b": "NOT RUN",
+      "evidence_paths": []
+    },
+    {
+      "case_id": "C1-08",
+      "mode_a": "NOT RUN",
+      "mode_b": "NOT RUN",
+      "evidence_paths": []
+    },
+    {
+      "case_id": "C1-09",
+      "mode_a": "NOT RUN",
+      "mode_b": "NOT RUN",
+      "evidence_paths": []
+    },
+    {
+      "case_id": "C1-10",
+      "mode_a": "NOT RUN",
+      "mode_b": "NOT RUN",
+      "evidence_paths": []
+    },
+    {
+      "case_id": "C1-11",
+      "mode_a": "NOT RUN",
+      "mode_b": "NOT RUN",
+      "evidence_paths": []
+    },
+    {
+      "case_id": "C1-12",
+      "mode_a": "NOT RUN",
+      "mode_b": "NOT RUN",
+      "evidence_paths": []
+    },
+    {
+      "case_id": "C1-13",
+      "mode_a": "NOT RUN",
+      "mode_b": "NOT RUN",
+      "evidence_paths": []
+    },
+    {
+      "case_id": "C1-14",
+      "mode_a": "NOT RUN",
+      "mode_b": "NOT RUN",
+      "evidence_paths": []
+    },
+    {
+      "case_id": "C1-15",
+      "mode_a": "NOT RUN",
+      "mode_b": "NOT RUN",
+      "evidence_paths": []
+    },
+    {
+      "case_id": "C1-16",
+      "mode_a": "NOT RUN",
+      "mode_b": "NOT RUN",
+      "evidence_paths": []
+    }
+  ],
+  "followup_coverage": [
+    {
+      "item_id": "F01",
+      "status": "ANSWER_REPORTED"
+    },
+    {
+      "item_id": "F02",
+      "status": "ANSWER_REPORTED"
+    },
+    {
+      "item_id": "F03",
+      "status": "ANSWER_REPORTED"
+    },
+    {
+      "item_id": "F04",
+      "status": "ANSWER_REPORTED"
+    },
+    {
+      "item_id": "F05",
+      "status": "ANSWER_REPORTED"
+    },
+    {
+      "item_id": "F06",
+      "status": "ANSWER_REPORTED"
+    }
+  ],
+  "blockers": [
+    "C1-PF-REV-01: เปลี่ยน Vite 6.2.0 และตรวจ advisories/current compatible exact pins",
+    "C1-PF-REV-02: กำหนดสิทธิ์ reconcile receipt หลัง normal close/session end; แยกจาก security revocation",
+    "ยังไม่มี human approval ให้ local build"
+  ],
+  "review_findings": [
+    "C1-PF-REV-01",
+    "C1-PF-REV-02",
+    "C1-PF-REV-03",
+    "C1-PF-REV-04"
+  ],
+  "next_gate": "Antigravity อ่าน result protocol และแก้ preflight ใน R02 แบบเอกสารเท่านั้น; ผู้ใช้อนุมัติ technical choices/local build แยกภายหลัง",
+  "independent_checks": [
+    {
+      "name": "git HEAD/status",
+      "outcome": "matches reported baseline; two protected dirty docs"
+    },
+    {
+      "name": "bun --version",
+      "outcome": "1.4.4",
+      "exit_code": 0
+    },
+    {
+      "name": "Intl.Segmenter th grapheme examples",
+      "outcome": "น้ำ=1; family emoji=1; Thai flag=1; woman technologist with skin tone=1",
+      "exit_code": 0
+    },
+    {
+      "name": "Docker images through absolute bundled CLI path",
+      "outcome": "empty output",
+      "exit_code": 0
+    },
+    {
+      "name": "Docker server version",
+      "outcome": "29.9.2",
+      "exit_code": 0
+    },
+    {
+      "name": "Vite upstream advisory",
+      "outcome": "GHSA-356w-63v5-8wf4 affects >=6.2.0 <=6.2.5 when dev server exposed on network and running on Node/Bun",
+      "url": "https://github.com/vitejs/vite/security/advisories/GHSA-356w-63v5-8wf4"
+    }
+  ],
+  "not_verified": [
+    "IDE skill activation/tool history",
+    "all package compatibility/advisories",
+    "image architecture/digests",
+    "application persistence/realtime/auth/runtime",
+    "independent QA acceptance",
+    "current IDE has read the new result protocol"
+  ],
+  "human_build_approved": false,
+  "published": false
+}

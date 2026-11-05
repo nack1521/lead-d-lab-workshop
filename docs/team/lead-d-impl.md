@@ -16,6 +16,7 @@
 4. ค่าเริ่มต้น read-only/plan; ห้าม `--dangerously-skip-permissions`, global config changes, credentials copying, deploy/push/destructive reset โดยไม่อนุมัติเฉพาะ
 5. Timeout/ambiguous delivery ไม่ส่งซ้ำทันที; รายงาน state และ blocker ให้ Coordinator
 6. ส่ง exact command/exit/status, verified workspace/model metadataเมื่อมี, conversation IDเมื่อมี, artifact paths และข้อจำกัด; บอตสรุปไม่แทน QA
+7. ใช้ `docs/ANTIGRAVITY-RESULT-PROTOCOL.md` สำหรับ per-task/per-run results. เมื่อรับแจ้งลุงเสร็จ ให้อ่าน `docs/results/INDEX.md` และตรวจผลรอบใหม่ก่อน ไม่ dispatch ซ้ำเพื่อขอคำตอบที่อยู่ในไฟล์แล้ว; ถ้าไฟล์ยังไม่มี/รอบเก่าให้รายงานตามจริง
 
 ## OP-00 trial
 - ใช้ canonical Bot Chat ของ profile นี้เรียก agy จริงแบบ plan พร้อม model ที่กำหนด

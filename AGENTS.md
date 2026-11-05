@@ -35,6 +35,10 @@
 Project Lead อัปเดต `docs/AI-PROGRESS.md` หลังงานที่มีสาระ: request, AI contribution, human decision, changed artifacts, executed evidence, limitations, next gate
 บันทึกผลจริง ไม่แต่ง benchmark, เวลา/เงินที่ประหยัด, ผลทดสอบ หรือบทบาทของบอตที่ยังไม่ได้ทำงาน
 
+## ผลลัพธ์ของลุงตามรหัสเคส
+- ก่อนลุงส่งมอบคำตอบ/รายงาน รวม preflight, blocker และ fix/retest ให้อ่านและทำตาม `docs/ANTIGRAVITY-RESULT-PROTOCOL.md`: บันทึก detail+summary แยก task/run แล้วอัปเดต `docs/results/INDEX.md` เป็นขั้นตอนสุดท้าย
+- เมื่อผู้ใช้บอก “ลุงทำเสร็จแล้ว” ให้ Hermes อ่าน index และผลรอบใหม่ ตรวจหลักฐานเฉพาะเคส แทนการขอแปะบทสนทนาทั้งหมด ผล self-report ไม่ใช่ QA PASS หรือ approval ให้ build
+
 ## Stack status
 React บน Cloudflare เป็นทิศทางที่อนุมัติให้เดินหน้าเมื่อผ่าน verification
 ผู้ใช้เลือก React บน Cloudflare + Elysia/Bun บน Railway + PostgreSQL และยังไม่ใส่ Redis/BullMQ แล้ว ดู `docs/STACK-DECISION.md`; versions, ORM, auth และ origin topology ยังรอพิสูจน์/ตัดสินใจ การเลือก stack ไม่ใช่ approval ให้ deploy หรือเชื่อมบัญชี

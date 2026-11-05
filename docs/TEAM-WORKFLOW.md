@@ -27,6 +27,8 @@ WIP: implementation หนึ่ง task ต่อครั้งสำหรั
 ข้อความระหว่าง bots: task ID + concrete ask + allowed files + evidence path; ไม่ส่งบทสนทนาส่วนตัวทั้งฉบับ ไม่ ping-pong acknowledgements
 การประสานผ่าน local documents เป็นแหล่งความจริง ไม่พึ่ง bot memory อย่างเดียว
 
+เมื่อส่งมอบคำตอบของ Antigravity หรือรับแจ้ง “ลุงทำเสร็จแล้ว” ใช้ [Result protocol](ANTIGRAVITY-RESULT-PROTOCOL.md) และ [Results index](results/INDEX.md) เพื่ออ่านผลตาม task/run/case โดยไม่ต้องแปะรายงานเต็มซ้ำ; ไม่แทน independent QA หรือ human gate
+
 ## Release definition of done
 - ผู้ใช้ใหม่เข้าผ่านมือถือได้จริง; facilitator คุมได้; HR เห็นข้อมูลที่บันทึกจริง
 - 30 concurrent simulated participants ผ่านเกณฑ์ที่ตกลง; เก็บจำนวนและ latency จากการรันจริง

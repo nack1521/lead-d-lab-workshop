@@ -1,0 +1,424 @@
+{
+  "task_id": "UI-01",
+  "status": "DRAFT_FOR_USER_DECISION",
+  "observed_at": "2026-11-05T14:27:52+07:00",
+  "scope": "UX/UI direction documents only; no Figma/app changes; no build approval",
+  "palettes": {
+    "A": {
+      "name": "Workshop Clarity",
+      "accent": "#0F766E",
+      "background": "#F8FAFC",
+      "text": "#0F172A"
+    },
+    "B": {
+      "name": "Executive Focus",
+      "accent": "#1D4ED8",
+      "background": "#F8FAFC",
+      "text": "#0F172A"
+    },
+    "C": {
+      "name": "Warm Facilitation",
+      "accent": "#92400E",
+      "background": "#FFFBF5",
+      "text": "#292524"
+    }
+  },
+  "contrast_method": "WCAG relative sRGB luminance; (Llighter+0.05)/(Ldarker+0.05); static opaque color pairs only",
+  "contrast_checks": [
+    {
+      "direction": "A",
+      "pair": "body",
+      "foreground": "#0F172A",
+      "background": "#F8FAFC",
+      "ratio": 17.063,
+      "minimum": 4.5,
+      "pass": true
+    },
+    {
+      "direction": "A",
+      "pair": "muted",
+      "foreground": "#475569",
+      "background": "#FFFFFF",
+      "ratio": 7.578,
+      "minimum": 4.5,
+      "pass": true
+    },
+    {
+      "direction": "A",
+      "pair": "primary-button",
+      "foreground": "#FFFFFF",
+      "background": "#0F766E",
+      "ratio": 5.473,
+      "minimum": 4.5,
+      "pass": true
+    },
+    {
+      "direction": "A",
+      "pair": "accent-text",
+      "foreground": "#0F766E",
+      "background": "#FFFFFF",
+      "ratio": 5.473,
+      "minimum": 4.5,
+      "pass": true
+    },
+    {
+      "direction": "A",
+      "pair": "success",
+      "foreground": "#166534",
+      "background": "#F0FDF4",
+      "ratio": 6.812,
+      "minimum": 4.5,
+      "pass": true
+    },
+    {
+      "direction": "A",
+      "pair": "error",
+      "foreground": "#B91C1C",
+      "background": "#FEF2F2",
+      "ratio": 5.915,
+      "minimum": 4.5,
+      "pass": true
+    },
+    {
+      "direction": "A",
+      "pair": "warning",
+      "foreground": "#92400E",
+      "background": "#FFFBEB",
+      "ratio": 6.837,
+      "minimum": 4.5,
+      "pass": true
+    },
+    {
+      "direction": "A",
+      "pair": "unknown",
+      "foreground": "#475569",
+      "background": "#F1F5F9",
+      "ratio": 6.917,
+      "minimum": 4.5,
+      "pass": true
+    },
+    {
+      "direction": "A",
+      "pair": "control-border",
+      "foreground": "#64748B",
+      "background": "#FFFFFF",
+      "ratio": 4.759,
+      "minimum": 3,
+      "pass": true
+    },
+    {
+      "direction": "A",
+      "pair": "focus-ring",
+      "foreground": "#0F766E",
+      "background": "#F8FAFC",
+      "ratio": 5.231,
+      "minimum": 3,
+      "pass": true
+    },
+    {
+      "direction": "B",
+      "pair": "body",
+      "foreground": "#0F172A",
+      "background": "#F8FAFC",
+      "ratio": 17.063,
+      "minimum": 4.5,
+      "pass": true
+    },
+    {
+      "direction": "B",
+      "pair": "muted",
+      "foreground": "#475569",
+      "background": "#FFFFFF",
+      "ratio": 7.578,
+      "minimum": 4.5,
+      "pass": true
+    },
+    {
+      "direction": "B",
+      "pair": "primary-button",
+      "foreground": "#FFFFFF",
+      "background": "#1D4ED8",
+      "ratio": 6.702,
+      "minimum": 4.5,
+      "pass": true
+    },
+    {
+      "direction": "B",
+      "pair": "accent-text",
+      "foreground": "#1D4ED8",
+      "background": "#FFFFFF",
+      "ratio": 6.702,
+      "minimum": 4.5,
+      "pass": true
+    },
+    {
+      "direction": "B",
+      "pair": "success",
+      "foreground": "#166534",
+      "background": "#F0FDF4",
+      "ratio": 6.812,
+      "minimum": 4.5,
+      "pass": true
+    },
+    {
+      "direction": "B",
+      "pair": "error",
+      "foreground": "#B91C1C",
+      "background": "#FEF2F2",
+      "ratio": 5.915,
+      "minimum": 4.5,
+      "pass": true
+    },
+    {
+      "direction": "B",
+      "pair": "warning",
+      "foreground": "#92400E",
+      "background": "#FFFBEB",
+      "ratio": 6.837,
+      "minimum": 4.5,
+      "pass": true
+    },
+    {
+      "direction": "B",
+      "pair": "unknown",
+      "foreground": "#475569",
+      "background": "#F1F5F9",
+      "ratio": 6.917,
+      "minimum": 4.5,
+      "pass": true
+    },
+    {
+      "direction": "B",
+      "pair": "control-border",
+      "foreground": "#64748B",
+      "background": "#FFFFFF",
+      "ratio": 4.759,
+      "minimum": 3,
+      "pass": true
+    },
+    {
+      "direction": "B",
+      "pair": "focus-ring",
+      "foreground": "#1D4ED8",
+      "background": "#F8FAFC",
+      "ratio": 6.405,
+      "minimum": 3,
+      "pass": true
+    },
+    {
+      "direction": "C",
+      "pair": "body",
+      "foreground": "#292524",
+      "background": "#FFFBF5",
+      "ratio": 14.714,
+      "minimum": 4.5,
+      "pass": true
+    },
+    {
+      "direction": "C",
+      "pair": "muted",
+      "foreground": "#475569",
+      "background": "#FFFFFF",
+      "ratio": 7.578,
+      "minimum": 4.5,
+      "pass": true
+    },
+    {
+      "direction": "C",
+      "pair": "primary-button",
+      "foreground": "#FFFFFF",
+      "background": "#92400E",
+      "ratio": 7.09,
+      "minimum": 4.5,
+      "pass": true
+    },
+    {
+      "direction": "C",
+      "pair": "accent-text",
+      "foreground": "#92400E",
+      "background": "#FFFFFF",
+      "ratio": 7.09,
+      "minimum": 4.5,
+      "pass": true
+    },
+    {
+      "direction": "C",
+      "pair": "success",
+      "foreground": "#166534",
+      "background": "#F0FDF4",
+      "ratio": 6.812,
+      "minimum": 4.5,
+      "pass": true
+    },
+    {
+      "direction": "C",
+      "pair": "error",
+      "foreground": "#B91C1C",
+      "background": "#FEF2F2",
+      "ratio": 5.915,
+      "minimum": 4.5,
+      "pass": true
+    },
+    {
+      "direction": "C",
+      "pair": "warning",
+      "foreground": "#92400E",
+      "background": "#FFFBEB",
+      "ratio": 6.837,
+      "minimum": 4.5,
+      "pass": true
+    },
+    {
+      "direction": "C",
+      "pair": "unknown",
+      "foreground": "#475569",
+      "background": "#F1F5F9",
+      "ratio": 6.917,
+      "minimum": 4.5,
+      "pass": true
+    },
+    {
+      "direction": "C",
+      "pair": "control-border",
+      "foreground": "#64748B",
+      "background": "#FFFFFF",
+      "ratio": 4.759,
+      "minimum": 3,
+      "pass": true
+    },
+    {
+      "direction": "C",
+      "pair": "focus-ring",
+      "foreground": "#92400E",
+      "background": "#FFFBF5",
+      "ratio": 6.877,
+      "minimum": 3,
+      "pass": true
+    }
+  ],
+  "contrast_pair_count": 30,
+  "all_listed_pairs_pass": true,
+  "screens": [
+    {
+      "code": "P01",
+      "name": "Join",
+      "figma_node": "7:19"
+    },
+    {
+      "code": "P02",
+      "name": "Waiting",
+      "figma_node": "7:34"
+    },
+    {
+      "code": "P03",
+      "name": "Rating",
+      "figma_node": "7:46"
+    },
+    {
+      "code": "P04",
+      "name": "Poll",
+      "figma_node": "7:62"
+    },
+    {
+      "code": "P05",
+      "name": "Sending",
+      "figma_node": "7:75"
+    },
+    {
+      "code": "P06",
+      "name": "Saved",
+      "figma_node": "7:87"
+    },
+    {
+      "code": "P07",
+      "name": "Send error",
+      "figma_node": "7:99"
+    },
+    {
+      "code": "P08",
+      "name": "Reconnect unknown",
+      "figma_node": "7:113"
+    },
+    {
+      "code": "P09",
+      "name": "Closed",
+      "figma_node": "7:126"
+    },
+    {
+      "code": "P10",
+      "name": "Join error",
+      "figma_node": "7:140"
+    },
+    {
+      "code": "F01",
+      "name": "Lobby",
+      "figma_node": "7:158"
+    },
+    {
+      "code": "F02",
+      "name": "Live aggregate",
+      "figma_node": "7:172"
+    },
+    {
+      "code": "F03",
+      "name": "Zero responses",
+      "figma_node": "7:197"
+    },
+    {
+      "code": "F04",
+      "name": "Stale reconnect",
+      "figma_node": "7:211"
+    },
+    {
+      "code": "F05",
+      "name": "Close pending",
+      "figma_node": "7:240"
+    },
+    {
+      "code": "F06",
+      "name": "Session ended",
+      "figma_node": "7:256"
+    },
+    {
+      "code": "H01",
+      "name": "Post-session summary",
+      "figma_node": "7:271"
+    },
+    {
+      "code": "H02",
+      "name": "Empty summary",
+      "figma_node": "7:299"
+    },
+    {
+      "code": "H03",
+      "name": "Partial missing",
+      "figma_node": "7:315"
+    }
+  ],
+  "screen_count": 19,
+  "role_counts": {
+    "P": 10,
+    "F": 6,
+    "H": 3
+  },
+  "baseline_node_count": 350,
+  "baseline_source": "archived WF-01-R1 readback-final.json and WF-01-NODES.json stable screen IDs; not a fresh Figma read",
+  "mobile_rating_fit": {
+    "viewport": 320,
+    "side_padding": 16,
+    "available_width": 288,
+    "five_options_required_width": 272,
+    "fits_nominal_layout": true,
+    "runtime_zoom_keyboard_test": "NOT RUN"
+  },
+  "not_verified": [
+    "official DESIGN.md CLI lint: no normative DESIGN.md created and no install permitted",
+    "rendered UI/actual font/contrast over imagery",
+    "keyboard/screen reader/mobile/Safari/touch usability",
+    "live Figma canvas or click prototype",
+    "independent Product/QA sign-off",
+    "application implementation"
+  ],
+  "human_direction_approved": false,
+  "human_build_approved": false
+}

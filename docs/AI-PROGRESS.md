@@ -152,6 +152,19 @@ C0 setup/research เสร็จในขอบเขตนี้; application 
 - Screens เป็น annotated flows ไม่ใช่ clickable prototype. ตัวเลขในภาพเป็น design examples; ไม่มีผู้ร่วมจริงหรือ fake runtime success. ยังไม่มีแอป/DB/realtime/load/security/mobile/accessibility execution, live URL หรือวิดีโอ
 - Next gate: ผู้ใช้ review/accept direction และ policy decisions; ไม่เริ่ม visual polish หรือ Antigravity coding อัตโนมัติ. เตรียม coherent checkpoint commit/push ตามคำขอเก็บประวัติ; ผล remote verification ตรวจแยกหลัง commit ไม่แต่ง hash ล่วงหน้า
 
+## WF-01-R1 — Optional nickname / comment revision
+- 2026-11-05: ผู้ใช้ขอ P01 nickname(optional), P03/P04 textbox และปรับส่วนอื่นให้สอดคล้อง; ไม่ใช่คำขอเขียนแอปหรือ deploy
+- Coordinator ทำ design authoring โดยตรงผ่าน Figma MCP ภายใต้ page1:2/root7:2 เดิม; ไม่อ้าง Product Bot เป็นผู้แก้ revision นี้. เพิ่ม reusable nickname component+P10 instance และ textarea component+P04 instance รวม20native nodes;19screens เดิมไม่สร้างซ้ำ
+- เลือก optional comment เป็นข้อความประกอบ rating/poll ไม่ใช่ question typeใหม่; design default nickname40/comment500, whitespace-only=ไม่กรอก, inline validationไม่ตัดเงียบ. ตัวเลขนี้เป็นค่าเริ่มต้นที่ Coordinatorเลือกและผู้ใช้ปรับได้ ไม่อ้างผู้ใช้กำหนด
+- ปรับ P02/P10 nickname fallback/preserve/ชื่อซ้ำได้; P05–P09 answer+comment atomic intent, draft/reconnect/closed; F02/H01/H03 ไม่เผย nickname/raw comments และไม่ตี optional blank เป็น0/partial; privacy notice แจ้งความเสี่ยงระบุตัวตน
+- Mutation request e4f218a5-8b8d-4279-902c-c9705487205f; fresh read-back f066ccb4-1e2b-4dc1-857b-1fdc88785579:350nodes,105FRAME/207TEXT/5COMPONENT/24INSTANCE/9RECTANGLE,19screens P10/F6/H3,0image-filled nodes; Noto Sans Thai Bold/Regular ตามเดิม
+- Senior Tester ตรวจ actual screenshots ทั้ง3roles และ readback พบ2 findings: retry/key ambiguity และ whitespace rule ขาดในแบบ. Coordinator แก้6text nodes และ P03 spacing (request cc500cc0-893e-455f-a3ec-530604007e4b); แยก unchanged retry(key+payloadเดิม) จาก edited new submission หลัง terminal confirmed rejection/non-save และยังเปิด; unknownห้ามkeyใหม่
+- Final actual read-back d801c3ef-8484-42e6-af92-f7773002acad ยืนยันข้อความใหม่,350nodes/19screens และ screen bounds/adjacent-sibling overflow/overlapsว่าง. เก็บ JSON โดย parse actual MCP returns จาก session ไม่สร้าง API responses ปลอม; raw session และ signed screenshot URLs ไม่อยู่ในpublic artifacts
+- 2026-11-05 07:53:40+07 Senior Tester targeted retest สรุป2findings RESOLVED ระดับdesign/spec; Coordinatorอ่านรายงานและ audit actual vision calls4ครั้งรวม crops จากcanonical QA sessionแล้ว. คงรายงานรอบแรกไว้ ไม่แก้ findingsย้อนหลัง
+- Artifacts: docs/handoffs/product-WF-01-R1.md; docs/product/WF-01-R1-DELIVERY.md; docs/product/evidence/WF-01-R1/{readback.json,readback-final.json,participant.png,participant-final.png,facilitator.png,hr-summary.png}; docs/qa/WF-01-R1-DESIGN-{REVIEW,RETEST}.md. Baseline330nodesยังอยู่ในหลักฐานรอบเดิมและใส่ลิงก์revisionล่าสุดชัดเจน
+- ข้อจำกัด: static editable design ไม่ใช่ runtime; inline error variants,Unicode/IME,mobile keyboard,DBatomicity,serveridempotency,securityและaccessibilityยัง NOT RUN; full global-style/property auditยังไม่มี. ไม่มีapplication/test/deploycode. ร่างไม่รับรองข้ามrefresh/ปิดแท็บ; ไม่เพิ่มcommentwall/AI/rawexportโดยปริยาย
+- เก็บcheckpoint Gitตามที่ผู้ใช้ขอ; ตรวจremoteSHAหลังpushแยก. Next gate: ผู้ใช้reviewrevisionก่อนขยายรอบimplementation
+
 ## Template สำหรับรอบถัดไป
 - Cycle/task ID และ timestamp
 - คำขอ/ปัญหา

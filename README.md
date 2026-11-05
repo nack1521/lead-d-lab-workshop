@@ -12,6 +12,7 @@
 7. [Antigravity C1 handoff](docs/handoffs/ANTIGRAVITY-C1.md)
 8. [Setup verification](docs/SETUP-VERIFICATION.json)
 9. [WF-01 ส่งมอบ Figma wireframes](docs/product/WF-01-DELIVERY.md) / [Design review](docs/qa/WF-01-DESIGN-REVIEW.md) / [Targeted retest](docs/qa/WF-01-DESIGN-RETEST.md)
+10. [ล่าสุด WF-01-R1: nickname และ textbox](docs/product/WF-01-R1-DELIVERY.md) / [R1 retest](docs/qa/WF-01-R1-DESIGN-RETEST.md)
 
 ## ทีม
 - lead-d-setup: Project Lead + Coordinator

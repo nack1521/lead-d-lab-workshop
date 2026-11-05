@@ -2,6 +2,8 @@
 
 สถานะ: READY FOR HUMAN REVIEW — สร้างแล้วและตรวจ design artifacts แล้ว แต่ยังไม่ใช่ user acceptance หรือ release approval
 
+**Revision ล่าสุด: [WF-01-R1 — nickname และข้อความประกอบ](WF-01-R1-DELIVERY.md)**. Inventory 330 nodes และภาพในเอกสารเดิมนี้เป็น baseline ก่อน R1; R1 มี 350 nodes และหลักฐานแยก ไม่แทนที่ผล review เก่า
+
 Product สร้าง canvas; Senior Tester ตรวจภาพ/structure และ retest; Coordinator ตรวจ Figma สด แก้ annotation สองจุด และรวมเอกสารส่งมอบนี้หลัง Product documentation subprocess ถูก interrupt โดยไม่มีไฟล์ส่งมอบ ไม่อ้างว่า Product เขียนเอกสารนี้เอง
 
 ## เปิดงาน

@@ -103,7 +103,7 @@ Mentimeter/Slido เป็นแรงบันดาลใจด้าน quest
 C1 ไม่ต้องรอ hi-fi ทั้ง19หน้าถ้าในภายหลังผู้ใช้เลือกให้ทำ technical proof ก่อน แต่ขณะนี้ผู้ใช้เลือกเอกสารก่อน จึงยังคง coding hold. UI-02/C1 ไม่เริ่มในรอบนี้
 
 ## 8. สิ่งที่ต้องตัดสินใจ
-เสนอ **A — Workshop Clarity** เป็น baseline สำหรับรอบต่อไป. ผู้ใช้เลือก A/B/C หรือแก้ character/accent/density ก่อนทำ hi-fi. ยังไม่ต้องเลือก framework UI library หรือ chart library เพราะเป็น implementation decision ที่ต้องดูความจำเป็นจริง
+**อัปเดตตามคำตอบผู้ใช้:** เลือก character “ผ่อนคลาย อบอุ่น และใช้พื้นที่โปร่งกว่าเดิม” พร้อมภาพ reference และคำขอปรับ scale แล้ว ดู [UI-01-R1 — reference & scale](UI-01-R1-REFERENCE-AND-SCALE.md). A/B/C ด้านบนคงไว้เป็น exploration history ไม่ถือว่าเลือก A หรือ palette C อัตโนมัติ. Tokens/สัดส่วนเป็นข้อเสนอรอ review; ผู้ใช้ยังไม่ให้เขียน Figma หรือเริ่ม C1 coding. ยังไม่ต้องเลือก framework UI/chart library
 
 ## 9. Verification / AI progress
 - Request/decision: เตรียม UX/UI direction เป็นเอกสารก่อน ไม่เริ่ม C1 coding

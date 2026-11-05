@@ -30,7 +30,7 @@
 - `.agents/skills`: คำแนะนำ coding สำหรับ Antigravity; Hermes ที่ค้นพบ skills เหล่านี้ยังต้องทำตามขอบเขต non-coding
 - ใช้ TDD เป็นวิธีทดสอบหลัก; Ponytail เสริมเรื่องความเรียบง่าย ไม่ลด validation/security/accessibility/tests
 - Caveman เป็น optional concise voice ไม่เปิดทั้งระบบ และไม่ย่อ evidence, ข้อจำกัด หรือคำเตือนจนเสียความหมาย
-- Unslop ใช้เมื่อมี UI จริงและผู้ใช้ยืนยัน direction แล้ว; Hermes ทำ audit/spec เท่านั้น Antigravity เป็นผู้แก้ UI
+- Unslop ใช้ตั้งแต่ design audit/direction/spec เพื่อหลีกเลี่ยง template และต้องมี human validation ไม่อ้างว่าคนชอบจาก skill อย่างเดียว; Hermes ทำ audit/spec และงานออกแบบ non-coding ตาม scope ที่อนุมัติ. การแก้ Figma/visual implementation ยังคงต้องผ่าน direction/scope/build gates และ Antigravity เป็นผู้แก้โค้ด ดู `docs/product/UI-01-UNSLOP-HUMAN-CENTERED.md`
 - Handoff เก็บใน `docs/handoffs/` ไม่ใช้ OS temporary directory; tickets ใช้ `docs/tasks/` เท่านั้น ไม่เชื่อม issue tracker โดยพลการ
 - ข้อกำหนดภาษาไทยและขอบเขตงานมีลำดับเหนือ wording/default ของ third-party skills
 

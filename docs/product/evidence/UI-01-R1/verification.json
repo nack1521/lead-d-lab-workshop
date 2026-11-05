@@ -1,0 +1,145 @@
+{
+  "task_id": "UI-01-R1",
+  "observed_at": "2026-11-05T17:05:23+07:00",
+  "confirmed_by_user": {
+    "character": "ผ่อนคลาย อบอุ่น และใช้พื้นที่โปร่งกว่าเดิม",
+    "reference": "https://i.pinimg.com/736x/e1/27/db/e127dba6fd41f4699d31cffef19fdd6b.jpg",
+    "request": "ประมาณรูปนี้แต่อยากให้ scale ให้เหมาะสมกว่านี้หน่อย",
+    "figma_writes_approved": false,
+    "coding_approved": false
+  },
+  "reference_review": "Image inspected with vision_analyze; cropped medical dashboard; inspiration only, no brand/patient data copied",
+  "candidate_tokens_approved": false,
+  "contrast_checks": [
+    {
+      "name": "body",
+      "foreground": "#172B2A",
+      "background": "#F7FAF9",
+      "ratio": 14.127992187300295,
+      "display_ratio": 14.128,
+      "minimum": 4.5,
+      "pass": true
+    },
+    {
+      "name": "secondary",
+      "foreground": "#4B6160",
+      "background": "#FFFFFF",
+      "ratio": 6.60802423786849,
+      "display_ratio": 6.608,
+      "minimum": 4.5,
+      "pass": true
+    },
+    {
+      "name": "primary-button",
+      "foreground": "#FFFFFF",
+      "background": "#1F5F55",
+      "ratio": 7.430155804924807,
+      "display_ratio": 7.43,
+      "minimum": 4.5,
+      "pass": true
+    },
+    {
+      "name": "selected-label",
+      "foreground": "#183431",
+      "background": "#DEF7EF",
+      "ratio": 11.850103914880666,
+      "display_ratio": 11.85,
+      "minimum": 4.5,
+      "pass": true
+    },
+    {
+      "name": "control-border",
+      "foreground": "#64748B",
+      "background": "#FFFFFF",
+      "ratio": 4.758842787868666,
+      "display_ratio": 4.759,
+      "minimum": 3,
+      "pass": true
+    },
+    {
+      "name": "focus",
+      "foreground": "#1F5F55",
+      "background": "#FFFFFF",
+      "ratio": 7.430155804924807,
+      "display_ratio": 7.43,
+      "minimum": 3,
+      "pass": true
+    },
+    {
+      "name": "chart-label",
+      "foreground": "#245B6B",
+      "background": "#F1F8FB",
+      "ratio": 7.026523874097887,
+      "display_ratio": 7.027,
+      "minimum": 4.5,
+      "pass": true
+    },
+    {
+      "name": "error-label",
+      "foreground": "#B91C1C",
+      "background": "#FEF2F2",
+      "ratio": 5.914600426850339,
+      "display_ratio": 5.915,
+      "minimum": 4.5,
+      "pass": true
+    }
+  ],
+  "mobile_fit": [
+    {
+      "viewport": 320,
+      "side_padding": 16,
+      "option_width": 48,
+      "option_height": 52,
+      "gap": 8,
+      "available": 288,
+      "required": 272,
+      "fits": true
+    },
+    {
+      "viewport": 390,
+      "side_padding": 16,
+      "option_width": 56,
+      "option_height": 52,
+      "gap": 8,
+      "available": 358,
+      "required": 312,
+      "fits": true
+    }
+  ],
+  "desktop_geometry": [
+    {
+      "viewport": 1280,
+      "optional_sidebar": 224,
+      "side_padding": 24,
+      "sidebar_gap": 24,
+      "available_main": 984,
+      "max_main": 1280,
+      "used_main": 984
+    },
+    {
+      "viewport": 1440,
+      "optional_sidebar": 224,
+      "side_padding": 24,
+      "sidebar_gap": 24,
+      "available_main": 1144,
+      "max_main": 1280,
+      "used_main": 1144
+    },
+    {
+      "viewport": 1920,
+      "optional_sidebar": 224,
+      "side_padding": 24,
+      "sidebar_gap": 24,
+      "available_main": 1624,
+      "max_main": 1280,
+      "used_main": 1280
+    }
+  ],
+  "method": "Static opaque sRGB contrast and nominal geometry only; not a rendered screen/accessibility/usability test",
+  "not_run": [
+    "hi-fi Figma",
+    "browser/font/zoom/keyboard",
+    "prototype usability/preference test",
+    "coding/runtime"
+  ]
+}

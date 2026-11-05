@@ -38,6 +38,7 @@ Antigravity docs ระบุ project skill path `.agents/skills/` และร�
 การทดสอบใน IDE: เปิด workspace นี้ → Customizations → ตรวจ tdd/codebase-design/diagnosing-bugs/ponytail/unslop → ให้รายงานชื่อ skill และ path โดยยังไม่แก้ source code
 
 ## Use and update policy
+- 2026-11-05 ผู้ใช้ให้ standing approval ใช้ทุก skill ที่ติดตั้งอยู่เมื่อเหมาะกับขั้นตอนนั้น ไม่ต้องขอใช้ skill ซ้ำ. ไม่ใช่เปิดทุก skill ทุก task หรืออนุมัติ actions นอก scope; ดู AGENTS.md และ [ผลตรวจติดตั้ง/โหลด/ใช้จริง](implementation/SKILL-AUDIT-01.md)
 - Skills โหลดเมื่อเกี่ยวข้องเท่านั้น; ลูกบอต non-coding ไม่เขียนโค้ดแม้ skill เรียกให้ทำ
 - ตรวจ helper script ก่อนรันทุกครั้ง โดยเฉพาะ network access, file deletion และ output path; คำสั่ง optional helpers ใน upstream ไม่ใช่ approval
 - ไม่ติดตั้ง global และไม่แก้ default/ทีมเอกสาร profiles

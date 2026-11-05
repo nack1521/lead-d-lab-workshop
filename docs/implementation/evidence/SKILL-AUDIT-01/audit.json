@@ -1,0 +1,236 @@
+{
+  "audit_id": "SKILL-AUDIT-01",
+  "observed_at": "2026-11-05T13:54:26+07:00",
+  "history_cutoff": "2026-11-05T13:50:00+07:00",
+  "scope": "12 curated project skills; project-session tool metadata only; no raw transcripts/auth data exported",
+  "installed_skills": [
+    {
+      "path": ".hermes/skills/caveman",
+      "skill_md_exists": true
+    },
+    {
+      "path": ".hermes/skills/grill-me",
+      "skill_md_exists": true
+    },
+    {
+      "path": ".hermes/skills/grilling",
+      "skill_md_exists": true
+    },
+    {
+      "path": ".hermes/skills/handoff",
+      "skill_md_exists": true
+    },
+    {
+      "path": ".hermes/skills/ponytail-review",
+      "skill_md_exists": true
+    },
+    {
+      "path": ".hermes/skills/to-tickets",
+      "skill_md_exists": true
+    },
+    {
+      "path": ".hermes/skills/writing-for-agents",
+      "skill_md_exists": true
+    },
+    {
+      "path": ".agents/skills/codebase-design",
+      "skill_md_exists": true
+    },
+    {
+      "path": ".agents/skills/diagnosing-bugs",
+      "skill_md_exists": true
+    },
+    {
+      "path": ".agents/skills/ponytail",
+      "skill_md_exists": true
+    },
+    {
+      "path": ".agents/skills/tdd",
+      "skill_md_exists": true
+    },
+    {
+      "path": ".agents/skills/unslop",
+      "skill_md_exists": true
+    }
+  ],
+  "locked_files_count": 43,
+  "locked_files_verified": 43,
+  "lock_failures": [],
+  "profile_mirrors_checked": [
+    {
+      "profile": "lead-d-setup",
+      "skill": "caveman",
+      "matches_project": true
+    },
+    {
+      "profile": "lead-d-setup",
+      "skill": "grill-me",
+      "matches_project": true
+    },
+    {
+      "profile": "lead-d-setup",
+      "skill": "grilling",
+      "matches_project": true
+    },
+    {
+      "profile": "lead-d-setup",
+      "skill": "handoff",
+      "matches_project": true
+    },
+    {
+      "profile": "lead-d-setup",
+      "skill": "ponytail-review",
+      "matches_project": true
+    },
+    {
+      "profile": "lead-d-setup",
+      "skill": "to-tickets",
+      "matches_project": true
+    },
+    {
+      "profile": "lead-d-setup",
+      "skill": "writing-for-agents",
+      "matches_project": true
+    },
+    {
+      "profile": "lead-d-product",
+      "skill": "caveman",
+      "matches_project": true
+    },
+    {
+      "profile": "lead-d-product",
+      "skill": "grill-me",
+      "matches_project": true
+    },
+    {
+      "profile": "lead-d-product",
+      "skill": "grilling",
+      "matches_project": true
+    },
+    {
+      "profile": "lead-d-product",
+      "skill": "handoff",
+      "matches_project": true
+    },
+    {
+      "profile": "lead-d-product",
+      "skill": "writing-for-agents",
+      "matches_project": true
+    },
+    {
+      "profile": "lead-d-qa",
+      "skill": "caveman",
+      "matches_project": true
+    },
+    {
+      "profile": "lead-d-qa",
+      "skill": "handoff",
+      "matches_project": true
+    },
+    {
+      "profile": "lead-d-qa",
+      "skill": "ponytail-review",
+      "matches_project": true
+    },
+    {
+      "profile": "lead-d-impl",
+      "skill": "caveman",
+      "matches_project": true
+    },
+    {
+      "profile": "lead-d-impl",
+      "skill": "grill-me",
+      "matches_project": true
+    },
+    {
+      "profile": "lead-d-impl",
+      "skill": "grilling",
+      "matches_project": true
+    },
+    {
+      "profile": "lead-d-impl",
+      "skill": "handoff",
+      "matches_project": true
+    },
+    {
+      "profile": "lead-d-impl",
+      "skill": "ponytail-review",
+      "matches_project": true
+    },
+    {
+      "profile": "lead-d-impl",
+      "skill": "to-tickets",
+      "matches_project": true
+    },
+    {
+      "profile": "lead-d-impl",
+      "skill": "writing-for-agents",
+      "matches_project": true
+    }
+  ],
+  "history_before_this_audit": [
+    {
+      "profile": "lead-d-setup",
+      "sessions_scanned": 1,
+      "pre_audit_invocations": {
+        "writing-for-agents": 6,
+        "ponytail-review": 3
+      },
+      "pre_audit_success_or_unchanged": {
+        "writing-for-agents": 4,
+        "ponytail-review": 3
+      },
+      "unmatched_or_non_json_results": {
+        "writing-for-agents": 2
+      }
+    },
+    {
+      "profile": "lead-d-product",
+      "sessions_scanned": 2,
+      "pre_audit_invocations": {
+        "handoff": 1,
+        "writing-for-agents": 5,
+        "ponytail-review": 1
+      },
+      "pre_audit_success_or_unchanged": {
+        "handoff": 1,
+        "writing-for-agents": 5,
+        "ponytail-review": 1
+      },
+      "unmatched_or_non_json_results": {}
+    },
+    {
+      "profile": "lead-d-qa",
+      "sessions_scanned": 2,
+      "pre_audit_invocations": {
+        "ponytail-review": 5,
+        "writing-for-agents": 1
+      },
+      "pre_audit_success_or_unchanged": {
+        "ponytail-review": 5,
+        "writing-for-agents": 1
+      },
+      "unmatched_or_non_json_results": {}
+    },
+    {
+      "profile": "lead-d-impl",
+      "sessions_scanned": 1,
+      "pre_audit_invocations": {},
+      "pre_audit_success_or_unchanged": {},
+      "unmatched_or_non_json_results": {}
+    }
+  ],
+  "coordinator_current_runtime_available": [
+    "caveman",
+    "grill-me",
+    "grilling",
+    "handoff",
+    "ponytail-review",
+    "to-tickets",
+    "writing-for-agents"
+  ],
+  "ide_activation": "SELF_REPORTED_IN_C1_PREFLIGHT; NOT_INDEPENDENTLY_VERIFIED",
+  "coding_runtime_execution": "NOT RUN; no app RED/GREEN or visual polish evidence",
+  "deferred_source": "cursor/plugins; not installed for Antigravity",
+  "authorization": "Use any already installed skill when relevant without re-asking; retain role/scope and build/publish/security gates"
+}

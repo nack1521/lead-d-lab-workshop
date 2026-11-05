@@ -23,6 +23,9 @@
 
 ## Skills
 อ่าน `docs/SKILLS-REGISTER.md` เพื่อทราบ provenance, การดัดแปลงและข้อจำกัด
+- 2026-11-05 ผู้ใช้อนุมัติให้ใช้ทุก skill ที่ติดตั้งอยู่เมื่อเหมาะกับขั้นตอนนั้น โดยไม่ต้องขออนุญาตใช้ skill ซ้ำ: เลือกจาก trigger/งานจริงและอ่าน instructions ก่อนใช้ ไม่เปิดทุก skill พร้อมกันเพียงเพื่อให้ครบชื่อ
+- Approval นี้ไม่ขยายขอบเขต coding ของ Hermes และไม่แทน approval ให้ build/install/publish/deploy/ใช้บริการมีค่าใช้จ่าย/รัน destructive helpers. Skills ที่เกี่ยวข้องใช้ได้ แต่ actions ภายในยังยึด scope และ human gates
+- แยก installed, discovered/read-loaded, applied และ runtime-verified; บันทึก skill ที่ใช้กับเคสและหลักฐานตาม result protocol. ผลตรวจล่าสุด: `docs/implementation/SKILL-AUDIT-01.md`
 - `.hermes/skills`: คำแนะนำ non-coding สำหรับ Hermes
 - `.agents/skills`: คำแนะนำ coding สำหรับ Antigravity; Hermes ที่ค้นพบ skills เหล่านี้ยังต้องทำตามขอบเขต non-coding
 - ใช้ TDD เป็นวิธีทดสอบหลัก; Ponytail เสริมเรื่องความเรียบง่าย ไม่ลด validation/security/accessibility/tests

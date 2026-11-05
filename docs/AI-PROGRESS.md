@@ -165,6 +165,17 @@ C0 setup/research เสร็จในขอบเขตนี้; application 
 - ข้อจำกัด: static editable design ไม่ใช่ runtime; inline error variants,Unicode/IME,mobile keyboard,DBatomicity,serveridempotency,securityและaccessibilityยัง NOT RUN; full global-style/property auditยังไม่มี. ไม่มีapplication/test/deploycode. ร่างไม่รับรองข้ามrefresh/ปิดแท็บ; ไม่เพิ่มcommentwall/AI/rawexportโดยปริยาย
 - เก็บcheckpoint Gitตามที่ผู้ใช้ขอ; ตรวจremoteSHAหลังpushแยก. Next gate: ผู้ใช้reviewrevisionก่อนขยายรอบimplementation
 
+## C1 — Flow accepted / Antigravity handoff prepared
+- 2026-11-05 ผู้ใช้ยืนยัน flow WF-01-R1 และขอเตรียม C1 handoff. บันทึก FLOW BASELINE ACCEPTED โดยจำกัดเฉพาะ flow ไม่ถือว่าแอป/release ผ่านหรือสั่งเริ่ม coding แทนผู้ใช้
+- Coordinator อ่าน briefเดิม, stack, skill register, dual-mode setup contract และ QA foundation plan แล้วขยาย docs/handoffs/ANTIGRAVITY-C1.md ให้รวม nickname/comment และ lifecycleล่าสุด
+- Handoff ครอบคลุม local join→rating/poll+optionalcomment→PostgreSQLcommit→authenticatedWebSocketaggregate, data model/transaction/idempotency/close-reconnect, proposed auth/origin/Unicode decisions, env visibility, permittedpaths, TDD tracerbullets และ output/evidence contract. ไม่เขียน application/test/migration/container/CI files
+- ตรวจ matrix ด้วย Pythonจริง: C1-01–C1-16 มีครบ16IDs ไม่ซ้ำและทุกcaseเริ่ม NOT RUN; required document referencesมีจริง (C1-REPORTเป็นfutureoutput) ไม่สร้างตัวอย่างผลtestสำเร็จ
+- Read-only preflight observation 2026-11-05T11:59:21+07:00: Bun1.4.4,gh2.103.3; rootยังไม่มีpackage.json/bun.lock/Compose. DockerCLIพบแต่defaultcontext; dockerinfo exit1 เพราะ /var/run/docker.sockไม่มี. ตรวจcontextlsซ้ำพบเฉพาะdefault ไม่มีalternatecontext. ไม่เปิดengine/เปลี่ยนcontext/สร้างDBแทนผู้ใช้
+- LocalDBexecutionมีblockerตามobservation; handoffยังพร้อมสำหรับIDEpreflight แต่ต้องrecheckDockerก่อนbuild. ไม่ตีDockererrorเป็นapplicationtestFAILและไม่ใช้memory/SQLiteแทนPostgreSQL
+- SeniorTesterอ่านhandoff/Product/dual-modecontractและเขียน docs/qa/C1-HANDOFF-REVIEW.md ณ2026-11-05 12:03:34+07: READY WITH GATES สำหรับเอกสารเท่านั้น ไม่พบconcrete must/shouldfixในขอบเขตstaticreview. Coordinatorอ่านรายงานจริงก่อนส่งมอบ
+- Next human action: เปิดAntigravityที่workspaceนี้ ส่งhandoffและทำread-onlypreflightก่อน เสนอversions/driver/auth/origin/testseams/pathsแล้วหยุดรอผู้ใช้สั่งlocalbuild. ไม่deploy/publish/cloudaccountหรือเริ่มimplementationในHermes
+- Updated README,TEAM-WORKFLOW,STACK-DECISION และ Productdeliveryให้แยกcurrentstatusจากhistoricalevidence; เก็บAIcollaborationlogและcheckpointGitตามworkflow. Remoteverificationทำหลังpush ไม่คาดเดาhashล่วงหน้า
+
 ## Template สำหรับรอบถัดไป
 - Cycle/task ID และ timestamp
 - คำขอ/ปัญหา

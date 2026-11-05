@@ -1,6 +1,6 @@
 # WF-01-R1 — Nickname และข้อความประกอบคำตอบ
 
-สถานะ: BUILT / READY FOR HUMAN REVIEW — ขอบเขตนี้แก้ wireframe เท่านั้น ไม่ใช่ user acceptance, runtime PASS หรือ approval ให้เริ่ม implementation
+สถานะ: FLOW BASELINE ACCEPTED BY USER — 2026-11-05 ผู้ใช้ยืนยัน flow WF-01-R1 และขอเตรียม C1 handoff. เป็นการยอมรับ flow ไม่ใช่ runtime/release acceptance หรือ approval ให้ Antigravity เริ่มแก้โค้ดโดยอัตโนมัติ
 
 ## เปิดแบบที่ปรับแล้ว
 - [P01 — Join + nickname](https://www.figma.com/design/RUOnC9Q15LA7DCc6rzhZtN/Lead-D-Lab-Workshop-MVP?node-id=7-19)
@@ -46,4 +46,4 @@
 - Escape/render text เป็นข้อความ ไม่ใช้ raw HTML; ไม่ให้ nickname/comment หลุด aggregate API, logs หรือ exports; access/retention ต้องตัดสินใจก่อนใช้จริง
 - ทดสอบ mobile keyboard, multiline Enter, focus/labels, live character count, inline error และ draft/reconnect ด้วย runtime จริง
 
-นี่คือ native editable low-fi/annotated specification ไม่ใช่ clickable prototype. ไม่มี app/test code, DB/API/realtime, security/load/accessibility runtime หรือ deployment ในรอบนี้; full global-property before/after audit ยังไม่ทำ. รอผู้ใช้ review ก่อนเริ่มงานรอบถัดไป
+นี่คือ native editable low-fi/annotated specification ไม่ใช่ clickable prototype. ไม่มี app/test code, DB/API/realtime, security/load/accessibility runtime หรือ deployment ในรอบนี้; full global-property before/after audit ยังไม่ทำ. ผู้ใช้ยืนยัน flow แล้ว; gate ถัดไปคือ read-only IDE preflight ตาม docs/handoffs/ANTIGRAVITY-C1.md ก่อนอนุมัติ local build

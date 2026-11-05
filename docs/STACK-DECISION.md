@@ -14,4 +14,4 @@ User selected native Bun + PostgreSQL in Docker. Repository must additionally pr
 
 ## Local recommendation
 Docker Desktop for Apple silicon with Compose: PostgreSQL local + production-image build verification. Run React/Elysia natively for iteration, then test backend container. No Kubernetes/Redis/queue required.
-Figma-first design is feasible. Approve user flow and wireframes before visual polish. Remote write capability depends on supported MCP client, account entitlement and file edit access. User supplied a Figma file URL; exact target access/design content is not yet verified. See docs/ENVIRONMENT-MCP-CHECK.md.
+Figma-first design is feasible. Approve user flow and wireframes before visual polish. Remote write capability depends on supported MCP client, account entitlement and file edit access. Figma access and native wireframes have since been verified; user confirmed WF-01-R1 flow. See docs/product/WF-01-R1-DELIVERY.md for current design baseline; docs/ENVIRONMENT-MCP-CHECK.md is historical tooling evidence. C1 implementation choices still require IDE preflight and approval.

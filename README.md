@@ -1,6 +1,6 @@
 # Lead+D Lab — Project foundation
 
-สถานะ: foundation พร้อม; WF-01 native wireframes สร้างแล้วและผ่าน targeted design retest — รอผู้ใช้ review/acceptance; ยังไม่มี application code หรือ live deployment
+สถานะ: ผู้ใช้ยืนยัน flow WF-01-R1 แล้ว; C1 handoff พร้อมสำหรับ IDE read-only preflight. ยังไม่มี application code/live deployment; การตรวจล่าสุดพบ Docker default socket ใช้ไม่ได้ ต้อง recheck ก่อนรัน PostgreSQL
 
 ## เริ่มอ่าน
 1. [ข้อตกลง AI](AGENTS.md)
@@ -9,7 +9,7 @@
 4. [Stack decision](docs/STACK-DECISION.md) / [Architecture research](docs/ARCHITECTURE-OPTIONS.md)
 5. [AI progress สำหรับนำเสนอ](docs/AI-PROGRESS.md)
 6. [Product review](docs/product/FOUNDATION-REVIEW.md) / [Senior test plan](docs/qa/FOUNDATION-TEST-PLAN.md)
-7. [Antigravity C1 handoff](docs/handoffs/ANTIGRAVITY-C1.md)
+7. [Antigravity C1 handoff](docs/handoffs/ANTIGRAVITY-C1.md) / [Static handoff review](docs/qa/C1-HANDOFF-REVIEW.md)
 8. [Setup verification](docs/SETUP-VERIFICATION.json)
 9. [WF-01 ส่งมอบ Figma wireframes](docs/product/WF-01-DELIVERY.md) / [Design review](docs/qa/WF-01-DESIGN-REVIEW.md) / [Targeted retest](docs/qa/WF-01-DESIGN-RETEST.md)
 10. [ล่าสุด WF-01-R1: nickname และ textbox](docs/product/WF-01-R1-DELIVERY.md) / [R1 retest](docs/qa/WF-01-R1-DESIGN-RETEST.md)

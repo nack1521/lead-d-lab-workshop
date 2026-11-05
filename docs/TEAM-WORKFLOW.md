@@ -1,6 +1,6 @@
 # Lean team — Cycle-based workflow
 
-สถานะ: ทีม A/stack ตาม docs/STACK-DECISION.md; flow WF-01-R1 เป็น baseline ที่ผู้ใช้ยืนยันแล้ว. C1 preflight R03 พร้อมขอ human build approval แต่ **C1 coding ยังคง hold**. ผู้ใช้อนุมัติปรับ AGENTS.md เรื่อง Unslop แล้ว และเลือก character ผ่อนคลาย/อบอุ่น/โปร่งพร้อมภาพ reference; ดู [UI-01-R1 — reference & scale](product/UI-01-R1-REFERENCE-AND-SCALE.md). สัดส่วน/tokens ยังเป็นข้อเสนอ ไม่ใช่ approved visual system; ผู้ใช้เลือก **ยังไม่เขียน Figma** ในรอบนี้. [Component/state contract](product/UI-01-COMPONENT-STATES.md) คงเดิม. ไม่มี approval ให้ app implementation, cloud resource/deploy หรือ push อัตโนมัติ
+สถานะ: ทีม A/stack ตาม docs/STACK-DECISION.md; flow WF-01-R1 เป็น baseline ที่ผู้ใช้ยืนยันแล้ว. C1 preflight R03 พร้อมขอ human build approval แต่ **C1 coding ยังคง hold**. ผู้ใช้อนุมัติปรับ AGENTS.md เรื่อง Unslop แล้ว และเลือก character ผ่อนคลาย/อบอุ่น/โปร่งพร้อมภาพ reference; ดู [UI-01-R1 — reference & scale](product/UI-01-R1-REFERENCE-AND-SCALE.md). หลังผู้ใช้ขอทำขั้นถัดไปและทำต่อจากงานค้าง มี [UI-02 hi-fi review drafts](product/UI-02-DELIVERY.md) สี่หน้า P01/P03/F02/H01 ในกลุ่มใหม่บนpage1:2แล้ว; สัดส่วน/tokens ยังรอ human review ไม่ใช่ approved visual system หรือ approval เริ่มC1coding. [Component/state contract](product/UI-01-COMPONENT-STATES.md) คงเดิม. ไม่มี approval ให้ app implementation, cloud resource/deploy หรือ push อัตโนมัติ
 
 ## Ownership
 | ผู้รับผิดชอบ | หน้าที่ | ผลลัพธ์/พื้นที่เขียน |

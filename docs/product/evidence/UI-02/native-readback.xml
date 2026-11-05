@@ -1,0 +1,209 @@
+<frame id="24:32" name="UI-02 | Soft Workspace | Hi-fi review drafts" x="2784" y="160" width="1520" height="3402">
+  <text id="24:33" name="UI-02 / Soft Workspace" x="40" y="40" width="1440" height="48" />
+  <text id="24:34" name="ผ่อนคลาย • อบอุ่น • โปร่ง  |  แบบตัวอย่างเพื่อ review ไม่ใช่แอปที่ใช้งานได้จริง" x="40" y="120" width="1440" height="28" />
+  <frame id="24:35" name="UI-02 / Local controls only — not global styles" x="40" y="180" width="1440" height="128">
+    <text id="24:36" name="องค์ประกอบเฉพาะแบบชุดนี้ — native components / instances" x="21" y="21" width="1400" height="22" />
+    <frame id="24:37" name="Local components" x="21" y="55" width="1400" height="52">
+      <symbol id="24:38" name="UI-02 / Button / Primary" x="0" y="0" width="320" height="52" />
+      <symbol id="24:40" name="UI-02 / Button / Secondary" x="344" y="0" width="320" height="52" />
+      <symbol id="24:42" name="UI-02 / Input / Neutral" x="688" y="0" width="320" height="52" />
+    </frame>
+  </frame>
+  <frame id="24:44" name="UI-02 / Participant mobile" x="40" y="340" width="1440" height="900">
+    <frame id="24:45" name="UI-02 / P01 / Mobile" x="0" y="0" width="390" height="900">
+      <text id="24:46" name="Lead+D Lab  /  Workshop" x="17" y="25" width="358" height="26" />
+      <frame id="24:47" name="Join / Introduction" x="17" y="71" width="358" height="108">
+        <text id="24:48" name="เข้าร่วมเวิร์กช็อป" x="0" y="0" width="358" height="44" />
+        <text id="24:49" name="พื้นที่แลกเปลี่ยนมุมมอง ของคนที่ดูแลทีม" x="0" y="52" width="358" height="56" />
+      </frame>
+      <frame id="24:50" name="Field / รหัสห้อง" x="17" y="199" width="358" height="86">
+        <text id="24:51" name="รหัสห้อง" x="0" y="0" width="358" height="26" />
+        <instance id="24:52" name="UI-02 / Input / Neutral" x="0" y="34" width="358" height="52" />
+      </frame>
+      <frame id="24:54" name="Field / ชื่อเล่น (ไม่บังคับ)" x="17" y="305" width="358" height="117">
+        <text id="24:55" name="ชื่อเล่น (ไม่บังคับ)" x="0" y="0" width="358" height="26" />
+        <instance id="24:56" name="UI-02 / Input / Neutral" x="0" y="34" width="358" height="52" />
+        <text id="24:58" name="ไม่ใส่ก็เข้าร่วมได้ • สูงสุด 40 ตัวอักษร" x="0" y="94" width="358" height="23" />
+      </frame>
+      <frame id="24:59" name="Join / Privacy" x="17" y="442" width="358" height="114">
+        <text id="24:60" name="เรียนรู้ร่วมกัน ไม่ประเมินรายคน" x="17" y="17" width="326" height="26" />
+        <text id="24:61" name="ผลแสดงในระดับกลุ่ม ชื่อเล่นและข้อความ อาจระบุตัวตนได้ ไม่ใส่ข้อมูลอ่อนไหว" x="17" y="51" width="326" height="46" />
+      </frame>
+      <instance id="24:62" name="UI-02 / Button / Primary" x="17" y="576" width="358" height="52" />
+      <text id="24:64" name="ไม่ต้องสมัครบัญชี แบบตัวอย่าง • ยังไม่เชื่อมต่อระบบ" x="17" y="648" width="358" height="46" />
+    </frame>
+    <frame id="24:65" name="UI-02 / P03 / Mobile" x="422" y="0" width="390" height="900">
+      <text id="24:66" name="Lead+D Lab  /  Workshop" x="17" y="25" width="358" height="26" />
+      <frame id="24:67" name="Status / คำถาม 1 • เปิดรับคำตอบ" x="17" y="71" width="234" height="34">
+        <text id="24:68" name="คำถาม 1 • เปิดรับคำตอบ" x="12" y="6" width="210" height="22" />
+      </frame>
+      <text id="24:69" name="คุณมั่นใจในการให้ feedback ที่ช่วยให้ทีมพัฒนาได้เพียงใด?" x="17" y="125" width="358" height="84" />
+      <frame id="24:70" name="Rating / Selected example" x="17" y="229" width="358" height="126">
+        <frame id="24:71" name="Rating options / 1–5" x="0" y="0" width="358" height="56">
+          <frame id="24:72" name="Rating 1" x="0" y="0" width="56" height="56">
+            <text id="24:73" name="1" x="8" y="12" width="40" height="32" />
+          </frame>
+          <frame id="24:74" name="Rating 2" x="68" y="0" width="56" height="56">
+            <text id="24:75" name="2" x="8" y="12" width="40" height="32" />
+          </frame>
+          <frame id="24:76" name="Rating 3 selected" x="136" y="0" width="56" height="56">
+            <text id="24:77" name="3" x="8" y="12" width="40" height="32" />
+          </frame>
+          <frame id="24:78" name="Rating 4" x="204" y="0" width="56" height="56">
+            <text id="24:79" name="4" x="8" y="12" width="40" height="32" />
+          </frame>
+          <frame id="24:80" name="Rating 5" x="272" y="0" width="56" height="56">
+            <text id="24:81" name="5" x="8" y="12" width="40" height="32" />
+          </frame>
+        </frame>
+        <frame id="24:82" name="Scale endpoints" x="0" y="68" width="358" height="23">
+          <text id="24:83" name="1 ยังไม่มั่นใจ" x="0" y="0" width="179" height="23" />
+          <text id="24:84" name="5 มั่นใจมาก" x="179" y="0" width="179" height="23" />
+        </frame>
+        <text id="24:85" name="เลือกแล้ว: 3 • ยังไม่ได้ส่งคำตอบ" x="0" y="103" width="358" height="23" />
+      </frame>
+      <frame id="24:86" name="Comment / Optional" x="17" y="375" width="358" height="177">
+        <text id="24:87" name="อยากเล่าเพิ่มเติมไหม? (ไม่บังคับ)" x="0" y="0" width="358" height="26" />
+        <frame id="24:88" name="Textarea / Empty" x="0" y="34" width="358" height="112">
+          <text id="24:89" name="พิมพ์มุมมองของคุณได้ที่นี่" x="17" y="17" width="326" height="26" />
+        </frame>
+        <text id="24:90" name="ไม่ใส่ชื่อคนหรือข้อมูลอ่อนไหว • สูงสุด 500 ตัวอักษร" x="0" y="154" width="358" height="23" />
+      </frame>
+      <instance id="24:91" name="UI-02 / Button / Primary" x="17" y="572" width="358" height="52" />
+      <text id="24:93" name="คำตอบและข้อความจะบันทึกพร้อมกัน เมื่อระบบยืนยันเท่านั้น" x="17" y="644" width="358" height="46" />
+      <text id="24:94" name="แบบตัวอย่าง: สถานะเลือก 3 แล้ว ยังไม่เชื่อมระบบ" x="17" y="710" width="358" height="22" />
+    </frame>
+    <frame id="24:95" name="UI-02 / Mobile design notes" x="844" y="0" width="580" height="400">
+      <text id="24:96" name="คำถามนำสายตา ไม่ใช่หน้ารายงานย่อส่วน" x="24" y="24" width="532" height="84" />
+      <text id="24:97" name="P01 / เข้าร่วมโดยไม่สมัครบัญชี P03 / เลือกคำตอบ พร้อมข้อความไม่บังคับ  องค์ประกอ" x="24" y="128" width="532" height="180" />
+      <text id="24:98" name="390px draft • ต้องทดสอบ keyboard/zoom/IME ภายหลัง ภาพนี้ยังไม่พิสูจน์การบันทึกข้" x="24" y="328" width="532" height="48" />
+    </frame>
+  </frame>
+  <frame id="24:99" name="UI-02 / F02 / Desktop" x="40" y="1272" width="1440" height="1000">
+    <frame id="24:100" name="Desktop header" x="33" y="33" width="1376" height="26">
+      <text id="24:101" name="Lead+D Lab  /  ผู้ดำเนินกิจกรรม" x="0" y="0" width="700" height="26" />
+      <text id="24:102" name="ข้อมูลตัวอย่างเพื่อออกแบบ • ไม่ใช่ผลผู้เข้าร่วมจริง" x="724" y="1" width="652" height="24" />
+    </frame>
+    <frame id="24:103" name="Current question / hierarchy" x="33" y="83" width="1376" height="142">
+      <frame id="24:104" name="Status / เปิดรับคำตอบ • ตัวอย่าง" x="0" y="0" width="224" height="34">
+        <text id="24:105" name="เปิดรับคำตอบ • ตัวอย่าง" x="12" y="6" width="200" height="22" />
+      </frame>
+      <text id="24:106" name="ฟังมุมมองของทีมไปด้วยกัน" x="0" y="46" width="1376" height="48" />
+      <text id="24:107" name="คำถาม 1  /  คุณมั่นใจในการให้ feedback ที่ช่วยให้ทีมพัฒนาได้เพียงใด?" x="0" y="106" width="1376" height="36" />
+    </frame>
+    <frame id="24:108" name="Main distribution and context" x="33" y="249" width="1376" height="428">
+      <frame id="24:109" name="Illustrative distribution / การกระจายคำตอบ" x="0" y="0" width="900" height="380">
+        <text id="24:110" name="การกระจายคำตอบ" x="25" y="25" width="852" height="34" />
+        <text id="24:111" name="ฐาน: 18 คำตอบที่ยืนยันแล้วในตัวอย่างนี้" x="25" y="75" width="852" height="24" />
+        <frame id="24:112" name="Bar row / คะแนน 1–2" x="25" y="115" width="852" height="56">
+          <text id="24:113" name="คะแนน 1–2" x="0" y="15" width="120" height="26" />
+          <frame id="24:114" name="Bar track / total 18" x="136" y="20" width="640" height="16">
+            <rounded-rectangle id="24:115" name="Editable count 4" x="0" y="0" width="142.22222900390625" height="16" />
+          </frame>
+          <text id="24:116" name="4 คน" x="792" y="14" width="60" height="28" />
+        </frame>
+        <frame id="24:117" name="Bar row / คะแนน 3" x="25" y="187" width="852" height="56">
+          <text id="24:118" name="คะแนน 3" x="0" y="15" width="120" height="26" />
+          <frame id="24:119" name="Bar track / total 18" x="136" y="20" width="640" height="16">
+            <rounded-rectangle id="24:120" name="Editable count 8" x="0" y="0" width="284.4444580078125" height="16" />
+          </frame>
+          <text id="24:121" name="8 คน" x="792" y="14" width="60" height="28" />
+        </frame>
+        <frame id="24:122" name="Bar row / คะแนน 4–5" x="25" y="259" width="852" height="56">
+          <text id="24:123" name="คะแนน 4–5" x="0" y="15" width="120" height="26" />
+          <frame id="24:124" name="Bar track / total 18" x="136" y="20" width="640" height="16">
+            <rounded-rectangle id="24:125" name="Editable count 6" x="0" y="0" width="213.3333282470703" height="16" />
+          </frame>
+          <text id="24:126" name="6 คน" x="792" y="14" width="60" height="28" />
+        </frame>
+        <text id="24:127" name="1 = ยังไม่มั่นใจ  /  5 = มั่นใจมาก" x="25" y="331" width="852" height="24" />
+      </frame>
+      <frame id="24:128" name="Facilitator context" x="924" y="0" width="452" height="428">
+        <frame id="24:129" name="Response coverage / synthetic" x="0" y="0" width="452" height="230">
+          <text id="24:130" name="การมีส่วนร่วมในคำถามนี้" x="25" y="25" width="404" height="26" />
+          <text id="24:131" name="18 / 30 คน" x="25" y="63" width="404" height="48" />
+          <text id="24:132" name="ผู้ตอบแล้ว / ผู้เข้าร่วมที่มีสิทธิ์ตอบ" x="25" y="123" width="404" height="24" />
+          <frame id="24:133" name="Coverage track / example" x="25" y="159" width="404" height="10">
+            <rounded-rectangle id="24:134" name="Coverage 18/30" x="0" y="0" width="242.39999389648438" height="10" />
+          </frame>
+          <text id="24:135" name="60% • ตัวอย่าง ไม่ใช่จำนวนตอบจริง" x="25" y="181" width="404" height="24" />
+        </frame>
+        <frame id="24:136" name="Facilitator guidance" x="0" y="250" width="452" height="178">
+          <text id="24:137" name="ให้พื้นที่กับทุกคำตอบ" x="25" y="25" width="404" height="32" />
+          <text id="24:138" name="ดูภาพรวมโดยไม่ระบุตัวคน ไม่มีชื่อเล่นหรือข้อความรายบุคคล ในผลรวมของหน้านี้" x="25" y="69" width="404" height="84" />
+        </frame>
+      </frame>
+    </frame>
+    <frame id="24:139" name="Question control / not session end" x="33" y="701" width="1376" height="138">
+      <frame id="24:140" name="Control row" x="25" y="25" width="1328" height="52">
+        <instance id="24:141" name="UI-02 / Button / Primary" x="0" y="0" width="260" height="52" />
+        <text id="24:143" name="ปิดรับเฉพาะคำถามนี้ ไม่ใช่การจบเวิร์กช็อป" x="284" y="13" width="1044" height="26" />
+      </frame>
+      <text id="24:144" name="หลังระบบยืนยันว่าปิดรับแล้ว จึงไปคำถามถัดไปหรือจบเวิร์กช็อป" x="25" y="89" width="1328" height="24" />
+    </frame>
+    <text id="24:145" name="แบบ hi-fi เพื่อ review เท่านั้น • กราฟและสถานะไม่ได้เชื่อม PostgreSQL / realtime" x="33" y="863" width="1376" height="24" />
+  </frame>
+  <frame id="24:146" name="UI-02 / H01 / Desktop" x="40" y="2304" width="1440" height="1000">
+    <frame id="24:147" name="Desktop header" x="33" y="33" width="1376" height="26">
+      <text id="24:148" name="Lead+D Lab  /  HR / สรุประดับกลุ่ม" x="0" y="0" width="700" height="26" />
+      <text id="24:149" name="ข้อมูลตัวอย่างเพื่อออกแบบ • ไม่ใช่ผลผู้เข้าร่วมจริง" x="724" y="1" width="652" height="24" />
+    </frame>
+    <frame id="24:150" name="Post-session context" x="33" y="83" width="1376" height="136">
+      <frame id="24:151" name="Status / จบเวิร์กช็อปแล้ว • ตัวอย่าง" x="0" y="0" width="250" height="34">
+        <text id="24:152" name="จบเวิร์กช็อปแล้ว • ตัวอย่าง" x="12" y="6" width="226" height="22" />
+      </frame>
+      <text id="24:153" name="สิ่งที่ได้เรียนรู้ร่วมกัน" x="0" y="46" width="1376" height="48" />
+      <text id="24:154" name="Workshop ผู้จัดการใหม่  /  ภาพรวมหลังจบกิจกรรม" x="0" y="106" width="1376" height="30" />
+    </frame>
+    <frame id="24:155" name="Summary distribution and coverage" x="33" y="243" width="1376" height="428">
+      <frame id="24:156" name="Illustrative distribution / ความมั่นใจในการให้ feedback" x="0" y="0" width="900" height="380">
+        <text id="24:157" name="ความมั่นใจในการให้ feedback" x="25" y="25" width="852" height="34" />
+        <text id="24:158" name="ฐาน: 18 คำตอบที่ยืนยันแล้วในตัวอย่างนี้" x="25" y="75" width="852" height="24" />
+        <frame id="24:159" name="Bar row / คะแนน 1–2" x="25" y="115" width="852" height="56">
+          <text id="24:160" name="คะแนน 1–2" x="0" y="15" width="120" height="26" />
+          <frame id="24:161" name="Bar track / total 18" x="136" y="20" width="640" height="16">
+            <rounded-rectangle id="24:162" name="Editable count 4" x="0" y="0" width="142.22222900390625" height="16" />
+          </frame>
+          <text id="24:163" name="4 คน" x="792" y="14" width="60" height="28" />
+        </frame>
+        <frame id="24:164" name="Bar row / คะแนน 3" x="25" y="187" width="852" height="56">
+          <text id="24:165" name="คะแนน 3" x="0" y="15" width="120" height="26" />
+          <frame id="24:166" name="Bar track / total 18" x="136" y="20" width="640" height="16">
+            <rounded-rectangle id="24:167" name="Editable count 8" x="0" y="0" width="284.4444580078125" height="16" />
+          </frame>
+          <text id="24:168" name="8 คน" x="792" y="14" width="60" height="28" />
+        </frame>
+        <frame id="24:169" name="Bar row / คะแนน 4–5" x="25" y="259" width="852" height="56">
+          <text id="24:170" name="คะแนน 4–5" x="0" y="15" width="120" height="26" />
+          <frame id="24:171" name="Bar track / total 18" x="136" y="20" width="640" height="16">
+            <rounded-rectangle id="24:172" name="Editable count 6" x="0" y="0" width="213.3333282470703" height="16" />
+          </frame>
+          <text id="24:173" name="6 คน" x="792" y="14" width="60" height="28" />
+        </frame>
+        <text id="24:174" name="1 = ยังไม่มั่นใจ  /  5 = มั่นใจมาก" x="25" y="331" width="852" height="24" />
+      </frame>
+      <frame id="24:175" name="HR coverage and limitations" x="924" y="0" width="452" height="428">
+        <frame id="24:176" name="Response coverage / synthetic" x="0" y="0" width="452" height="230">
+          <text id="24:177" name="การมีส่วนร่วมในคำถามนี้" x="25" y="25" width="404" height="26" />
+          <text id="24:178" name="18 / 30 คน" x="25" y="63" width="404" height="48" />
+          <text id="24:179" name="ผู้ตอบแล้ว / ผู้เข้าร่วมที่มีสิทธิ์ตอบ" x="25" y="123" width="404" height="24" />
+          <frame id="24:180" name="Coverage track / example" x="25" y="159" width="404" height="10">
+            <rounded-rectangle id="24:181" name="Coverage 18/30" x="0" y="0" width="242.39999389648438" height="10" />
+          </frame>
+          <text id="24:182" name="60% • ตัวอย่าง ไม่ใช่จำนวนตอบจริง" x="25" y="181" width="404" height="24" />
+        </frame>
+        <frame id="24:183" name="Read with context" x="0" y="250" width="452" height="178">
+          <text id="24:184" name="อ่านผลพร้อมบริบท" x="25" y="25" width="404" height="32" />
+          <text id="24:185" name="เป็นมุมมองที่ผู้ตอบรายงานเอง ไม่ใช่การประเมินพนักงาน และไม่แทนภาพรวมทั้งองค์กร" x="25" y="69" width="404" height="84" />
+        </frame>
+      </frame>
+    </frame>
+    <frame id="24:186" name="Reported organisational blocker / example" x="33" y="695" width="1376" height="166">
+      <text id="24:187" name="อุปสรรคที่ผู้ตอบรายงาน" x="25" y="25" width="1328" height="34" />
+      <text id="24:188" name="10 จาก 18 คน เลือก “เวลาสำหรับดูแลทีมไม่พอ”" x="25" y="71" width="1328" height="32" />
+      <text id="24:189" name="ตัวอย่างของผลคำถามแบบเลือกหนึ่งข้อ ไม่ใช่ข้อพิสูจน์สาเหตุหรือข้อสรุปจาก AI" x="25" y="115" width="1328" height="26" />
+    </frame>
+    <text id="24:190" name="ไม่แสดงชื่อเล่นหรือข้อความดิบ • ข้อมูลที่ขาดไม่ถูกแทนด้วยศูนย์ • ภาพนี้ใช้ข้อมูล" x="33" y="885" width="1376" height="24" />
+  </frame>
+  <text id="24:191" name="Review scope: P01 / P03 / F02 / H01 • ไม่ใช่ clickable prototype • C1 coding ยัง" x="40" y="3336" width="1440" height="26" />
+</frame>

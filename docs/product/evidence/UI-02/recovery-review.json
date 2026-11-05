@@ -1,0 +1,89 @@
+{
+  "checkedAt": "2026-11-05T10:50:52.858310+00:00",
+  "status": "READY_FOR_HUMAN_REVIEW",
+  "freshMCPRequestId": "10f6efd2-9a34-4fc8-85f3-b4701bacf84e",
+  "freshReadObserved": {
+    "rootId": "24:32",
+    "nativeNodeCount": 160,
+    "screenIds": [
+      "24:45",
+      "24:65",
+      "24:99",
+      "24:146"
+    ],
+    "collapsedText": [],
+    "originalRootNodeCount": 350,
+    "originalFingerprint": "c51ebd30",
+    "originalFingerprintCharacters": 56151
+  },
+  "artifactValidation": {
+    "uniqueNativeIds": 160,
+    "screenCount": 4,
+    "textCount": 87,
+    "textContrastPairCount": 14,
+    "textContrastFailures": [],
+    "barContrast": 4.4173329876560015,
+    "hexRecomputeMaxAbsoluteDifference": 2.21098890307303e-07,
+    "hexVsNormalizedRGBTolerance": 1e-06,
+    "note": "Initial equality assertion at1e-12 failed; diagnosed differences around1e-7 from normalized RGB vs hex recomputation. Actual threshold checks pass without relaxing thresholds.",
+    "PNGChecks": [
+      {
+        "file": "F02-before-contrast-fix.png",
+        "sha256": "54217b6e4b7a9c1ee37b4eafcedf87d94b16fd7bf365c93cf879067a4e0731eb",
+        "verified": true
+      },
+      {
+        "file": "F02.png",
+        "sha256": "a433e066621db8a89142ec0c76a6f78fb86b4f5ca6938c0c72175c17da427952",
+        "verified": true
+      },
+      {
+        "file": "H01-before-contrast-fix.png",
+        "sha256": "910215ad157848d27e402b4788671cf423aade652f9ac5033293239b81f2e4ca",
+        "verified": true
+      },
+      {
+        "file": "H01.png",
+        "sha256": "9a5fa54b3cf52e98482c9622e07ee8dd44e2cb710d264e00b10d11c7fe2feff1",
+        "verified": true
+      },
+      {
+        "file": "P01-before-text-fix.png",
+        "sha256": "a0f20036c2a8f801d91581ee0c56f354e65c4d742f0cfa919247b3c37948089c",
+        "verified": true
+      },
+      {
+        "file": "P01.png",
+        "sha256": "79f080f7c36f9aefddb9582b22d95bcd419e8ea5792182b47de8c694b7c0902b",
+        "verified": true
+      },
+      {
+        "file": "P03.png",
+        "sha256": "a59c7427654c293bf1bba50769005a08f8df137da703cb0ba89c50fa880dd114",
+        "verified": true
+      },
+      {
+        "file": "participant-comparison.png",
+        "sha256": "376ceddb658333a35071f1776f8d73561e4fb2807888d7f1330de3c4ae0b25a8",
+        "verified": true
+      }
+    ],
+    "protectedFilesUnchanged": true,
+    "appManifestCreated": false
+  },
+  "visualReview": {
+    "reviewer": "Coordinator, not independent QA or human usability test",
+    "images": [
+      "participant-comparison.png",
+      "F02.png",
+      "H01.png"
+    ],
+    "observation": "No obvious overlapping or clipped text in inspected full-screen images; sample-data disclosures visible."
+  },
+  "runtime": "NOT RUN",
+  "humanPreference": "NOT RUN",
+  "responsiveIMEKeyboard": "NOT RUN",
+  "globalStyleAudit": "NOT DONE",
+  "codingStarted": false,
+  "pushed": false
+}

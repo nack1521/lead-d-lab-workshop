@@ -1,0 +1,112 @@
+{
+  "status": "READY_FOR_HUMAN_REVIEW",
+  "author": "Coordinator; not independent QA sign-off",
+  "fileKey": "RUOnC9Q15LA7DCc6rzhZtN",
+  "pageId": "1:2",
+  "rootId": "24:32",
+  "screenCount": 4,
+  "fullNativeNodeCount": 160,
+  "metadataElementCount": 152,
+  "metadataHiddenComponentAndInstanceChildren": [
+    "24:39",
+    "24:41",
+    "24:43",
+    "I24:141;24:39",
+    "I24:52;24:43",
+    "I24:56;24:43",
+    "I24:62;24:39",
+    "I24:91;24:39"
+  ],
+  "textCount": 87,
+  "textContrastPairCount": 14,
+  "textContrastFailures": [],
+  "barContrastAfter": 4.4173329876560015,
+  "barMinimum": 3,
+  "geometryOverflow": [],
+  "originalRoot": {
+    "id": "7:2",
+    "nodeCount": 350,
+    "fingerprint": {
+      "algorithm": "FNV1a32 structural/text rows; non-cryptographic",
+      "value": "c51ebd30",
+      "characters": 56151
+    }
+  },
+  "otherPages": [
+    {
+      "pageId": "0:1",
+      "childCount": 0
+    },
+    {
+      "pageId": "1:3",
+      "childCount": 0
+    }
+  ],
+  "screenshots": [
+    {
+      "file": "F02-before-contrast-fix.png",
+      "sha256": "54217b6e4b7a9c1ee37b4eafcedf87d94b16fd7bf365c93cf879067a4e0731eb",
+      "width": 1440,
+      "height": 1000,
+      "kind": "earlier-failed-check"
+    },
+    {
+      "file": "F02.png",
+      "sha256": "a433e066621db8a89142ec0c76a6f78fb86b4f5ca6938c0c72175c17da427952",
+      "width": 1440,
+      "height": 1000,
+      "kind": "final-native-screenshot"
+    },
+    {
+      "file": "H01-before-contrast-fix.png",
+      "sha256": "910215ad157848d27e402b4788671cf423aade652f9ac5033293239b81f2e4ca",
+      "width": 1440,
+      "height": 1000,
+      "kind": "earlier-failed-check"
+    },
+    {
+      "file": "H01.png",
+      "sha256": "9a5fa54b3cf52e98482c9622e07ee8dd44e2cb710d264e00b10d11c7fe2feff1",
+      "width": 1440,
+      "height": 1000,
+      "kind": "final-native-screenshot"
+    },
+    {
+      "file": "P01-before-text-fix.png",
+      "sha256": "a0f20036c2a8f801d91581ee0c56f354e65c4d742f0cfa919247b3c37948089c",
+      "width": 390,
+      "height": 900,
+      "kind": "earlier-failed-check"
+    },
+    {
+      "file": "P01.png",
+      "sha256": "79f080f7c36f9aefddb9582b22d95bcd419e8ea5792182b47de8c694b7c0902b",
+      "width": 390,
+      "height": 900,
+      "kind": "final-native-screenshot"
+    },
+    {
+      "file": "P03.png",
+      "sha256": "a59c7427654c293bf1bba50769005a08f8df137da703cb0ba89c50fa880dd114",
+      "width": 390,
+      "height": 900,
+      "kind": "final-native-screenshot"
+    },
+    {
+      "file": "participant-comparison.png",
+      "sha256": "376ceddb658333a35071f1776f8d73561e4fb2807888d7f1330de3c4ae0b25a8",
+      "width": 804,
+      "height": 900,
+      "kind": "contact-sheet"
+    }
+  ],
+  "runtimeTests": "NOT RUN",
+  "usabilityAndPreferenceTests": "NOT RUN",
+  "keyboardIMEZoomResponsive": "NOT RUN",
+  "allNineteenScreensHiFi": "NOT DONE",
+  "clickablePrototype": "NOT DONE",
+  "fullGlobalStyleAudit": "NOT DONE",
+  "codingStarted": false,
+  "pushed": false,
+  "source": "Actual MCP result payloads parsed from this profile tool transcript; temporary asset URLs omitted."
+}

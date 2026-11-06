@@ -1,6 +1,6 @@
 # UI-02 — Hi-fi review drafts
 
-สถานะ: **READY_FOR_HUMAN_REVIEW**, ไม่ใช่ ACCEPTED / runtime PASS. Coordinator authoring + visual review; ไม่ใช่ independent QA หรือ usability/preference sign-off
+สถานะปัจจุบัน: **REJECTED_BY_USER** — ผู้ใช้ปฏิเสธUI02ทั้งหมดว่าเป็นAI slopและขอcomposeใหม่; ดู [UI-03 reset proposals](UI-03-RESET-PROPOSALS.md). ผลauthoring/visualchecksด้านล่างเป็นหลักฐานในอดีต ไม่ใช่useracceptance. สถานะก่อนreview: READY_FOR_HUMAN_REVIEW, ไม่ใช่ ACCEPTED / runtime PASS. Coordinator authoring + visual review; ไม่ใช่ independent QA หรือ usability/preference sign-off
 
 ## Outcome / scope
 ผู้ใช้ขอทำขั้นถัดไปหลัง direction/reference และขอทำต่อจากงานค้าง. สร้างแบบ native editable สี่หน้าบน Figma page1:2 เป็นกลุ่มใหม่ ไม่ทับ WF01 root7:2. เมื่อกลับจาก interruption ตรวจ canvas ปัจจุบันก่อน; text-height/contrast fixes มีอยู่แล้ว จึงไม่ replay creation หรือแก้ซ้ำ

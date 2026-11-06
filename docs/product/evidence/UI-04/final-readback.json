@@ -1,0 +1,495 @@
+{
+  "rootId": "40:43",
+  "pageId": "1:2",
+  "nodeCount": 197,
+  "allNodeIds": [
+    "40:43",
+    "40:44",
+    "40:45",
+    "40:46",
+    "40:47",
+    "40:48",
+    "40:49",
+    "40:50",
+    "40:51",
+    "40:52",
+    "40:53",
+    "40:54",
+    "40:55",
+    "40:56",
+    "40:57",
+    "40:58",
+    "40:59",
+    "40:60",
+    "40:61",
+    "40:62",
+    "I40:62;40:50",
+    "40:64",
+    "40:65",
+    "40:66",
+    "I40:66;40:50",
+    "40:68",
+    "40:69",
+    "40:70",
+    "40:71",
+    "40:72",
+    "40:73",
+    "I40:73;40:48",
+    "40:75",
+    "40:76",
+    "40:77",
+    "40:78",
+    "40:79",
+    "40:80",
+    "40:81",
+    "40:82",
+    "40:83",
+    "40:84",
+    "40:85",
+    "40:86",
+    "40:87",
+    "40:88",
+    "40:89",
+    "40:90",
+    "40:91",
+    "40:92",
+    "40:93",
+    "40:94",
+    "40:95",
+    "40:96",
+    "40:97",
+    "40:98",
+    "40:99",
+    "40:100",
+    "40:101",
+    "40:102",
+    "40:103",
+    "40:104",
+    "40:105",
+    "40:106",
+    "40:107",
+    "I40:107;40:48",
+    "40:109",
+    "40:110",
+    "40:111",
+    "40:112",
+    "40:113",
+    "40:114",
+    "40:115",
+    "40:116",
+    "40:117",
+    "40:118",
+    "40:119",
+    "40:120",
+    "40:121",
+    "40:122",
+    "40:123",
+    "40:124",
+    "40:125",
+    "40:126",
+    "40:127",
+    "40:128",
+    "40:129",
+    "40:130",
+    "40:131",
+    "40:132",
+    "40:133",
+    "40:134",
+    "40:135",
+    "40:136",
+    "40:137",
+    "40:138",
+    "40:139",
+    "40:140",
+    "40:141",
+    "40:142",
+    "40:143",
+    "40:144",
+    "40:145",
+    "40:146",
+    "40:147",
+    "40:148",
+    "40:149",
+    "40:150",
+    "40:151",
+    "40:152",
+    "40:153",
+    "40:154",
+    "40:155",
+    "40:156",
+    "40:157",
+    "40:158",
+    "40:159",
+    "40:160",
+    "40:161",
+    "40:162",
+    "40:163",
+    "40:164",
+    "40:165",
+    "40:166",
+    "I40:166;40:48",
+    "40:168",
+    "40:169",
+    "40:170",
+    "40:171",
+    "40:172",
+    "40:173",
+    "40:174",
+    "40:175",
+    "40:176",
+    "40:177",
+    "40:178",
+    "40:179",
+    "40:180",
+    "40:181",
+    "40:182",
+    "40:183",
+    "40:184",
+    "40:185",
+    "40:186",
+    "40:187",
+    "40:188",
+    "40:189",
+    "40:190",
+    "40:191",
+    "40:192",
+    "40:193",
+    "40:194",
+    "40:195",
+    "40:196",
+    "40:197",
+    "40:198",
+    "40:199",
+    "40:200",
+    "40:201",
+    "40:202",
+    "40:203",
+    "40:204",
+    "40:205",
+    "40:206",
+    "40:207",
+    "40:208",
+    "40:209",
+    "40:210",
+    "40:211",
+    "40:212",
+    "40:213",
+    "40:214",
+    "40:215",
+    "40:216",
+    "40:217",
+    "40:218",
+    "40:219",
+    "40:220",
+    "40:221",
+    "40:222",
+    "40:223",
+    "40:224",
+    "40:225",
+    "40:226",
+    "40:227",
+    "40:228",
+    "40:229",
+    "40:230",
+    "40:231",
+    "40:232",
+    "40:233",
+    "40:234",
+    "40:235",
+    "40:236",
+    "40:237",
+    "40:238",
+    "40:239"
+  ],
+  "typeCounts": {
+    "FRAME": 70,
+    "TEXT": 93,
+    "COMPONENT": 2,
+    "INSTANCE": 5,
+    "RECTANGLE": 20,
+    "VECTOR": 7
+  },
+  "textCount": 93,
+  "fonts": [
+    "IBM Plex Sans Thai / Medium",
+    "IBM Plex Sans Thai / Regular"
+  ],
+  "collapsedText": [],
+  "overflow": [],
+  "glassNodes": [
+    {
+      "id": "40:72",
+      "name": "Glass / Join action only",
+      "fills": [
+        {
+          "type": "SOLID",
+          "visible": true,
+          "opacity": 0.7799999713897705,
+          "blendMode": "NORMAL",
+          "color": {
+            "r": 1,
+            "g": 1,
+            "b": 1
+          },
+          "boundVariables": {}
+        }
+      ],
+      "effects": [
+        {
+          "type": "BACKGROUND_BLUR",
+          "visible": true,
+          "radius": 20,
+          "boundVariables": {},
+          "blurType": "NORMAL"
+        },
+        {
+          "type": "DROP_SHADOW",
+          "visible": true,
+          "radius": 20,
+          "boundVariables": {},
+          "color": {
+            "r": 0,
+            "g": 0,
+            "b": 0,
+            "a": 0.07999999821186066
+          },
+          "offset": {
+            "x": 0,
+            "y": 6
+          },
+          "spread": 0,
+          "blendMode": "NORMAL",
+          "showShadowBehindNode": true
+        }
+      ]
+    },
+    {
+      "id": "40:106",
+      "name": "Glass / Submit action only",
+      "fills": [
+        {
+          "type": "SOLID",
+          "visible": true,
+          "opacity": 0.7799999713897705,
+          "blendMode": "NORMAL",
+          "color": {
+            "r": 1,
+            "g": 1,
+            "b": 1
+          },
+          "boundVariables": {}
+        }
+      ],
+      "effects": [
+        {
+          "type": "BACKGROUND_BLUR",
+          "visible": true,
+          "radius": 20,
+          "boundVariables": {},
+          "blurType": "NORMAL"
+        },
+        {
+          "type": "DROP_SHADOW",
+          "visible": true,
+          "radius": 20,
+          "boundVariables": {},
+          "color": {
+            "r": 0,
+            "g": 0,
+            "b": 0,
+            "a": 0.07999999821186066
+          },
+          "offset": {
+            "x": 0,
+            "y": 6
+          },
+          "spread": 0,
+          "blendMode": "NORMAL",
+          "showShadowBehindNode": true
+        }
+      ]
+    },
+    {
+      "id": "40:162",
+      "name": "Glass / Facilitator control dock",
+      "fills": [
+        {
+          "type": "SOLID",
+          "visible": true,
+          "opacity": 0.7799999713897705,
+          "blendMode": "NORMAL",
+          "color": {
+            "r": 1,
+            "g": 1,
+            "b": 1
+          },
+          "boundVariables": {}
+        }
+      ],
+      "effects": [
+        {
+          "type": "BACKGROUND_BLUR",
+          "visible": true,
+          "radius": 20,
+          "boundVariables": {},
+          "blurType": "NORMAL"
+        },
+        {
+          "type": "DROP_SHADOW",
+          "visible": true,
+          "radius": 20,
+          "boundVariables": {},
+          "color": {
+            "r": 0,
+            "g": 0,
+            "b": 0,
+            "a": 0.07999999821186066
+          },
+          "offset": {
+            "x": 0,
+            "y": 6
+          },
+          "spread": 0,
+          "blendMode": "NORMAL",
+          "showShadowBehindNode": true
+        }
+      ]
+    }
+  ],
+  "imageFilledNodes": [],
+  "originals": [
+    {
+      "id": "7:2",
+      "count": 350,
+      "fnv1a32": "c51ebd30",
+      "characters": 56151
+    },
+    {
+      "id": "24:32",
+      "count": 160,
+      "fnv1a32": "e133cccf",
+      "characters": 24637
+    },
+    {
+      "id": "38:37",
+      "count": 140,
+      "fnv1a32": "bce728b5",
+      "characters": 19431
+    },
+    {
+      "id": "38:177",
+      "count": 180,
+      "fnv1a32": "fb993cb0",
+      "characters": 23792
+    },
+    {
+      "id": "38:357",
+      "count": 141,
+      "fnv1a32": "8b5f484d",
+      "characters": 19429
+    }
+  ],
+  "textContrastPairs": [
+    {
+      "foreground": "#242424",
+      "background": "#eaeaea",
+      "ratio": 12.938362859917524,
+      "minimum": 4.5,
+      "nodes": 1
+    },
+    {
+      "foreground": "#636363",
+      "background": "#eaeaea",
+      "ratio": 5.007535880293337,
+      "minimum": 4.5,
+      "nodes": 2
+    },
+    {
+      "foreground": "#ffffff",
+      "background": "#242424",
+      "ratio": 15.522910096409824,
+      "minimum": 4.5,
+      "nodes": 5
+    },
+    {
+      "foreground": "#636363",
+      "background": "#f3f3f3",
+      "ratio": 5.414313063730396,
+      "minimum": 4.5,
+      "nodes": 4
+    },
+    {
+      "foreground": "#242424",
+      "background": "#ffffff",
+      "ratio": 15.522910096409824,
+      "minimum": 4.5,
+      "nodes": 38
+    },
+    {
+      "foreground": "#636363",
+      "background": "#ffffff",
+      "ratio": 6.007833457442188,
+      "minimum": 4.5,
+      "nodes": 37
+    },
+    {
+      "foreground": "#242424",
+      "background": "#f2f2f2",
+      "ratio": 13.896780028192655,
+      "minimum": 4.5,
+      "nodes": 4
+    },
+    {
+      "foreground": "#242424",
+      "background": "#f3f3f3",
+      "ratio": 13.989384945082415,
+      "minimum": 4.5,
+      "nodes": 2
+    }
+  ],
+  "textContrastFailures": [],
+  "contrastScope": "Ancestor solid-fill composite only; not per-pixel blur/backdrop, web accessibility or interaction verification",
+  "phoneContentClearance": [
+    {
+      "id": "40:53",
+      "name": "Phone / White content canvas",
+      "flowContentBottom": 520,
+      "reservedBackdropY": 696
+    },
+    {
+      "id": "40:76",
+      "name": "Phone / White content canvas",
+      "flowContentBottom": 612,
+      "reservedBackdropY": 696
+    }
+  ],
+  "screens": [
+    {
+      "id": "40:52",
+      "name": "UI04 / P01 / Mobile",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "40:75",
+      "name": "UI04 / P03 / Mobile",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "40:112",
+      "name": "UI04 / F02 / Desktop",
+      "width": 1440,
+      "height": 920
+    },
+    {
+      "id": "40:168",
+      "name": "UI04 / H01 / Desktop",
+      "width": 1440,
+      "height": 920
+    }
+  ],
+  "fullGlobalStyleAudit": "NOT DONE",
+  "runtime": "NOT RUN",
+  "humanAcceptance": "PENDING"
+}

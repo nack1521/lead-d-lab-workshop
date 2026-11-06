@@ -1,6 +1,6 @@
 # UI-05 — Component/state pack และ handoff
 
-สถานะ: **READY_FOR_HUMAN_REVIEW** — เป็น design draft ที่สร้างและตรวจกลับแล้ว ไม่ใช่ user acceptance, independent QA sign-off หรือ runtime PASS
+สถานะ: **CHANGES_REQUESTED หลัง independent Product/QA review R01** — ผลรวม [consolidated disposition](../implementation/evidence/UI-05-REVIEW-R01-CONSOLIDATED.md): 3 Major/2 Minor หลัง dedupe; ยังไม่แก้ design หรือเปลี่ยน submission policy. UI05 acceptance และ C1 build approval ยังคง PENDING/HOLD. Static verification ด้านล่างเป็นผลของ draft เดิม ไม่ใช่ retest หลังแก้.
 
 ## ขอบเขตและแหล่งความจริง
 ผู้ใช้สั่ง “จัดมาได้เลย” ให้ขยาย components/states หลังอนุมัติ UI-04 ทั้ง 4 หน้า. รอบนี้ทำ native Figma + specification/handoff เท่านั้น; C1 coding, install, push และ deploy ยัง hold.
@@ -84,7 +84,7 @@ UI-C03 textarea, C04 rating, C05 poll, C07 context, C08 aggregate, C09 coverage 
 - เก็บ PNG จริงจาก Figma 9 panels พร้อม SHA-256; ดูภาพจริงทั้ง participant/desktop/components. แก้ secondary/disabled differentiation, poll privacy/limit และ human-language microcopy แล้ว capture รอบ final. ไม่ reconstruct ภาพหรือจำลอง API success.
 
 ## Not done / acceptance gates
-**NOT RUN:** app/database/WS/receipt/retry/race/security/30-client load, keyboard/IME/screen reader/mobile browser, reduced-motion/transparency behavior, real reflow/zoom และ human usability. Independent canonical Product/QA sign-off ยังไม่ทำ. New state visual acceptance **PENDING**; UI-04 approval เดิมไม่ถูกขยายเอง.
+**NOT RUN:** app/database/WS/receipt/retry/race/security/30-client load, keyboard/IME/screen reader/mobile browser, reduced-motion/transparency behavior, real reflow/zoom และ human usability. Independent canonical Product/QA ตรวจ archived artifacts แล้ว ทั้งสองเป็น CHANGES_REQUESTED; ดู consolidated disposition ด้านบน. New state visual acceptance **PENDING**; UI-04 approval เดิมไม่ถูกขยายเอง.
 
 [Advisory R01 disposition](evidence/UI-05/advisory-R01.md): รับ read-only risk review ภายหลัง draft delivery และเติม handoff เรื่อง payload conflict, accepted replay หลัง close, event ordering, draft lifetime และเจ้าของ expiry decisions. ไม่มี Figma/runtime change และไม่เปลี่ยนผล static verification เดิม.
 

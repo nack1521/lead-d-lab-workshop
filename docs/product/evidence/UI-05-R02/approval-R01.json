@@ -1,0 +1,19 @@
+{
+  "task": "UI-05-R02",
+  "status": "AUTHORIZED_DESIGN_SPEC_FIX_ONLY",
+  "request": "อนุมัติการทำขั้นตอนต่อไป",
+  "clarificationResponse": "อนุมัติ: ผลยังไม่ทราบใช้ key เดิม; หลังยืนยันไม่บันทึกจึงเริ่ม attempt ใหม่ด้วย key ใหม่ได้เมื่อคำถามยังเปิด",
+  "approvedPolicy": {
+    "unknown": "Reconcile/replay original key and immutable payload; no fresh attempt or auto-resend",
+    "sameKey": "Always returns stable prior outcome; differing payload conflicts",
+    "freshAttempt": "Explicit user action only after authoritative terminal non-save, no possibility of late commit, and question still open; fresh key even if payload unchanged",
+    "accepted": "Read-only; one accepted response per participant/question regardless of new keys"
+  },
+  "scope": ["targeted Figma UI05 revision", "state/transition/type contracts", "Product and QA targeted retest"],
+  "notAuthorized": ["C1 application coding", "install", "containers", "deploy", "push", "public link", "new TTL or retention policy"],
+  "evidenceBaseline": "93ee52b0bff7ca3eb1e49293452b75dd0cc16913",
+  "figmaSessionId": "df570d77-4b54-4253-8dfa-5d78b9943c25",
+  "preserve": [{"id":"40:43","count":197,"fnv1a32":"7ba8c687","characters":60577},{"id":"47:48","count":573,"fnv1a32":"ff0cdf86","characters":185963}],
+  "humanRevisedVisualAcceptance": "PENDING",
+  "runtime": "NOT RUN"
+}

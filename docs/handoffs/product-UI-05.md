@@ -2,6 +2,8 @@
 
 สถานะ: **PREPARED / NOT DISPATCHED**. เอกสารสำหรับลุงอ่านเมื่อได้รับ approval ของ slice; ไม่ใช่คำสั่งให้เริ่ม coding. UI-05 รอ visual acceptance, C1 ยังรอ explicit local-build approval.
 
+**Mandatory current amendment:** อ่าน [UI05 R02 targeted fixes / approved attempt policy](../product/UI-05-R02-TARGETED-FIXES.md) ก่อน implementation. ผู้ใช้อนุมัติ fresh attempt หลัง terminal non-save + no late commit + still open ด้วย new key แม้ payload เดิม; same key คือ stable replay ไม่ใช่ attempt ใหม่. R02 supersedes retry classification wording ของ UI05 R01/UI01/WF01 และข้อจำกัด edited-only ของ protected C1 handoff เฉพาะจุดนี้ โดยไม่แก้ไฟล์เดิมหรือเปลี่ยน scope/TTL/auth/accepted uniqueness. R02 design fixes ยังรอ canonical retest ไม่ใช่ build approval.
+
 ## ลำดับอ่านและขอบเขต
 1. อ่าน `AGENTS.md`, `docs/TEAM-WORKFLOW.md` และ `docs/ANTIGRAVITY-RESULT-PROTOCOL.md`.
 2. ใช้ [UI-05 specification](../product/UI-05-STATE-PACK.md) สำหรับ component/outcome/lifecycle/microcopy และ node inventory. ใช้ [UI-04](../product/UI-04-SELECTIVE-GLASS.md) เป็น approved visual baseline เฉพาะ P01/P03/F02/H01; UI-02 ถูก reject และ UI-03 เป็น history.
@@ -9,8 +11,8 @@
 4. ทำเฉพาะ slice ที่อนุมัติ. C1 คือ technical tracer bullet React + Elysia/Bun + real PostgreSQL + authenticated native WS และ C1-01–C1-16; ไม่เพิ่ม HR/full polished UI, dependencies, Redis/BullMQ หรือ deployment เพราะมีภาพครบ.
 
 ## Design references
-- Figma file `RUOnC9Q15LA7DCc6rzhZtN`, page `1:2`, UI-05 root `47:48`: https://www.figma.com/design/RUOnC9Q15LA7DCc6rzhZtN?node-id=47-48
-- Approved root `40:43` คงเดิม. Node mapping และ properties อยู่ใน `docs/product/evidence/UI-05/final-readback.json`; ภาพจริง 9 panels พร้อม SHA-256 อยู่ใน `screenshots.json`.
+- Current Figma: file `RUOnC9Q15LA7DCc6rzhZtN`, page `1:2`, R02 delta root `66:153`: https://www.figma.com/design/RUOnC9Q15LA7DCc6rzhZtN?node-id=66-153 . R01 root `47:48` เก็บเป็นhistory/unchanged-state reference ไม่ใช้P07เก่าแทนR02.
+- Approved root `40:43` คงเดิม. Current R02 mapping/PNG3panels อยู่ใน `docs/product/evidence/UI-05-R02/{final-readback,screenshots}.json`; R01 mapping/PNG9panels ที่ `docs/product/evidence/UI-05/` เป็นhistorical/unchangedreferencesตามR02amendment ไม่ใช่หลักฐานretestผ่าน.
 - 3 local sets คือ button/field/notice, 19 variants. Composite textarea/rating/poll/context/chart/coverage/end-confirmation ยังเป็น screen/spec patterns ไม่ใช่ completed production library.
 - คง Soft Monochrome + Selective Glass: content opaque, no floating control overlap, black primary, secondary actionable ต่างจาก disabled, danger เฉพาะยืนยันจบ; IBM Plex Sans Thai Regular/Medium. Native BACKGROUND_BLUR ใน Figma ไม่ใช่ browser-performance หรือ Apple Liquid Glass proof.
 
@@ -20,8 +22,8 @@
 | Seam | Expected outcome ที่ต้องพิสูจน์ภายหลัง | สถานะ |
 |---|---|---|
 | UI05-R01 Sending → saved | Success หลัง atomic DB commit ของ answer+comment และอ่าน own receipt ตรงกัน; pending ไม่แสดง saved ล่วงหน้า | NOT RUN |
-| UI05-R02 Duplicate / retry | unchanged key+payload ซ้ำไม่เพิ่ม accepted count; การกดซ้ำและ reconnect ไม่สร้าง submission ใหม่ | NOT RUN |
-| UI05-R03 Terminal non-save / edit | server ยืนยัน old request ไม่ commit ภายหลัง + still open จึงเสนอ edit/new key ได้; transient missing/404 ไม่ปลด lock | NOT RUN |
+| UI05-R02 Duplicate / replay | same-attempt key+payload replay คืน stable outcome ไม่เพิ่ม count; keyเดิมต่างpayload conflict; fresh attempt ไม่ใช่ replay | NOT RUN |
+| UI05-R03 Terminal non-save / fresh attempt | หลัง terminal non-save + no late commit + still open + valid auth ผู้ใช้กด fresh attempt ด้วย new key แม้ payloadเดิมหรือแก้ร่าง; serverตรวจguards/accepted uniquenessอีกครั้ง; unknownไม่ปลดlock | NOT RUN |
 | UI05-R04 Unknown / race | timeout, disconnect และ close ระหว่างส่งยัง reconcile ผลชุดเดิม; saved/not-saved/unknown ไม่ถูกสลับจาก timer | NOT RUN |
 | UI05-R05 Closed / receipt auth | ปิด writes แต่ own receipt อ่านได้ตาม scope/grace/hard TTL/revoke; expired/unavailable คง unknown ไม่เปิด submit ใหม่ | NOT RUN |
 | UI05-R06 Zero / stale / partial | loading/error ไม่กลายเป็น zero; stale ไม่ Live และ mutation controls รอ reconcile; missing denominator ไม่กลายเป็นเปอร์เซ็นต์หรือค่าเฉลี่ยรวม | NOT RUN |

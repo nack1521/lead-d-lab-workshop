@@ -1,0 +1,83 @@
+{
+  "task": "UI-05-R02",
+  "phase": "READY_FOR_TARGETED_RETEST",
+  "fileKey": "RUOnC9Q15LA7DCc6rzhZtN",
+  "pageId": "1:2",
+  "sessionId": "df570d77-4b54-4253-8dfa-5d78b9943c25",
+  "rootId": "66:153",
+  "panels": [
+    {
+      "id": "66:157",
+      "name": "participant-corrections"
+    },
+    {
+      "id": "66:229",
+      "name": "lobby-question-zero"
+    },
+    {
+      "id": "66:284",
+      "name": "stale-transition"
+    }
+  ],
+  "views": [
+    {
+      "id": "66:158",
+      "code": "P07",
+      "variant": "fresh-attempt"
+    },
+    {
+      "id": "66:179",
+      "code": "P04",
+      "variant": "poll-question-02"
+    },
+    {
+      "id": "66:198",
+      "code": "P05",
+      "variant": "poll-sending"
+    },
+    {
+      "id": "66:213",
+      "code": "P06",
+      "variant": "poll-saved"
+    },
+    {
+      "id": "66:230",
+      "code": "F01",
+      "variant": "join-instructions"
+    },
+    {
+      "id": "66:258",
+      "code": "F03",
+      "variant": "zero-question-01"
+    },
+    {
+      "id": "66:285",
+      "code": "F04",
+      "variant": "stale-question-01"
+    }
+  ],
+  "annotationId": "66:333",
+  "sourceBaseline": "93ee52b0bff7ca3eb1e49293452b75dd0cc16913",
+  "preserved": [
+    {
+      "id": "40:43",
+      "count": 197,
+      "fnv1a32": "7ba8c687",
+      "characters": 60577
+    },
+    {
+      "id": "47:48",
+      "count": 573,
+      "fnv1a32": "ff0cdf86",
+      "characters": 185963
+    }
+  ],
+  "newLibraryComponents": 0,
+  "approval": "approval-R01.json",
+  "readback": "final-readback.json",
+  "screenshots": "screenshots.json",
+  "independentProductRetest": "PENDING",
+  "independentQARetest": "PENDING",
+  "humanRevisedVisualAcceptance": "PENDING",
+  "coding": "HOLD"
+}

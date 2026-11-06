@@ -1,0 +1,95 @@
+{
+  "task": "UI-05-R02",
+  "producerDisposition": "FIXED_DRAFT_READY_FOR_TARGETED_RETEST",
+  "nodeCount": 212,
+  "typeCounts": {
+    "FRAME": 69,
+    "TEXT": 115,
+    "INSTANCE": 14,
+    "VECTOR": 9,
+    "RECTANGLE": 5
+  },
+  "viewCount": 7,
+  "nativeAnnotationBoards": 1,
+  "textContrastPairCount": 11,
+  "textContrastFailures": [],
+  "overflow": [],
+  "collapsedText": [],
+  "clearances": [
+    {
+      "id": "66:158",
+      "contentBottom": 543,
+      "reservedY": 696
+    },
+    {
+      "id": "66:179",
+      "contentBottom": 555,
+      "reservedY": 696
+    },
+    {
+      "id": "66:198",
+      "contentBottom": 428,
+      "reservedY": 696
+    },
+    {
+      "id": "66:213",
+      "contentBottom": 405,
+      "reservedY": 696
+    },
+    {
+      "id": "66:230",
+      "contentBottom": 617,
+      "reservedY": 766
+    },
+    {
+      "id": "66:258",
+      "contentBottom": 415,
+      "reservedY": 766
+    },
+    {
+      "id": "66:285",
+      "contentBottom": 703,
+      "reservedY": 766
+    }
+  ],
+  "preserved": [
+    {
+      "id": "40:43",
+      "count": 197,
+      "fnv1a32": "7ba8c687",
+      "characters": 60577
+    },
+    {
+      "id": "47:48",
+      "count": 573,
+      "fnv1a32": "ff0cdf86",
+      "characters": 185963
+    }
+  ],
+  "pngCount": 3,
+  "protectedHashes": {
+    "docs/AI-PROGRESS.md": "d28a75f17c43a7d7a48709e546d6125ec777d72f04b10fa83f401b0fcb384754",
+    "docs/handoffs/ANTIGRAVITY-C1.md": "d361d2deac8b7fccf1e2f365372d8318c5b11b470722c052e197e10231b5770b"
+  },
+  "scope": [
+    "actual native editable delta",
+    "same local component masters reused",
+    "no app implementation"
+  ],
+  "authoringRecovery": {
+    "firstError": "undefined setProperties from assumed State= instance name",
+    "canvasReadAfterError": "No partial R02 root existed",
+    "correctedSelector": "verified instance text/property roles, not assumed variant name",
+    "visualFix": "P05/P06 poll notice changed from score+comment to answer+comment; phone panel recaptured"
+  },
+  "countProvenance": {
+    "creationReturned": 204,
+    "finalReadbackReturned": 212,
+    "note": "Counts recorded as actually returned; final is current resolved-instance snapshot; exact cause of difference not independently established"
+  },
+  "independentRetest": "PENDING",
+  "runtime": "NOT RUN",
+  "humanRevisedVisualAcceptance": "PENDING",
+  "buildApproval": "NOT GRANTED",
+  "publication": "NOT PERFORMED"
+}

@@ -1,0 +1,36 @@
+{
+  "capturedAt": "2026-11-06T17:58:51.696247+07:00",
+  "images": [
+    {
+      "path": "docs/product/evidence/UI-05-R02/participant-corrections.png",
+      "nodeId": "66:157",
+      "width": 1656,
+      "height": 844,
+      "bytes": 118394,
+      "sha256": "9f4b9636886d932ca800595c102fc6fa17a4c54eb4d2cab6c6878125195036e1",
+      "source": "Actual native Figma get_screenshot inline PNG; no temporary asset URL archived"
+    },
+    {
+      "path": "docs/product/evidence/UI-05-R02/lobby-question-zero.png",
+      "nodeId": "66:229",
+      "width": 2912,
+      "height": 920,
+      "bytes": 110939,
+      "sha256": "312d107cb4f8ff2e2847ebc92d13fd28a4f025e3117734ad289e7311a1dce94c",
+      "source": "Actual native Figma get_screenshot inline PNG; no temporary asset URL archived"
+    },
+    {
+      "path": "docs/product/evidence/UI-05-R02/stale-transition.png",
+      "nodeId": "66:284",
+      "width": 2912,
+      "height": 920,
+      "bytes": 153298,
+      "sha256": "e2682c43431561c87cc95f93bf92882102cbf62dec61d7dc02c5303c6ad913e8",
+      "source": "Actual native Figma get_screenshot inline PNG; no temporary asset URL archived"
+    }
+  ],
+  "protectedHashes": {
+    "docs/AI-PROGRESS.md": "d28a75f17c43a7d7a48709e546d6125ec777d72f04b10fa83f401b0fcb384754",
+    "docs/handoffs/ANTIGRAVITY-C1.md": "d361d2deac8b7fccf1e2f365372d8318c5b11b470722c052e197e10231b5770b"
+  }
+}

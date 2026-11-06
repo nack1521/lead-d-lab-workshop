@@ -86,6 +86,8 @@ UI-C03 textarea, C04 rating, C05 poll, C07 context, C08 aggregate, C09 coverage 
 ## Not done / acceptance gates
 **NOT RUN:** app/database/WS/receipt/retry/race/security/30-client load, keyboard/IME/screen reader/mobile browser, reduced-motion/transparency behavior, real reflow/zoom และ human usability. Independent canonical Product/QA sign-off ยังไม่ทำ. New state visual acceptance **PENDING**; UI-04 approval เดิมไม่ถูกขยายเอง.
 
+[Advisory R01 disposition](evidence/UI-05/advisory-R01.md): รับ read-only risk review ภายหลัง draft delivery และเติม handoff เรื่อง payload conflict, accepted replay หลัง close, event ordering, draft lifetime และเจ้าของ expiry decisions. ไม่มี Figma/runtime change และไม่เปลี่ยนผล static verification เดิม.
+
 ลำดับถัดไป: ผู้ใช้ review UI-05 → ตัดสินใจแยกเรื่อง C1 technical choices/local build approval → ลุง implement เฉพาะ slice ที่อนุมัติ → independent QA. [Handoff](../handoffs/product-UI-05.md) เป็น addon ไม่ใช่ dispatch/build permission.
 
 ## AI progress / ownership

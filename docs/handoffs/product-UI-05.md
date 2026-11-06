@@ -32,6 +32,14 @@
 
 ตารางนี้เป็น test seams ไม่ใช่ test code, ไม่แทน C1 acceptance IDs เดิม และไม่บังคับให้ทุก UI05-R case อยู่ใน C1. ให้เลือกตาม vertical slice และเก็บ deferred cases อย่างชัดเจน.
 
+### Clarifications หลัง read-only advisory R01
+- UI05-R02: same key/different payload ต้องเป็น conflict ไม่เขียนทับคำตอบเดิม. Accepted replay หลัง close คืน accepted outcome เดิมเมื่อยังมีสิทธิ์ ไม่ถือเป็น new write และไม่ bypass hard TTL/revocation.
+- UI05-R06: ใช้ authoritative snapshot/revision หรือ ordering contract ที่พิสูจน์ได้; event เก่าของ session/question เดิมห้ามย้อนทับ snapshot ใหม่. UI timer/connection-open อย่างเดียวไม่ทำให้ fresh.
+- UI05-R09: preserve draft ใน active tab ตาม contract เท่านั้น; ยังไม่รับรอง refresh/ปิดแท็บ และไม่เพิ่ม localStorage หรือ persistent draft storage โดยปริยาย.
+- Expiry decisions: ผู้ใช้เป็นเจ้าของ approval ของ proposed grant TTL, receipt read grace, retention/revoke และช่องทางช่วยกู้สถานะที่อนุญาต; R03 เป็นข้อเสนอเดิม ไม่ใช่ค่าที่ UI05 ตัดสินใหม่. Retention/ช่องทางกู้สถานะที่ยังไม่ตกลงต้องระบุ OPEN ก่อน implementation ของส่วนนั้น. Antigravity เสนอทางเลือก, canonical QA ตรวจ policy หลังได้รับ approval; ห้ามเสนอ HR bypass หรือสัญญาว่าอ่าน receipt ได้ตลอด.
+
+[Advisory R01 disposition](../product/evidence/UI-05/advisory-R01.md) เป็นการตรวจความครบถ้วนของเอกสารโดย Coordinator ไม่ใช่ผล runtime หรือ sign-off ของ Senior Tester.
+
 R03 technical choices/security policies ยังเป็น proposed choices ที่รอ human build approval. UI-05 ไม่เปลี่ยน TTL, receipt grace, body/frame limits, origin rules, revocation semantics หรือ dependency pins ด้วยตนเอง. ตอน build ต้องตรวจ versions/security/ports/Docker ตามจริงอีกครั้ง หากมี blocker ให้เสนอเปลี่ยนพร้อมเหตุผล ไม่เปลี่ยน stack เงียบ ๆ.
 
 ## สิ่งที่ภาพไม่ได้พิสูจน์

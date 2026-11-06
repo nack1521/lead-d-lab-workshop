@@ -1,0 +1,84 @@
+{
+  "status": "APPROVED_DRAFT",
+  "decisionSource": {
+    "type": "direct_user_message",
+    "quote": "ผม approve draft นี้"
+  },
+  "recordedAt": "2026-11-06T14:48:29.647853+07:00",
+  "artifactBaselineCommit": "e75b4ff5d1aaa93ddbeef368a66ecfe1a432d4cb",
+  "fileKey": "RUOnC9Q15LA7DCc6rzhZtN",
+  "rootId": "40:43",
+  "screens": [
+    {
+      "id": "40:52",
+      "name": "UI04 / P01 / Mobile",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "40:75",
+      "name": "UI04 / P03 / Mobile",
+      "width": 390,
+      "height": 844
+    },
+    {
+      "id": "40:112",
+      "name": "UI04 / F02 / Desktop",
+      "width": 1440,
+      "height": 920
+    },
+    {
+      "id": "40:168",
+      "name": "UI04 / H01 / Desktop",
+      "width": 1440,
+      "height": 920
+    }
+  ],
+  "screenshotHashesVerified": [
+    {
+      "file": "F02.png",
+      "dimensions": [
+        1440,
+        920
+      ],
+      "sha256": "470f1e7bb1453bf3c64226376dba0e01fb88df1487565ec0b0320e5c1ef38188"
+    },
+    {
+      "file": "H01.png",
+      "dimensions": [
+        1440,
+        920
+      ],
+      "sha256": "c17db1aa4eb1099c3da11f2058b156113e8d91fdfa8ef5ba8bb9377270c859e1"
+    },
+    {
+      "file": "P01.png",
+      "dimensions": [
+        390,
+        844
+      ],
+      "sha256": "755eb86e3a336d7048e0decaa69ace0cce03eb28de82e106ef2f35672efc5cbb"
+    },
+    {
+      "file": "P03.png",
+      "dimensions": [
+        390,
+        844
+      ],
+      "sha256": "7dbdc6afea9f80cf48437a5833f17251509664d6c21c4b11b4f7af7d76cff752"
+    }
+  ],
+  "approvedScope": [
+    "UI04 visual draft P01/P03/F02/H01",
+    "Soft Monochrome + Selective Glass as visual baseline"
+  ],
+  "notApprovedByThisMessage": [
+    "all19 hi-fi screens and unseen states",
+    "implementation or C1 build",
+    "install/deploy/push/external publication"
+  ],
+  "runtime": "NOT RUN",
+  "usabilityTesting": "NOT RUN",
+  "FigmaChangedByApprovalRecording": false,
+  "historicalVerificationPreserved": true
+}

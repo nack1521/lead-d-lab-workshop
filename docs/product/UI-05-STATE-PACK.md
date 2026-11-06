@@ -1,6 +1,6 @@
 # UI-05 — Component/state pack และ handoff
 
-สถานะ: **R02 FIXED_DRAFT / TARGETED_RETEST_PENDING** — ผู้ใช้อนุมัติ design/spec fixes และ fresh-attempt policy แล้ว ดู [current R02 amendment](UI-05-R02-TARGETED-FIXES.md). R01 independent findings ยังไม่ปิดจน Product/QA ตรวจซ้ำ; revised visual acceptance ยัง PENDING และ C1 coding ยัง HOLD. Inventory/verification ด้านล่างเป็น R01 history; ใช้ R02 delta ตาม precedence ที่ระบุ.
+สถานะ: **R02 READY_FOR_HUMAN_STATE_REVIEW** — canonical Product/QA targeted retest ครบและ findings เดิมเป็น RESOLVED_STATIC ใน design/spec scope ดู [review summary](../implementation/UI-05-R02-REVIEW-SUMMARY.md). [Current R02 amendment](UI-05-R02-TARGETED-FIXES.md) มี user-approved fresh-attempt policy; revised visual acceptance ยัง PENDING และ C1 coding ยัง HOLD. Inventory/verification ด้านล่างเป็น R01 history; ใช้ R02 delta ตาม precedence ที่ระบุ.
 
 ## ขอบเขตและแหล่งความจริง
 ผู้ใช้สั่ง “จัดมาได้เลย” ให้ขยาย components/states หลังอนุมัติ UI-04 ทั้ง 4 หน้า. รอบนี้ทำ native Figma + specification/handoff เท่านั้น; C1 coding, install, push และ deploy ยัง hold.
@@ -84,7 +84,7 @@ UI-C03 textarea, C04 rating, C05 poll, C07 context, C08 aggregate, C09 coverage 
 - เก็บ PNG จริงจาก Figma 9 panels พร้อม SHA-256; ดูภาพจริงทั้ง participant/desktop/components. แก้ secondary/disabled differentiation, poll privacy/limit และ human-language microcopy แล้ว capture รอบ final. ไม่ reconstruct ภาพหรือจำลอง API success.
 
 ## Not done / acceptance gates
-**NOT RUN:** app/database/WS/receipt/retry/race/security/30-client load, keyboard/IME/screen reader/mobile browser, reduced-motion/transparency behavior, real reflow/zoom และ human usability. Independent canonical Product/QA R01 เป็น CHANGES_REQUESTED; R02 แก้ draft ตาม user-approved scope แล้ว แต่ targeted retest ยัง PENDING ไม่ถือว่าปิด findings. New state visual acceptance **PENDING**; UI-04 approval เดิมไม่ถูกขยายเอง.
+**NOT RUN:** app/database/WS/receipt/retry/race/security/30-client load, keyboard/IME/screen reader/mobile browser, reduced-motion/transparency behavior, real reflow/zoom และ human usability. Independent canonical Product/QA R01 เป็น CHANGES_REQUESTED ตามประวัติ; R02 targeted retest กลับมาครบและ findings เดิมเป็น RESOLVED_STATIC ใน design/spec scope โดยทั้งสองให้ READY_FOR_HUMAN_STATE_REVIEW ตาม summary ด้านบน. New state visual acceptance **PENDING**; UI-04 approval เดิมไม่ถูกขยายเอง.
 
 [Advisory R01 disposition](evidence/UI-05/advisory-R01.md): รับ read-only risk review ภายหลัง draft delivery และเติม handoff เรื่อง payload conflict, accepted replay หลัง close, event ordering, draft lifetime และเจ้าของ expiry decisions. ไม่มี Figma/runtime change และไม่เปลี่ยนผล static verification เดิม.
 

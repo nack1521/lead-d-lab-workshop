@@ -2,7 +2,7 @@
 
 สถานะ: **PREPARED / NOT DISPATCHED**. เอกสารสำหรับลุงอ่านเมื่อได้รับ approval ของ slice; ไม่ใช่คำสั่งให้เริ่ม coding. UI-05 รอ visual acceptance, C1 ยังรอ explicit local-build approval.
 
-**Mandatory current amendment:** อ่าน [UI05 R02 targeted fixes / approved attempt policy](../product/UI-05-R02-TARGETED-FIXES.md) ก่อน implementation. ผู้ใช้อนุมัติ fresh attempt หลัง terminal non-save + no late commit + still open ด้วย new key แม้ payload เดิม; same key คือ stable replay ไม่ใช่ attempt ใหม่. R02 supersedes retry classification wording ของ UI05 R01/UI01/WF01 และข้อจำกัด edited-only ของ protected C1 handoff เฉพาะจุดนี้ โดยไม่แก้ไฟล์เดิมหรือเปลี่ยน scope/TTL/auth/accepted uniqueness. R02 design fixes ยังรอ canonical retest ไม่ใช่ build approval.
+**Mandatory current amendment:** อ่าน [UI05 R02 targeted fixes / approved attempt policy](../product/UI-05-R02-TARGETED-FIXES.md) ก่อน implementation. ผู้ใช้อนุมัติ fresh attempt หลัง terminal non-save + no late commit + still open ด้วย new key แม้ payload เดิม; same key คือ stable replay ไม่ใช่ attempt ใหม่. R02 supersedes retry classification wording ของ UI05 R01/UI01/WF01 และข้อจำกัด edited-only ของ protected C1 handoff เฉพาะจุดนี้ โดยไม่แก้ไฟล์เดิมหรือเปลี่ยน scope/TTL/auth/accepted uniqueness. R02 targeted retest ทั้ง canonical Product/QA เป็น READY_FOR_HUMAN_STATE_REVIEW; [review summary](../implementation/UI-05-R02-REVIEW-SUMMARY.md) เก็บdispositionที่ตรวจแล้ว ไม่ใช่humanacceptanceหรือbuildapproval.
 
 ## ลำดับอ่านและขอบเขต
 1. อ่าน `AGENTS.md`, `docs/TEAM-WORKFLOW.md` และ `docs/ANTIGRAVITY-RESULT-PROTOCOL.md`.

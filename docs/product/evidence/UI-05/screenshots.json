@@ -1,0 +1,90 @@
+{
+  "capturedAt": "2026-11-06T15:54:33.342335+07:00",
+  "images": [
+    {
+      "path": "docs/product/evidence/UI-05/components.png",
+      "nodeId": "50:48",
+      "width": 2960,
+      "height": 753,
+      "bytes": 84041,
+      "sha256": "480d43bf29d7493cc3731f5e5fe872e97da72c1163fb0820ef4822a10c4a99b2",
+      "source": "Actual native Figma get_screenshot inline-image fallback, not reconstructed"
+    },
+    {
+      "path": "docs/product/evidence/UI-05/participant-1.png",
+      "nodeId": "50:136",
+      "width": 1656,
+      "height": 844,
+      "bytes": 106365,
+      "sha256": "36f9a626d933c24702df540e07c2a6cfee9e59f5c20b437be108c25710a47e21",
+      "source": "Actual native Figma get_screenshot inline-image fallback, not reconstructed"
+    },
+    {
+      "path": "docs/product/evidence/UI-05/participant-2.png",
+      "nodeId": "50:319",
+      "width": 1656,
+      "height": 844,
+      "bytes": 112855,
+      "sha256": "64358e3d7aa937ecb945603f96ca6ac8e6017080242bd07794492eff2cd07a15",
+      "source": "Actual native Figma get_screenshot inline-image fallback, not reconstructed"
+    },
+    {
+      "path": "docs/product/evidence/UI-05/participant-closed.png",
+      "nodeId": "50:513",
+      "width": 1656,
+      "height": 844,
+      "bytes": 65645,
+      "sha256": "47c9725085eddbf3aeecdeb3d4461487280e0e47aa8e5c462b3db4c181fb39c4",
+      "source": "Actual native Figma get_screenshot inline-image fallback, not reconstructed"
+    },
+    {
+      "path": "docs/product/evidence/UI-05/facilitator-lobby-zero.png",
+      "nodeId": "50:607",
+      "width": 2912,
+      "height": 920,
+      "bytes": 76094,
+      "sha256": "8f00a206e63702a531e22b42f5fefa8a8c85d21af503d75ee22ba4b1cf6a6660",
+      "source": "Actual native Figma get_screenshot inline-image fallback, not reconstructed"
+    },
+    {
+      "path": "docs/product/evidence/UI-05/facilitator-stale-confirm.png",
+      "nodeId": "50:735",
+      "width": 2912,
+      "height": 920,
+      "bytes": 98767,
+      "sha256": "3c672706a3b09eb10b38db0420248058efbec7d2cbe12310aa766d19d2bb8602",
+      "source": "Actual native Figma get_screenshot inline-image fallback, not reconstructed"
+    },
+    {
+      "path": "docs/product/evidence/UI-05/facilitator-end-pending-unknown.png",
+      "nodeId": "50:889",
+      "width": 2912,
+      "height": 920,
+      "bytes": 78108,
+      "sha256": "2f58953e662a7beebf925149a0c11e0e9681bb83c5c8e3e93997cc5c5d2146bf",
+      "source": "Actual native Figma get_screenshot inline-image fallback, not reconstructed"
+    },
+    {
+      "path": "docs/product/evidence/UI-05/facilitator-ended-hr-empty.png",
+      "nodeId": "50:1017",
+      "width": 2912,
+      "height": 920,
+      "bytes": 79318,
+      "sha256": "05c517ef608a1d621a81d1006dc611e834a3d3438a86e2401338fb58d50e8582",
+      "source": "Actual native Figma get_screenshot inline-image fallback, not reconstructed"
+    },
+    {
+      "path": "docs/product/evidence/UI-05/hr-partial.png",
+      "nodeId": "50:1161",
+      "width": 2912,
+      "height": 920,
+      "bytes": 63163,
+      "sha256": "38d3e12c602a94415aea772b1793526f4569e5157aecd6481767a91b559a1c69",
+      "source": "Actual native Figma get_screenshot inline-image fallback, not reconstructed"
+    }
+  ],
+  "protected": {
+    "docs/AI-PROGRESS.md": "d28a75f17c43a7d7a48709e546d6125ec777d72f04b10fa83f401b0fcb384754",
+    "docs/handoffs/ANTIGRAVITY-C1.md": "d361d2deac8b7fccf1e2f365372d8318c5b11b470722c052e197e10231b5770b"
+  }
+}

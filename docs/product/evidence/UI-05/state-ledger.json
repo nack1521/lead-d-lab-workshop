@@ -1,0 +1,23 @@
+{
+  "task": "UI-05",
+  "phase": "READY_FOR_HUMAN_REVIEW",
+  "finalReadback": "final-readback.json",
+  "verification": "verification.json",
+  "screenshots": "screenshots.json",
+  "coverage": {"authoredViews":19,"authoredUniqueCodes":15,"approvedBaselineReferences":4,"canonicalUniqueCodes":19},
+  "humanStatePackAcceptance": "PENDING",
+  "runtime": "NOT RUN",
+  "fileKey": "RUOnC9Q15LA7DCc6rzhZtN",
+  "pageId": "1:2",
+  "sessionId": "efc619ef-bb03-4188-9c82-47441649609b",
+  "rootId": "47:48",
+  "sourceId": "47:51",
+  "approvedRoot": {"id":"40:43","count":197,"fnv1a32":"7ba8c687","characters":60577,"fields":"id,parent,name,type,geometry,text,font,fills,effects; noncryptographic"},
+  "sets": {
+    "button": {"id":"48:48","label":"Label#48:0","states":{"ready":"47:52","secondary":"47:54","disabled":"47:56","pending":"47:58","danger":"47:60","focus":"47:62"}},
+    "field": {"id":"48:49","value":"Value#48:7","helper":"Helper#48:12","states":{"empty":"47:64","focus":"47:69","invalid":"47:74","disabled":"47:79"}},
+    "notice": {"id":"48:50","title":"Title#48:17","body":"Body#48:27","states":{"waiting":"47:84","sending":"47:87","saved":"47:90","not-saved":"47:93","unknown":"47:96","closed":"47:99","stale":"47:102","loading":"47:105","error":"47:108"}}
+  },
+  "originalBaselines": {"P01":"40:52","P03":"40:75","F02":"40:112","H01":"40:168"},
+  "limitations": ["local draft families only", "global styles/variables not changed", "not a published token-bound production library", "runtime NOT RUN", "new state visual acceptance PENDING"]
+}

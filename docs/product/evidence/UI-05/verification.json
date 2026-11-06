@@ -1,0 +1,212 @@
+{
+  "task": "UI-05",
+  "status": "VERIFIED_STATIC_DRAFT_READY_FOR_HUMAN_REVIEW",
+  "counts": {
+    "native_views": 19,
+    "new_unique_codes": 15,
+    "references": 4,
+    "displayed_views_with_references": 23,
+    "canonical_unique_codes": 19
+  },
+  "nativeNodeCount": 573,
+  "typeCounts": {
+    "FRAME": 166,
+    "TEXT": 291,
+    "COMPONENT_SET": 3,
+    "COMPONENT": 19,
+    "INSTANCE": 60,
+    "VECTOR": 29,
+    "RECTANGLE": 5
+  },
+  "contrastPairs": [
+    {
+      "foreground": "#242424",
+      "background": "#eaeaea",
+      "ratio": 12.938362859917524,
+      "minimum": 4.5,
+      "nodes": 9
+    },
+    {
+      "foreground": "#636363",
+      "background": "#eaeaea",
+      "ratio": 5.007535880293337,
+      "minimum": 4.5,
+      "nodes": 1
+    },
+    {
+      "foreground": "#242424",
+      "background": "#ffffff",
+      "ratio": 15.522910096409824,
+      "minimum": 4.5,
+      "nodes": 60
+    },
+    {
+      "foreground": "#636363",
+      "background": "#ffffff",
+      "ratio": 6.007833457442188,
+      "minimum": 4.5,
+      "nodes": 62
+    },
+    {
+      "foreground": "#ffffff",
+      "background": "#242424",
+      "ratio": 15.522910096409824,
+      "minimum": 4.5,
+      "nodes": 8
+    },
+    {
+      "foreground": "#242424",
+      "background": "#efefef",
+      "ratio": 13.499864237655682,
+      "minimum": 4.5,
+      "nodes": 9
+    },
+    {
+      "foreground": "#6e6e6e",
+      "background": "#f5f5f5",
+      "ratio": 4.668692999235759,
+      "minimum": 4.5,
+      "nodes": 6
+    },
+    {
+      "foreground": "#636363",
+      "background": "#efefef",
+      "ratio": 5.224853815050648,
+      "minimum": 4.5,
+      "nodes": 3
+    },
+    {
+      "foreground": "#ffffff",
+      "background": "#9f2525",
+      "ratio": 7.593488719657424,
+      "minimum": 4.5,
+      "nodes": 2
+    },
+    {
+      "foreground": "#636363",
+      "background": "#f3f3f3",
+      "ratio": 5.414313063730396,
+      "minimum": 4.5,
+      "nodes": 42
+    },
+    {
+      "foreground": "#9f2525",
+      "background": "#ffffff",
+      "ratio": 7.593488719657424,
+      "minimum": 4.5,
+      "nodes": 2
+    },
+    {
+      "foreground": "#242424",
+      "background": "#f3f3f3",
+      "ratio": 13.989384945082415,
+      "minimum": 4.5,
+      "nodes": 46
+    },
+    {
+      "foreground": "#9f2525",
+      "background": "#f3f3f3",
+      "ratio": 6.843319720056707,
+      "minimum": 4.5,
+      "nodes": 5
+    }
+  ],
+  "textContrastFailures": [],
+  "visibleTextCount": 255,
+  "overflow": [],
+  "collapsedText": [],
+  "phoneContentClearance": [
+    {
+      "id": "50:137",
+      "name": "UI05 / P02 / waiting",
+      "bottom": 261,
+      "reservedY": 696
+    },
+    {
+      "id": "50:179",
+      "name": "UI05 / P04 / poll",
+      "bottom": 555,
+      "reservedY": 696
+    },
+    {
+      "id": "50:226",
+      "name": "UI05 / P05 / sending",
+      "bottom": 428,
+      "reservedY": 696
+    },
+    {
+      "id": "50:272",
+      "name": "UI05 / P06 / saved",
+      "bottom": 405,
+      "reservedY": 696
+    },
+    {
+      "id": "50:320",
+      "name": "UI05 / P07 / not-saved",
+      "bottom": 500,
+      "reservedY": 696
+    },
+    {
+      "id": "50:368",
+      "name": "UI05 / P08 / unknown",
+      "bottom": 451,
+      "reservedY": 696
+    },
+    {
+      "id": "50:414",
+      "name": "UI05 / P09 / saved",
+      "bottom": 405,
+      "reservedY": 696
+    },
+    {
+      "id": "50:460",
+      "name": "UI05 / P10 / error",
+      "bottom": 548,
+      "reservedY": 696
+    },
+    {
+      "id": "50:514",
+      "name": "UI05 / P09 / not-saved",
+      "bottom": 428,
+      "reservedY": 696
+    },
+    {
+      "id": "50:560",
+      "name": "UI05 / P09 / unknown",
+      "bottom": 468,
+      "reservedY": 696
+    }
+  ],
+  "approvedRootPreserved": {
+    "id": "40:43",
+    "count": 197,
+    "fnv1a32": "7ba8c687",
+    "characters": 60577,
+    "expected": "7ba8c687",
+    "matches": true
+  },
+  "screenshots": 9,
+  "protectedHashes": {
+    "docs/AI-PROGRESS.md": "d28a75f17c43a7d7a48709e546d6125ec777d72f04b10fa83f401b0fcb384754",
+    "docs/handoffs/ANTIGRAVITY-C1.md": "d361d2deac8b7fccf1e2f365372d8318c5b11b470722c052e197e10231b5770b"
+  },
+  "visualReview": {
+    "method": "Coordinator inspected actual native PNG panels; not independent user or canonical QA",
+    "findingsAddressed": [
+      "secondary action versus disabled differentiation",
+      "poll privacy/500-character helper",
+      "plain-language lifecycle copy",
+      "partial/empty/ended named distinctly",
+      "desktop selective-glass docks retained"
+    ],
+    "remaining": [
+      "dedicated expiry frame not drawn; notice contract documented",
+      "full responsive/keyboard/mobile prototype not built"
+    ]
+  },
+  "runtime": "NOT RUN",
+  "canonicalIndependentQA": "NOT RUN",
+  "userApproval": "PENDING",
+  "buildApproval": "NOT GRANTED",
+  "publication": "NOT PERFORMED"
+}

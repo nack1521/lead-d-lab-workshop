@@ -27,3 +27,33 @@ Source skills อยู่ใน .hermes/skills และ .agents/skills; proven
 
 ## Future deliverables
 Working URL, public GitHub repository with full commit history, unlisted one-take 5–8 minute video with face and screen. ยังไม่มีแอปออนไลน์หรือวิดีโอ; repository เริ่มเก็บ foundation/design history ก่อน implementation
+
+## C1 local tracer bullet — commands ที่รันจริง
+
+ต้องมี Bun 1.4.4 และ Docker engine ที่ทำงานอยู่. ค่า secret อยู่ใน `.env` (untracked) — คัดลอกจาก `.env.example` แล้วตั้ง `POSTGRES_PASSWORD` เอง.
+
+```bash
+bun install                 # pinned dependencies จาก bun.lock
+docker compose up -d db     # PostgreSQL 16.15-alpine บน 127.0.0.1:5433 (volume c1a_c1_pgdata)
+bun run migrate             # db/migrations/*.sql ผ่าน schema_migrations
+bun run bootstrap           # synthetic fixtures ROOM-01/ROOM-02 + facilitator grants ใน .local/fixtures.json (untracked)
+bun run api                 # Elysia API + WS บน 127.0.0.1:3000
+bun run web                 # Vite dev server บน 127.0.0.1:5173
+bun test tests              # integration tests กับ PostgreSQL จริง
+bun run build:web           # production build ที่ apps/web/dist
+bun run docker/web-serve.ts # เสิร์ฟ dist พร้อม SPA deep-link fallback บน 127.0.0.1:5173
+docker compose stop db      # หยุดโดยไม่ลบ volume; ห้าม down -v/prune
+```
+
+Mode B (Docker-only, ไม่ใช้ host Bun/node_modules/DB เดิม) สร้างจาก fresh worktree และใช้ project คนละชื่อ:
+
+```bash
+git worktree add .worktrees/c1-mode-b HEAD
+cp .env.mode-b .worktrees/c1-mode-b/.env   # คนละพอร์ต: web 5174, api 3001, db 5434
+cd .worktrees/c1-mode-b
+docker compose -p c1b --profile full up -d --build
+docker compose -p c1b ps
+docker compose -p c1b stop                 # ห้ามลบ volume
+```
+
+ห้าม push/deploy/public tunnel/paid service/global config/destructive reset จาก workflow นี้. ผลลัพธ์จริงพร้อมคำสั่ง/exit code อยู่ `docs/results/C1-LOCAL-BUILD/R01/`.

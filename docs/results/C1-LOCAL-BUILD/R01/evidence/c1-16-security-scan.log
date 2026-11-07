@@ -1,0 +1,25 @@
+== tracked env files ==
+.env.example
+== tracked files containing the local DB password ==
+no tracked match
+== tracked files with grant-like fixtures ==
+no fixture files tracked
+== scan source for bearer/token logging patterns ==
+no log of grants/nicknames/comments in source
+== mode A api log contents ==
+c1 api listening on http://127.0.0.1:3000 (origins: http://127.0.0.1:5173)
+c1 api listening on http://127.0.0.1:3000 (origins: http://127.0.0.1:5173)
+== api log secret scan ==
+not logged: ok
+not logged: ok
+not logged: ok
+not logged: ok
+== image context (no env/local fixtures) ==
+. .. apps bun.lock db docker node_modules package.json 
+no_env_in_image
+no_local_dir_in_image
+== image history has no secret env ==
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/bun-node-fallback-bin
+BUN_RUNTIME_TRANSPILER_CACHE_PATH=0
+BUN_INSTALL_BIN=/usr/local/bin
+

@@ -1,0 +1,15 @@
+bun test v1.4.4 (38afee6c8)
+
+tests/web-state.test.ts:
+(pass) C1-08 client attempt policy > a fresh attempt is only allowed after a terminal non-save while the question is open and the grant is valid [0.06ms]
+(pass) C1-08 client attempt policy > classifies only structured terminal application outcomes as fresh-attempt eligible [0.07ms]
+(pass) C1-08 client attempt policy > a retry or reconcile reuses the same key and immutable payload [0.11ms]
+(pass) C1-11 revision guard > older or equal revisions never overwrite newer client state [0.01ms]
+(pass) C1-06 client grapheme counting and draft handling > Thai combining marks and emoji ZWJ count as one grapheme each [1.04ms]
+(pass) C1-06 client grapheme counting and draft handling > whitespace-only comments become absent and other text is preserved verbatim [0.03ms]
+(pass) C1-06 client grapheme counting and draft handling > fallback counts are clearly labelled as approximate [0.02ms]
+
+ 7 pass
+ 0 fail
+ 35 expect() calls
+Ran 7 tests across 1 file. [5.00ms]

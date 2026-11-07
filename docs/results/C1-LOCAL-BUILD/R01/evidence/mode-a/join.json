@@ -1,0 +1,15 @@
+{
+  "status": "joined",
+  "participant_id": "3ba08464-3cc2-4afe-ae99-cc112f7c6ddb",
+  "grant_present": true,
+  "question": "คุณมั่นใจในการให้ feedback ที่ช่วยให้ทีมพัฒนาได้เพียงใด?",
+  "session": {
+    "id": "77b5b93e-06ee-4d62-bbf2-036ddc2664d8",
+    "join_code": "ROOM-01",
+    "status": "active",
+    "revision": 0,
+    "active_question_id": "c9ebe455-9397-42b7-a2de-c5abfa76d1a4",
+    "ended_at": null
+  },
+  "grant": "[redacted capability token; held only in memory]"
+}

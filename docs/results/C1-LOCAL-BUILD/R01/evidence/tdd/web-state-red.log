@@ -1,0 +1,84 @@
+bun test v1.4.4 (38afee6c8)
+
+tests/web-state.test.ts:
+30 |   outcome: Outcome;
+31 |   questionOpen: boolean;
+32 |   grantValid: boolean;
+33 |   oldRequestTerminal: boolean;
+34 | }): boolean {
+35 |   throw new Error('not implemented');
+                                        ^
+error: not implemented
+      at canStartFreshAttempt (/Users/aiink/Nack/Lead+D-Lab/apps/web/src/state.ts:35:36)
+      at <anonymous> (/Users/aiink/Nack/Lead+D-Lab/tests/web-state.test.ts:16:7)
+(fail) C1-08 client attempt policy > a fresh attempt is only allowed after a terminal non-save while the question is open and the grant is valid [0.16ms]
+21 | export function createAttempt(_payload: AttemptPayload, _now = Date.now()): Attempt {
+22 |   throw new Error('not implemented');
+23 | }
+24 | 
+25 | export function classifyResponse(_status: number, _body: unknown): 'accepted' | 'terminal_non_save' | 'conflict' | 'unknown' {
+26 |   throw new Error('not implemented');
+                                        ^
+error: not implemented
+      at classifyResponse (/Users/aiink/Nack/Lead+D-Lab/apps/web/src/state.ts:26:36)
+      at <anonymous> (/Users/aiink/Nack/Lead+D-Lab/tests/web-state.test.ts:39:12)
+(fail) C1-08 client attempt policy > classifies only structured terminal application outcomes as fresh-attempt eligible [0.06ms]
+17 |   payload: AttemptPayload;
+18 |   createdAt: number;
+19 | }
+20 | 
+21 | export function createAttempt(_payload: AttemptPayload, _now = Date.now()): Attempt {
+22 |   throw new Error('not implemented');
+                                        ^
+error: not implemented
+      at createAttempt (/Users/aiink/Nack/Lead+D-Lab/apps/web/src/state.ts:22:36)
+      at <anonymous> (/Users/aiink/Nack/Lead+D-Lab/tests/web-state.test.ts:51:21)
+(fail) C1-08 client attempt policy > a retry or reconcile reuses the same key and immutable payload [0.06ms]
+34 | }): boolean {
+35 |   throw new Error('not implemented');
+36 | }
+37 | 
+38 | export function isStaleRevision(_currentRevision: number, _incomingRevision: number): boolean {
+39 |   throw new Error('not implemented');
+                                        ^
+error: not implemented
+      at isStaleRevision (/Users/aiink/Nack/Lead+D-Lab/apps/web/src/state.ts:39:36)
+      at <anonymous> (/Users/aiink/Nack/Lead+D-Lab/tests/web-state.test.ts:67:12)
+(fail) C1-11 revision guard > older or equal revisions never overwrite newer client state [0.04ms]
+38 | export function isStaleRevision(_currentRevision: number, _incomingRevision: number): boolean {
+39 |   throw new Error('not implemented');
+40 | }
+41 | 
+42 | export function clientGraphemeCount(_text: string): { count: number; approximate: boolean } {
+43 |   throw new Error('not implemented');
+                                        ^
+error: not implemented
+      at clientGraphemeCount (/Users/aiink/Nack/Lead+D-Lab/apps/web/src/state.ts:43:36)
+      at <anonymous> (/Users/aiink/Nack/Lead+D-Lab/tests/web-state.test.ts:76:12)
+(fail) C1-06 client grapheme counting and draft handling > Thai combining marks and emoji ZWJ count as one grapheme each [0.04ms]
+46 | export function formatCountLabel(_count: number, _limit: number, _approximate: boolean): string {
+47 |   throw new Error('not implemented');
+48 | }
+49 | 
+50 | export function normalizeDraftComment(_input: string): string | null {
+51 |   throw new Error('not implemented');
+                                        ^
+error: not implemented
+      at normalizeDraftComment (/Users/aiink/Nack/Lead+D-Lab/apps/web/src/state.ts:51:36)
+      at <anonymous> (/Users/aiink/Nack/Lead+D-Lab/tests/web-state.test.ts:82:12)
+(fail) C1-06 client grapheme counting and draft handling > whitespace-only comments become absent and other text is preserved verbatim [0.03ms]
+42 | export function clientGraphemeCount(_text: string): { count: number; approximate: boolean } {
+43 |   throw new Error('not implemented');
+44 | }
+45 | 
+46 | export function formatCountLabel(_count: number, _limit: number, _approximate: boolean): string {
+47 |   throw new Error('not implemented');
+                                        ^
+error: not implemented
+      at formatCountLabel (/Users/aiink/Nack/Lead+D-Lab/apps/web/src/state.ts:47:36)
+      at <anonymous> (/Users/aiink/Nack/Lead+D-Lab/tests/web-state.test.ts:88:12)
+(fail) C1-06 client grapheme counting and draft handling > fallback counts are clearly labelled as approximate [0.04ms]
+
+ 0 pass
+ 7 fail
+Ran 7 tests across 1 file. [4.00ms]

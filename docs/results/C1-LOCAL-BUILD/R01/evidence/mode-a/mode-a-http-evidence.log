@@ -1,0 +1,58 @@
+== health ==
+HTTP 200
+{"status":"ok"}
+== ready ==
+HTTP 200
+{"status":"ready","db":"ok"}
+== join ==
+{
+  "status": "joined",
+  "participant_id": "3ba08464-3cc2-4afe-ae99-cc112f7c6ddb",
+  "grant_present": true,
+  "question": "คุณมั่นใจในการให้ feedback ที่ช่วยให้ทีมพัฒนาได้เพียงใด?",
+  "session": {
+    "id": "77b5b93e-06ee-4d62-bbf2-036ddc2664d8",
+    "join_code": "ROOM-01",
+    "status": "active",
+    "revision": 0,
+    "active_question_id": "c9ebe455-9397-42b7-a2de-c5abfa76d1a4",
+    "ended_at": null
+  }
+}
+participant_id=3ba08464-3cc2-4afe-ae99-cc112f7c6ddb question_id=c9ebe455-9397-42b7-a2de-c5abfa76d1a4 session_id=77b5b93e-06ee-4d62-bbf2-036ddc2664d8
+== submit rating ==
+{"status":"accepted","replay":false,"deduplicated":false,"response":{"id":"76e565af-e7e2-4670-be44-ca32c1edbf5d","question_id":"c9ebe455-9397-42b7-a2de-c5abfa76d1a4","rating":4,"option_id":null,"comment":"หลักฐานจาก Mode A","comment_graphemes":16,"accepted_at":"2026-11-07T09:41:50.751Z"},"revision":1}
+HTTP 201
+== unchanged retry ==
+{"status":"accepted","replay":true,"deduplicated":false,"response":{"id":"76e565af-e7e2-4670-be44-ca32c1edbf5d","question_id":"c9ebe455-9397-42b7-a2de-c5abfa76d1a4","rating":4,"option_id":null,"comment":"หลักฐานจาก Mode A","comment_graphemes":16,"accepted_at":"2026-11-07T09:41:50.751Z"},"revision":1}
+HTTP 200
+== new key after acceptance ==
+{"status":"accepted","replay":false,"deduplicated":true,"response":{"id":"76e565af-e7e2-4670-be44-ca32c1edbf5d","question_id":"c9ebe455-9397-42b7-a2de-c5abfa76d1a4","rating":4,"option_id":null,"comment":"หลักฐานจาก Mode A","comment_graphemes":16,"accepted_at":"2026-11-07T09:41:50.751Z"},"revision":1}
+HTTP 200
+== facilitator snapshot ==
+{
+  "revision": 1,
+  "status": "active",
+  "rating": {
+    "total": 1,
+    "counts": {
+      "4": 1
+    },
+    "average": 4
+  }
+}
+== DB readback ==
+1|4
+1
+== denied origin ==
+evil HTTP 403 acao={"content-type":["application/json; charset=utf-8"],
+"date":["Sat, 07 Nov 2026 09:41:50 GMT"],
+"content-length":["125"]
+}
+evil_status=HTTP/1.1 403 Forbidden acao=0
+good acao=Access-Control-Allow-Origin: http://127.0.0.1:5173
+== deep link /join ==
+HTTP 200 type=text/html;charset=utf-8
+<div id="root">
+/facilitator HTTP 200
+asset /assets/index-DhMM-leF.js HTTP 200 type=text/javascript;charset=utf-8

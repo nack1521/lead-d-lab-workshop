@@ -1,0 +1,80 @@
+[0.14ms] ".env"
+bun install v1.4.4 (38afee6c8)
+
+Checked 93 installs across 144 packages (no changes) [26.00ms]
+bun test v1.4.4 (38afee6c8)
+
+tests/web-state.test.ts:
+(pass) C1-08 client attempt policy > a fresh attempt is only allowed after a terminal non-save while the question is open and the grant is valid [0.09ms]
+(pass) C1-08 client attempt policy > classifies only structured terminal application outcomes as fresh-attempt eligible [0.07ms]
+(pass) C1-08 client attempt policy > a retry or reconcile reuses the same key and immutable payload [0.21ms]
+(pass) C1-11 revision guard > older or equal revisions never overwrite newer client state [0.02ms]
+(pass) C1-06 client grapheme counting and draft handling > Thai combining marks and emoji ZWJ count as one grapheme each [1.27ms]
+(pass) C1-06 client grapheme counting and draft handling > whitespace-only comments become absent and other text is preserved verbatim [0.08ms]
+(pass) C1-06 client grapheme counting and draft handling > fallback counts are clearly labelled as approximate [0.16ms]
+
+tests/submission.test.ts:
+(pass) C1-04 atomic rating + comment commit on real PostgreSQL > rating and comment commit together and are readable from the database [12.93ms]
+(pass) C1-04 atomic rating + comment commit on real PostgreSQL > a database failure during receipt insert leaves no partial rating or comment [8.39ms]
+(pass) C1-07 unchanged retry and key conflict > sequential unchanged retry returns the stable outcome and adds no rows [4.03ms]
+(pass) C1-07 unchanged retry and key conflict > concurrent unchanged retries count once and never duplicate the answer [13.66ms]
+(pass) C1-07 unchanged retry and key conflict > the same key with different payload is a clear conflict and never overwrites [4.46ms]
+(pass) C1-08 accepted answers are immutable and fresh attempts are explicit > a new key after acceptance returns the accepted answer without overwrite or duplicate [5.07ms]
+(pass) C1-08 accepted answers are immutable and fresh attempts are explicit > a terminal non-save rejection keeps the old key and allows a fresh key while the question is open [2.72ms]
+(pass) C1-08 accepted answers are immutable and fresh attempts are explicit > an unknown receipt is reported as unknown, not as permission for a new key [3.37ms]
+(pass) C1-05 poll submissions and typed validation > poll option plus comment commits; wrong option and wrong type are rejected without rows [4.99ms]
+(pass) C1-05 poll submissions and typed validation > rating outside the question bounds is rejected [1.85ms]
+(pass) C1-06 comment boundaries and Unicode > 500 graphemes accepted, 501 rejected, whitespace-only becomes absent [4.68ms]
+(pass) C1-06 comment boundaries and Unicode > Thai combining marks and emoji ZWJ are counted as graphemes server-side [1.80ms]
+(pass) C1-06 comment boundaries and Unicode > HTML-like comment is stored as data and no markup is interpreted [1.74ms]
+
+tests/join.test.ts:
+(pass) C1-01 Mode A health/readiness against real PostgreSQL > health reports ok and readiness proves a real DB round trip [1.93ms]
+(pass) C1-03 anonymous join > join without an account issues an opaque participant grant [2.48ms]
+(pass) C1-03 anonymous join > blank and whitespace-only nicknames are absent; duplicate nicknames are allowed [3.16ms]
+(pass) C1-03 anonymous join > an unchanged join retry returns the same participant, not a new one [2.37ms]
+(pass) C1-03 anonymous join > unknown room returns 404 and a terminal rejection body [0.30ms]
+(pass) C1-06 nickname grapheme limits and safe text > 40 graphemes are accepted and 41 graphemes rejected with Thai message [0.84ms]
+(pass) C1-06 nickname grapheme limits and safe text > emoji ZWJ and Thai combining marks count as single graphemes [1.93ms]
+(pass) C1-06 nickname grapheme limits and safe text > HTML-like nickname is stored as data and never rendered as markup [0.92ms]
+
+tests/facilitator-ws.test.ts:
+(pass) C1-09 authenticated facilitator aggregate over the database commit > facilitator receives the snapshot and pushed aggregate without nickname or comment [12.02ms]
+(pass) C1-09 authenticated facilitator aggregate over the database commit > a participant socket receives own state only, never the facilitator aggregate [2.32ms]
+(pass) C1-13 role, session and grant isolation > participant cannot call facilitator control or aggregate endpoints [2.85ms]
+(pass) C1-13 role, session and grant isolation > participant cannot submit to a question of another session [3.68ms]
+(pass) C1-13 role, session and grant isolation > missing, expired and revoked grants are rejected on read and write [4.20ms]
+(pass) C1-13 role, session and grant isolation > facilitator of one session cannot read or control another session [1.32ms]
+(pass) C1-13 role, session and grant isolation > WS sends nothing before authentication and drops unauthenticated messages [253.98ms]
+(pass) C1-14 CORS and WebSocket origin contract > allowed origin passes preflight and receives explicit CORS headers [0.63ms]
+(pass) C1-14 CORS and WebSocket origin contract > denied and null origins are refused for HTTP and for WS upgrade [2.28ms]
+(pass) C1-14 CORS and WebSocket origin contract > an allowed origin does not replace the grant [1.59ms]
+
+tests/web-views.test.tsx:
+(pass) C1-15 approved Thai copy and labels render in the participant view > join instructions use the approved participant entry copy [2.19ms]
+(pass) C1-15 approved Thai copy and labels render in the participant view > rating question keeps approved label, scale endpoints and multiline comment field [0.97ms]
+(pass) C1-15 approved Thai copy and labels render in the participant view > a multi-line draft is preserved verbatim in the textarea [0.58ms]
+(pass) C1-15 approved Thai copy and labels render in the participant view > terminal non-save shows the Thai error, draft, and fresh attempt actions [0.50ms]
+(pass) C1-15 approved Thai copy and labels render in the participant view > unknown state offers reconcile and never claims the answer was saved [0.29ms]
+(pass) C1-15 approved Thai copy and labels render in the participant view > HTML-like comment and nickname render as escaped text, not markup [0.33ms]
+(pass) C1-15 approved Thai copy and labels render in the participant view > closed question renders read-only and hides submit [0.26ms]
+(pass) C1-15 facilitator view states > live snapshot renders aggregate counts without nickname or comment [0.79ms]
+(pass) C1-15 facilitator view states > stale state is labelled old data and mutations are disabled [0.30ms]
+
+tests/limits.test.ts:
+(pass) C1-06 payload budgets > HTTP body larger than 16KB is refused without creating a row [4.27ms]
+(pass) C1-06 payload budgets > WS frame larger than 4KB closes the socket [0.40ms]
+(pass) C1-06 payload budgets > participant rate budget returns a structured 429 and stops new rows [13.82ms]
+
+tests/lifecycle.test.ts:
+(pass) C1-10 deterministic close/submit ordering and replay after close > an accepted answer replays after the question closes; new keys are refused [11.04ms]
+(pass) C1-10 deterministic close/submit ordering and replay after close > stale questions do not receive answers and closed questions stay closed [8.16ms]
+(pass) C1-10 deterministic close/submit ordering and replay after close > concurrent submit and close always resolve to one serial order [31.19ms]
+(pass) C1-10 deterministic close/submit ordering and replay after close > session end stops new writes but a bounded read of own receipt still works [6.63ms]
+(pass) C1-11 reconnect and authoritative snapshot recovery > a submission committed while the facilitator socket is down appears on reconnect [8.58ms]
+(pass) C1-11 reconnect and authoritative snapshot recovery > resync returns the same authoritative snapshot revision [1.41ms]
+
+ 56 pass
+ 0 fail
+ 260 expect() calls
+Ran 56 tests across 7 files. [1063.00ms]

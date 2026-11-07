@@ -1,0 +1,11 @@
+{
+  "revision": 1,
+  "status": "active",
+  "rating": {
+    "total": 1,
+    "counts": {
+      "4": 1
+    },
+    "average": 4
+  }
+}

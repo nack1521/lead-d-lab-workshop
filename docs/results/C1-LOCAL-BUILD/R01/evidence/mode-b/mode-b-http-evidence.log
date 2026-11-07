@@ -1,0 +1,40 @@
+== mode B containers ==
+NAME        STATUS                    PORTS                      IMAGE
+c1b-api-1   Up 11 seconds (healthy)   127.0.0.1:3001->3000/tcp   c1b-api
+c1b-db-1    Up 41 seconds (healthy)   127.0.0.1:5434->5432/tcp   postgres:16.15-alpine@sha256:aa6cb33cf4c19c765cefcf48d96176258800870a9a1e930ad126200f9d825139
+c1b-web-1   Up 38 seconds             127.0.0.1:5174->5173/tcp   c1b-web
+== mode B volumes ==
+c1b_c1_pgdata
+== health/ready ==
+health HTTP 200 {"status":"ok"}
+ready HTTP 200 {"status":"ready","db":"ok"}
+== join (origin 5174) ==
+{
+  "status": "joined",
+  "participant_id": "3b3c178f-6c2d-4bed-8dbc-92816138a5c2",
+  "question": "คุณมั่นใจในการให้ feedback ที่ช่วยให้ทีมพัฒนาได้เพียงใด?",
+  "grant_present": true
+}
+== submit ==
+{"status":"accepted","replay":false,"deduplicated":false,"response":{"id":"8ee8a494-1eb5-496d-8d78-2363f0777de1","question_id":"f7f5108c-284e-4d64-ae20-5be5ad1b918c","rating":5,"option_id":null,"comment":"หลักฐานจาก Mode B","comment_graphemes":16,"accepted_at":"2026-11-07T09:43:53.016Z"},"revision":1}
+HTTP 201
+== facilitator snapshot ==
+{
+  "revision": 1,
+  "rating": {
+    "total": 1,
+    "counts": {
+      "5": 1
+    },
+    "average": 5
+  }
+}
+== db readback (container) ==
+responses=1
+receipts=1
+== deep link + built API base ==
+/join HTTP 200 type=text/html;charset=utf-8
+/facilitator HTTP 200
+built_API_BASE=127.0.0.1:3001
+== denied origin ==
+evil HTTP 403

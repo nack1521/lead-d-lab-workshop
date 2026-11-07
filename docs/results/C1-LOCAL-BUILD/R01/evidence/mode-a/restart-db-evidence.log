@@ -1,0 +1,36 @@
+== before restart ==
+{
+  "revision": 1,
+  "rating": {
+    "total": 1,
+    "counts": {
+      "4": 1
+    }
+  }
+}
+responses=1
+receipts=1
+participants=1
+== restart db (no volume removal) ==
+ Container c1a-db-1 Restarting 
+ Container c1a-db-1 Started 
+COMPOSE_RESTART_EXIT=0
+/var/run/postgresql:5432 - accepting connections
+PG_READY_EXIT=0
+ready HTTP 200
+{"status":"ready","db":"ok"}
+== after db restart ==
+{
+  "revision": 1,
+  "rating": {
+    "total": 1,
+    "counts": {
+      "4": 1
+    }
+  }
+}
+responses=1
+receipts=1
+participants=1
+volumes:
+c1a_c1_pgdata

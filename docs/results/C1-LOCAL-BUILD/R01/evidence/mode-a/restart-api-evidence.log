@@ -1,0 +1,16 @@
+== after API restart ==
+ready HTTP 200
+{"status":"ready","db":"ok"}
+{
+  "revision": 1,
+  "status": "active",
+  "rating": {
+    "total": 1,
+    "counts": {
+      "4": 1
+    }
+  }
+}
+== api process tree (no secret argv) ==
+32437 bash -c cd /Users/aiink/Nack/Lead+D-Lab && bun run apps/api/src/index.ts >> docs/results/C1-LOCAL-BUILD/R01/evidence/mode-a/api.log 2>&1
+32444 bun run apps/api/src/index.ts

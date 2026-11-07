@@ -1,0 +1,30 @@
+{
+  "op": "C1-LOCAL-BUILD-DISPATCH-R01",
+  "status": "BLOCKED",
+  "blocked_reason": "Antigravity IDE GUI binding cannot be confirmed - app is not running on this machine (running=false, pid=0 for both com.google.antigravity and com.google.antigravity-ide; no on-screen window matches capture; list_windows has no Antigravity window). Per START R01/approval R01: no CLI blind retry (OP-01 trajectory not found), no channel/model switch, no new conversation substitution.",
+  "checked_at": "2026-11-07T15:24:27+07:00",
+  "head_commit": "3a9fb500092445ad51ec0194591874bd1600ddfb",
+  "git_status": ["M docs/AI-PROGRESS.md", "M docs/handoffs/ANTIGRAVITY-C1.md"],
+  "protected_hashes": {
+    "AGENTS.md": "ca4b1051f9e1b06295ee0c37823094e004a673caa48dcca83f9e6502c8275c90",
+    "docs/AI-PROGRESS.md": "d28a75f17c43a7d7a48709e546d6125ec777d72f04b10fa83f401b0fcb384754",
+    "docs/handoffs/ANTIGRAVITY-C1.md": "d361d2deac8b7fccf1e2f365372d8318c5b11b470722c052e197e10231b5770b"
+  },
+  "prerequisites": {
+    "bun_version": "1.4.4",
+    "docker_info": "29.9.2/aarch64",
+    "ports_5173_3000_5433_LISTEN": "none (lsof exit 1, no LISTEN entries)"
+  },
+  "gui_binding_attempts": [
+    {"call": "computer_use list_windows", "result": "no Antigravity window listed"},
+    {"call": "computer_use list_apps", "result": "com.google.antigravity pid=0 running=false; com.google.antigravity-ide pid=0 running=false"},
+    {"call": "computer_use capture app=Antigravity mode=ax", "result": "no on-screen window matched app='Antigravity'; 0 elements"}
+  ],
+  "model": "gemini-3.8-flash-high (designated; GUI model NOT verified this round - app not running)",
+  "conversation_id_expected": "9b5e0289-c9f1-4b9a-a74b-9fbfa8ede331 (NOT verified - neither GUI nor agy resume confirmed this round)",
+  "files_written": [
+    "docs/implementation/C1-LOCAL-BUILD-DISPATCH-R01.md",
+    "docs/implementation/evidence/C1-LOCAL-BUILD-DISPATCH-R01/checks.json"
+  ],
+  "no_actions": ["no START prompt sent to uncle", "no CLI retry", "no model switch", "no new conversation", "no app/config/test edits", "no installs/pulls", "no git writes (no commit/stage)", "no push/deploy"]
+}

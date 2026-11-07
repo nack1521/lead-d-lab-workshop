@@ -16,3 +16,5 @@ coverage/
 Full Stack Case Interview.pdf
 # Raw evidence may contain tokens or personal data
 artifacts/private/
+.local/
+.worktrees/

@@ -1,0 +1,61 @@
+name: c1a
+
+services:
+  db:
+    image: postgres:16.15-alpine@sha256:aa6cb33cf4c19c765cefcf48d96176258800870a9a1e930ad126200f9d825139
+    environment:
+      POSTGRES_USER: c1
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: c1
+    ports:
+      - "127.0.0.1:${DB_HOST_PORT:-5433}:5432"
+    volumes:
+      - c1_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U c1 -d c1"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  api:
+    profiles: ["full"]
+    build:
+      context: .
+      target: api
+    environment:
+      DATABASE_URL: postgres://c1:${POSTGRES_PASSWORD}@db:5432/c1
+      API_HOST: 0.0.0.0
+      API_PORT: "3000"
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-http://127.0.0.1:5173}
+      GRANT_TTL_PARTICIPANT_SECONDS: ${GRANT_TTL_PARTICIPANT_SECONDS:-14400}
+      GRANT_TTL_FACILITATOR_SECONDS: ${GRANT_TTL_FACILITATOR_SECONDS:-28800}
+      WS_AUTH_TIMEOUT_MS: ${WS_AUTH_TIMEOUT_MS:-3000}
+      HTTP_BODY_LIMIT_BYTES: ${HTTP_BODY_LIMIT_BYTES:-16384}
+      WS_FRAME_LIMIT_BYTES: ${WS_FRAME_LIMIT_BYTES:-4096}
+      RECEIPT_READ_GRACE_SECONDS: ${RECEIPT_READ_GRACE_SECONDS:-900}
+    ports:
+      - "127.0.0.1:${API_HOST_PORT:-3000}:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "bun", "-e", "fetch('http://127.0.0.1:3000/ready').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 3s
+      timeout: 5s
+      retries: 40
+
+  web:
+    profiles: ["full"]
+    build:
+      context: .
+      target: web
+      args:
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-http://127.0.0.1:3000}
+        VITE_WS_URL: ${VITE_WS_URL:-ws://127.0.0.1:3000/ws}
+    ports:
+      - "127.0.0.1:${WEB_HOST_PORT:-5173}:5173"
+    depends_on:
+      - api
+
+volumes:
+  c1_pgdata:

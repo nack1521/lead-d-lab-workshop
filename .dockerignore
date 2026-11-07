@@ -1,0 +1,17 @@
+node_modules
+**/node_modules
+dist
+coverage
+.git
+.gitignore
+.local
+.worktrees
+docs
+.research
+.env
+.env.*
+!.env.example
+Full Stack Case Interview.pdf
+*.log
+.DS_Store
+artifacts

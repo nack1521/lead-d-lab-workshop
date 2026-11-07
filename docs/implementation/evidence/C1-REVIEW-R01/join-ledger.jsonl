@@ -1,0 +1,5 @@
+{"mode": "B", "phase": "before_lost_join_ack", "participant_count": 2}
+{"mode": "B", "phase": "lost_join_ack", "http_status_before_fault": 201, "stillOnJoin": true, "error": "เข้าร่วมไม่สำเร็จ กรุณาตรวจรหัสห้อง", "joinRequestCount": 1}
+{"mode": "B", "phase": "after_lost_join_ack", "participant_count": 3}
+{"mode": "B", "phase": "retry_same_join_form", "path": "/room", "joinRequestCount": 2, "retryChangedJoinKey": true, "text": "คำถามสำหรับผู้เข้าร่วม\n\nเข้าร่วมในชื่อ “Synthetic lost join ack”\n\nข้อ 01\n\nคุณมั่นใจในการให้ feedback ที่ช่วยให้ทีมพัฒนาได้เพียงใด?\n\nเลือก 1 ถึง 5 ตามความรู้สึกของคุณ\n\nเลือกคะแนน\n1 ยังไม่มั่นใจ\n2\n3\n4\n5 มั่นใจมาก\nความคิดเห็นเพิ่มเติม (ไม่บังคับ)\n\n0/500 ตัวอักษร\n\nส่งคำตอบ"}
+{"mode": "B", "phase": "after_retry_same_join_form", "participant_count": 4}

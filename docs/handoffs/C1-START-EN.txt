@@ -1,0 +1,16 @@
+Task: C1-LOCAL-BUILD
+Workspace: /Users/aiink/Nack/Lead+D-Lab
+
+C1 local implementation is authorized and UI-05 R02 is accepted. DeepSeek Harness is the primary coding tool; keep Antigravity on standby. Use one active coding writer.
+
+Read AGENTS.md, then docs/handoffs/C1-LOCAL-BUILD.md and its required references. Follow its current precedence, approved scope, case matrix, result protocol and transfer rules; historical tool-only/preflight-hold wording does not override them. Inspect current Git/files/services and resume existing work rather than overwriting it.
+
+Implement the smallest approved React + Elysia/Bun + real PostgreSQL + authenticated native WebSocket tracer bullet using TDD. Exercise C1-01 through C1-16 with the required Mode A/B coverage. Record actual commands, exit codes and current-build evidence. Proceed beyond planning unless genuinely blocked; report real blockers without inventing execution or silently changing scope.
+
+Preserve pending work in docs/AI-PROGRESS.md and docs/handoffs/ANTIGRAVITY-C1.md; neither overwrite nor stage them. Commit only owned changes in meaningful local commits; keep secrets out of Git. Stay within authorized local actions: no push, deploy, public tunnel, paid services, global configuration or destructive reset.
+
+Write immutable results under docs/results/C1-LOCAL-BUILD/<RUN>/, following the result protocol; update docs/implementation/C1-REPORT.md and INDEX last as specified by the handoff. Unexecuted cases are NOT RUN, not PASS. Identify the actual producer/model; unknown models remain null/UNVERIFIED.
+
+Use concise English for technical communication and preserve approved Thai product copy. Before budget exhaustion, stop safely and save the transfer checkpoint, including writer state and the next failing case. Let the user authorize any fallback.
+
+Final reply: task/run, status, report paths, actual blockers and next gate. Avoid repeating the full reports in chat.

@@ -11,6 +11,11 @@
 - ผู้ใช้เปิด/สั่ง DeepSeek Harness เองเป็นค่าเริ่มต้น; การเลือกเครื่องมือไม่ใช่การอนุญาตให้ Hermes เปิด/ติดตั้ง/ควบคุมหรือส่ง START เอง. Antigravity Operator อยู่ standby จนผู้ใช้ยืนยัน fallback และผู้เขียนเดิมหยุดแล้ว
 - การจัดการ profile/skills และเอกสารเป็น administrative setup ไม่ใช่งาน implementation ของแอป
 
+## Communication language
+- Use concise English for coding-tool prompts, inter-agent requests/replies, and new agent-facing technical reports. Speak Thai to the user; provide a Thai summary when useful instead of duplicating full bilingual reports.
+- Preserve approved Thai UI copy, workshop questions, user quotations, exact identifiers, paths, statuses and validation semantics. Existing Thai source documents remain authoritative; language changes do not amend acceptance criteria or permissions.
+- Reference authoritative documents rather than repeating their contents or forwarding full conversations. Keep historical evidence unchanged. Report token/cost savings only when measured for the actual model; English alone does not prove savings.
+
 ## Cycle และ gates
 อ่าน `docs/TEAM-WORKFLOW.md` และ `docs/CODING-WORKFLOW.md` ก่อนรับงาน ใช้ cycle: Brief → Design & Test Plan → Human Approval → Active Coding Tool Build → QA → Fix & Retest → Human Accept → Evidence & Retro → รอบถัดไป. Current C1 entry point คือ `docs/handoffs/C1-LOCAL-BUILD.md`; tool-only wording ในเอกสารเก่าไม่ override workflow ปัจจุบัน
 งานที่ QA ยังไม่รันคือ NOT RUN ไม่ใช่ PASS ผู้ประสานงานปิดงานได้เมื่อมีหลักฐานตรง acceptance criteria และผู้ใช้ยอมรับ

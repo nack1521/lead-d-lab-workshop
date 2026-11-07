@@ -9,6 +9,9 @@
 - **หนึ่งactive writerต่อtask/workspace.** เลือกDeepSeekเป็นหลักไม่อนุญาตให้Operatorส่งSTARTเข้าลุงพร้อมกัน. AntigravityOperator=`lead-d-impl` อยู่standby/ห้ามauto-dispatchจนผู้ใช้ยืนยันfallbackและผู้เขียนเดิมหยุดแล้ว.
 - ผู้ใช้ควบคุมเครื่องมือcodingเองเป็นค่าเริ่มต้น. การอนุมัติปรับเอกสารไม่ใช่การสั่งHermesเปิด/ติดตั้ง/ควบคุมDeepSeek Harnessหรือเริ่มrunแทน. หากจะdelegatecontrolต้องกำหนดscope/channelก่อน.
 
+## Communication
+Follow the **Communication language** section in `AGENTS.md`: concise English between tools/agents, Thai for the user and approved Thai product copy. Use the English [C1 starter](handoffs/C1-START-EN.txt) for a user-operated initial run; it references the existing handoff rather than replacing its requirements. Language-only changes do not authorize dispatch, change the active writer, or prove token savings.
+
 ## Sources / precedence
 1. `AGENTS.md` และเอกสารนี้เป็นcurrent authoring policy แทนwording “Antigravityเท่านั้น” ในhistoricalhandoff/review/results.
 2. Current C1 entry point: [C1 local build handoff](handoffs/C1-LOCAL-BUILD.md). UI05R02 acceptedและC1 local-build approvalเดิมยังมีผลตามscopeเดิม ไม่ต้องขอรับUIใหม่เพียงเพราะเปลี่ยนtool.

@@ -123,6 +123,22 @@ describe('C1-15 approved Thai copy and labels render in the participant view', (
     expect(html).not.toContain('บันทึกคำตอบและข้อความแล้ว');
   });
 
+  test('HTML-like comment and nickname render as escaped text, not markup', () => {
+    const html = renderToStaticMarkup(
+      <ParticipantView
+        {...baseParticipantProps}
+        participantLabel={'<b>ผู้เข้าร่วม</b>'}
+        question={ratingQuestion}
+        comment={'<script>alert(1)</script>'}
+        countLabel="25/500 ตัวอักษร"
+      />,
+    );
+    expect(html).not.toContain('<script>alert(1)</script>');
+    expect(html).toContain('&lt;script&gt;alert(1)&lt;/script&gt;');
+    expect(html).not.toContain('<b>ผู้เข้าร่วม</b>');
+    expect(html).toContain('&lt;b&gt;ผู้เข้าร่วม&lt;/b&gt;');
+  });
+
   test('closed question renders read-only and hides submit', () => {
     const html = renderToStaticMarkup(
       <ParticipantView {...baseParticipantProps} question={ratingQuestion} questionClosed />,

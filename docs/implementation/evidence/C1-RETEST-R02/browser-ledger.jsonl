@@ -1,0 +1,14 @@
+{"mode": "A", "phase": "lost_join_ack", "httpStatus": 201, "path": "/join"}
+{"mode": "A", "phase": "retried_join", "samePayload": true, "sameParticipant": true, "path": "/room"}
+{"mode": "A", "phase": "rating_saved", "nativeNewline": true, "saved": true, "readOnly": true, "HTMLSafe": true, "errors": []}
+{"mode": "A", "phase": "rating_saved_to_poll", "path": "/room", "seq": "ข้อ 02", "falseSaved": false, "optionsUsable": true, "submitPresent": true}
+{"mode": "A", "phase": "poll_saved", "saved": true, "seq": "ข้อ 02", "readonly": true, "errors": []}
+{"mode": "A", "phase": "return_to_answered_rating", "seq": null, "saved": false, "selectedRating": null, "readonly": null, "errors": null}
+{"mode": "B", "phase": "lost_join_retried", "samePayload": true, "sameParticipant": true, "path": "/room"}
+{"mode": "B", "phase": "terminal_rejection", "draftLength": 501, "freshEnabled": true, "saved": false}
+{"mode": "B", "phase": "lost_submission_ack_and_state", "HTTP": 201, "unknown": true, "freshAttemptShown": false, "multilineRetained": true}
+{"mode": "B", "phase": "reconcile_saved", "sameKey": true, "saved": true, "HTMLSafe": true, "readonly": true, "errors": []}
+{"mode": "B", "phase": "rating_saved_to_poll", "seq": "ข้อ 02", "falseSaved": false, "optionsUsable": true, "submitPresent": true}
+{"mode": "B", "phase": "poll_saved_blank_comment", "saved": true, "blankComment": true}
+{"mode": "B", "phase": "hold_real_HTTP_during_reconnect", "HTTPHeld": true, "heldRevision": 8, "socketCount": 1, "seq": "ข้อ 02"}
+{"mode": "B", "phase": "older_HTTP_released_after_new_WS", "beforeRelease": {"seq": "ข้อ 01", "sockets": 2, "latestSocketState": 1, "heldRevision": 8}, "seq": "ข้อ 01", "selectedRating": "3", "saved": true, "readonly": true, "errors": []}

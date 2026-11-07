@@ -1,0 +1,4 @@
+{"mode": "A", "phase": "before_R02_lost_join_ack", "participant_count": 5}
+{"mode": "B", "phase": "before_R02_lost_join_ack", "participant_count": 5}
+{"mode": "A", "phase": "after_R02_browser_retest", "participant_count": 6, "logical_join_participants": 1, "accepted_responses": 2, "accepted_receipts": 2, "rejected_receipts": 0, "stored_rating_comment_has_newline": true}
+{"mode": "B", "phase": "after_R02_browser_retest", "participant_count": 6, "logical_join_participants": 1, "accepted_responses": 2, "accepted_receipts": 2, "rejected_receipts": 1, "stored_rating_comment_has_newline": true}

@@ -1,0 +1,67 @@
+{
+  "task_id": "C1-LOCAL-BUILD",
+  "review_run": "R02",
+  "verdict": "CHANGES_REQUESTED",
+  "build": "da30003a805cc6b0e133bdc9ac94ae001419e488",
+  "report_commit": "97a47605bc827c6b8f0a860fbfa8a8c5df6ebc39",
+  "browser_review_commit": "fe549b4bcc0138ea3b22b1699f0211820ee3bd3e",
+  "findings": [
+    {
+      "id": "R02-QA-01",
+      "group": "C1-RV-01",
+      "qa_priority": "High",
+      "coordinator_priority": "High",
+      "evidence": "RUNTIME_API_DB_A_B",
+      "title": "Rejected receipt GET returns 500 instead of its stored outcome"
+    },
+    {
+      "id": "R02-QA-02",
+      "group": "C1-RV-01",
+      "qa_priority": "High",
+      "coordinator_priority": "High",
+      "evidence": "RUNTIME_API_DB_A_B",
+      "title": "Deduplicated new key has no stable fingerprint/outcome mapping"
+    },
+    {
+      "id": "R02-QA-03",
+      "group": "C1-RV-01",
+      "qa_priority": "High",
+      "coordinator_priority": "High",
+      "evidence": "STATIC_CODE_PATH",
+      "title": "Submission grant is not rechecked under write/revocation serialization"
+    },
+    {
+      "id": "R02-QA-04",
+      "group": "C1-RV-03",
+      "qa_priority": "High",
+      "coordinator_priority": "Medium",
+      "evidence": "RUNTIME_BROWSER_DB_A",
+      "title": "Edited nickname changes an uncertain join payload and displayed label"
+    },
+    {
+      "id": "R02-QA-05",
+      "group": "C1-RV-04",
+      "qa_priority": "High",
+      "coordinator_priority": "High",
+      "evidence": "STATIC_CODE_PATH",
+      "title": "Participant state can mix session/question/own-response snapshots"
+    }
+  ],
+  "original_group_states": {
+    "C1-RV-01": "OPEN",
+    "C1-RV-02": "PARTIAL_OPEN_VERIFICATION_GATE",
+    "C1-RV-03": "PARTIAL_OPEN_NICKNAME_PAYLOAD",
+    "C1-RV-04": "PARTIAL_OPEN_SERVER_SNAPSHOT",
+    "C1-RV-05": "RESOLVED_TARGETED_BROWSER"
+  },
+  "additional_security_gate": {
+    "group": "C1-RV-02",
+    "evidence": "STATIC_RISK_AND_UNTESTED_BOUNDARIES",
+    "scope": "Define and verify the approved authorization/send boundary, exact TTL/grace and idle sweep; account for explicit participant socket disconnection. No runtime post-revocation leak asserted."
+  },
+  "operational_observations": [
+    "Test runner uses exec after EXIT trap and expands secret into process arguments; static only, no actual leak claimed.",
+    "Live Mode A API appends to tracked R02 evidence log; original prefix remains, runtime append left unstaged."
+  ],
+  "regression": "71/0 in each mode; typecheck exit 0; does not close missing scenarios"
+}

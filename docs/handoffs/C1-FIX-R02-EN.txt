@@ -1,0 +1,10 @@
+Continue C1-LOCAL-BUILD after the R02 independent retest; do not bootstrap again.
+Workspace: /Users/aiink/Nack/Lead+D-Lab
+
+Read AGENTS.md, docs/handoffs/C1-LOCAL-BUILD.md and docs/implementation/C1-REVIEW-SUMMARY-R02.md. Address R02-QA-01..05 and the explicit C1-RV-02 security verification gate. Use the linked reproductions and distinguish runtime failures from static risks. Preserve the already-passing unchanged-join and question-transition regressions.
+
+Reproduce remaining static scenarios before fixing. Use genuine RED-to-GREEN tests at real API/PostgreSQL/WS and React-container seams, with controlled write/revoke and snapshot interleavings. Preserve approved attempt/lifetime semantics; do not silently change policy. Fix runner cleanup/secret-argument handling and stop using tracked evidence as a live log sink without erasing history.
+
+Rerun current-build tests in both approved modes and targeted browser flows where supported. Continue under existing local authorization, single-writer and protected-file rules. Use the next unused producer run, preserve every finding/case ID and prior result, and update C1-REPORT and INDEX last. Report missing execution as NOT RUN.
+
+Use concise English and retain approved Thai copy. No push/deploy, destructive reset or automatic tool switch. Checkpoint before budget exhaustion. Reply with task/run, status, evidence paths and actual blockers.

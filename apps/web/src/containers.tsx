@@ -78,23 +78,34 @@ function JoinPage() {
   const submit = async () => {
     setPending(true);
     setError(null);
-    // Reuse the pending operation key for an uncertain join to the same room.
-    const { attempt } = resolveJoinAttempt(pendingJoinAttempt, joinCode);
+    const normalizedNickname = nickname.trim() ? nickname.trim() : null;
+    // Reuse the pending key and immutable payload for an uncertain join to the same room.
+    const { attempt } = resolveJoinAttempt(pendingJoinAttempt, {
+      joinCode,
+      nickname: normalizedNickname,
+    });
     pendingJoinAttempt = attempt;
     try {
-      const result = await apiFetch<ParticipantViewData & { participant_id: string; grant: string }>('/api/join', {
+      const result = await apiFetch<
+        ParticipantViewData & {
+          participant_id: string;
+          grant: string;
+          participant?: { id: string; nickname: string | null } | null;
+        }
+      >('/api/join', {
         method: 'POST',
-        body: { join_code: joinCode, join_key: attempt.key, nickname: nickname || undefined },
+        body: { join_code: attempt.joinCode, join_key: attempt.key, nickname: attempt.nickname ?? undefined },
       });
       pendingJoinAttempt = null;
       roomSession = {
         participantId: result.participant_id,
         grant: result.grant,
-        participantLabel: nickname.trim() || 'ผู้เข้าร่วม',
+        // The stored participant label is authoritative, never the typed retry field.
+        participantLabel: result.participant?.nickname ?? 'ผู้เข้าร่วม',
       };
       navigate('/room');
     } catch (err) {
-      // Unknown outcome: keep the same key and the entered room code for the next retry.
+      // Unknown outcome: keep the same key and immutable payload for the next retry.
       setError(readErrorMessage(err, 'เข้าร่วมไม่สำเร็จ กรุณาตรวจรหัสห้อง'));
     } finally {
       setPending(false);
@@ -201,7 +212,8 @@ function RoomPage() {
     void refresh();
     const connection = connectSocket(session.grant, {
       onState: (message) => {
-        if (isStaleRevision(revisionRef.current, message.revision)) return;
+        // Equal revisions must reconcile (reconnect/resync); only strictly older state is stale.
+        if (isOlderRevision(revisionRef.current, message.revision)) return;
         applyAuthoritative(
           {
             question: message.question,

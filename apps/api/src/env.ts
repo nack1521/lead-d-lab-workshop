@@ -8,6 +8,7 @@ export interface Config {
   wsAuthTimeoutMs: number;
   httpBodyLimitBytes: number;
   wsFrameLimitBytes: number;
+  wsSweepIntervalMs: number;
   receiptReadGraceSeconds: number;
   rate: {
     participantMax: number;
@@ -45,6 +46,7 @@ export function loadConfig(env: Record<string, string | undefined> = process.env
     wsAuthTimeoutMs: num(env, 'WS_AUTH_TIMEOUT_MS', 3000),
     httpBodyLimitBytes: num(env, 'HTTP_BODY_LIMIT_BYTES', 16384),
     wsFrameLimitBytes: num(env, 'WS_FRAME_LIMIT_BYTES', 4096),
+    wsSweepIntervalMs: num(env, 'WS_SWEEP_INTERVAL_MS', 30000),
     receiptReadGraceSeconds: num(env, 'RECEIPT_READ_GRACE_SECONDS', 900),
     rate: {
       participantMax: num(env, 'RATE_PARTICIPANT_MAX', 10),

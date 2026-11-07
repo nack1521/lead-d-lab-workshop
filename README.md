@@ -63,4 +63,8 @@ tests/run-in-docker.sh            # Mode B network c1b_default + c1b DB
 tests/run-in-docker.sh c1b_default
 ```
 
+The runner forwards `DATABASE_URL`/`ALLOWED_ORIGINS` by name (values never appear in
+process arguments) and removes its temporary source copy on exit. Live server output
+belongs in `.local/logs/` (untracked); result evidence files are immutable snapshots.
+
 ห้าม push/deploy/public tunnel/paid service/global config/destructive reset จาก workflow นี้. ผลลัพธ์จริงพร้อมคำสั่ง/exit code อยู่ `docs/results/C1-LOCAL-BUILD/R01/`.

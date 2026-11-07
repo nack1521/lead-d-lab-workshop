@@ -108,3 +108,128 @@ export async function buildSnapshot(sql: Sql, sessionId: string): Promise<Snapsh
 function participant_count(row: { count: number } | undefined): number {
   return row ? Number(row.count) : 0;
 }
+
+export interface ParticipantQuestion {
+  id: string;
+  seq: number;
+  type: 'rating' | 'poll';
+  label: string;
+  help_text: string | null;
+  options: { id: string; label: string }[] | null;
+  rating_min: number | null;
+  rating_max: number | null;
+  receiving: boolean;
+  closed_at: string | null;
+}
+
+export interface ParticipantOwnResponse {
+  id: string;
+  question_id: string;
+  rating: number | null;
+  option_id: string | null;
+  comment: string | null;
+  accepted_at: string;
+}
+
+export interface ParticipantSnapshot {
+  session: {
+    id: string;
+    join_code: string;
+    status: 'active' | 'ended';
+    revision: number;
+    active_question_id: string | null;
+    ended_at: string | null;
+  };
+  question: ParticipantQuestion | null;
+  own_response: ParticipantOwnResponse | null;
+  participant: { id: string; nickname: string | null };
+}
+
+/**
+ * One repeatable-read transaction for session revision, active question, the
+ * participant's own accepted answer and the stored participant identity, so a
+ * concurrent commit can never pair an old revision with newer state.
+ */
+export async function buildParticipantView(
+  sql: Sql,
+  sessionId: string,
+  participantId: string,
+): Promise<ParticipantSnapshot | null> {
+  return sql.begin(async (tx) => {
+    await tx`set transaction isolation level repeatable read`;
+    const [session] = await tx<{
+      id: string;
+      join_code: string;
+      status: 'active' | 'ended';
+      active_question_id: string | null;
+      revision: number;
+      ended_at: Date | null;
+    }[]>`select id, join_code, status, active_question_id, revision, ended_at from sessions where id = ${sessionId} limit 1`;
+    if (!session) return null;
+    const questions = session.active_question_id
+      ? await tx<{
+          id: string;
+          seq: number;
+          type: 'rating' | 'poll';
+          label: string;
+          help_text: string | null;
+          options: { id: string; label: string }[] | null;
+          rating_min: number | null;
+          rating_max: number | null;
+          receiving: boolean;
+          closed_at: Date | null;
+        }[]>`select id, seq, type, label, help_text, options, rating_min, rating_max, receiving, closed_at
+             from questions where id = ${session.active_question_id} limit 1`
+      : [];
+    const question = questions[0] ?? null;
+    const responses = question
+      ? await tx<{
+          id: string;
+          question_id: string;
+          rating_value: number | null;
+          option_id: string | null;
+          comment: string | null;
+          accepted_at: Date;
+        }[]>`select id, question_id, rating_value, option_id, comment, accepted_at
+             from responses where participant_id = ${participantId} and question_id = ${question.id} limit 1`
+      : [];
+    const own = responses[0] ?? null;
+    const [participant] = await tx<{ id: string; nickname: string | null }[]>`
+      select id, nickname from participants where id = ${participantId} and session_id = ${sessionId} limit 1`;
+    return {
+      session: {
+        id: session.id,
+        join_code: session.join_code,
+        status: session.status,
+        revision: Number(session.revision),
+        active_question_id: session.active_question_id,
+        ended_at: session.ended_at ? new Date(session.ended_at).toISOString() : null,
+      },
+      question: question
+        ? {
+            id: question.id,
+            seq: question.seq,
+            type: question.type,
+            label: question.label,
+            help_text: question.help_text,
+            options: question.options,
+            rating_min: question.rating_min,
+            rating_max: question.rating_max,
+            receiving: question.receiving,
+            closed_at: question.closed_at ? new Date(question.closed_at).toISOString() : null,
+          }
+        : null,
+      own_response: own
+        ? {
+            id: own.id,
+            question_id: own.question_id,
+            rating: own.rating_value,
+            option_id: own.option_id,
+            comment: own.comment,
+            accepted_at: new Date(own.accepted_at).toISOString(),
+          }
+        : null,
+      participant: participant ?? { id: participantId, nickname: null },
+    };
+  });
+}

@@ -2,7 +2,7 @@ import type { Server, ServerWebSocket } from 'bun';
 import type { Sql } from './db.ts';
 import type { Config } from './env.ts';
 import { authenticate } from './grants.ts';
-import { buildSnapshot, type Snapshot } from './snapshot.ts';
+import { buildParticipantView, buildSnapshot, type Snapshot } from './snapshot.ts';
 
 export interface SocketData {
   state: 'pending' | 'authed';
@@ -80,27 +80,16 @@ export function createHub(sql: Sql, config: Config): Hub {
     if (ws.data.role === 'facilitator') {
       return { type: 'snapshot', snapshot };
     }
-    const active = snapshot.questions.find((q) => q.question_id === snapshot.active_question_id) ?? null;
-    const question = active
-      ? {
-          id: active.question_id,
-          seq: active.seq,
-          type: active.type,
-          label: active.label,
-          help_text: active.help_text,
-          options: active.options,
-          rating_min: active.rating_min,
-          rating_max: active.rating_max,
-          receiving: active.receiving,
-          closed_at: active.closed_at,
-        }
-      : null;
+    // Participant state comes from one repeatable-read view so the revision,
+    // active question and own answer can never be mixed across commits.
+    const view = await buildParticipantView(sql, snapshot.session_id, ws.data.participantId ?? '');
+    if (!view) return null;
     return {
       type: 'state',
-      revision: snapshot.revision,
-      session_status: snapshot.session_status,
-      question,
-      own_response: question ? await ownResponse(ws.data.participantId, question.id) : null,
+      revision: view.session.revision,
+      session_status: view.session.status,
+      question: view.question,
+      own_response: view.own_response,
     };
   }
 
@@ -108,7 +97,17 @@ export function createHub(sql: Sql, config: Config): Hub {
     if (!ws.data.sessionId || ws.data.state !== 'authed') return;
     const snapshot = await buildSnapshot(sql, ws.data.sessionId);
     if (!snapshot) return;
-    send(ws, await stateFor(snapshot, ws));
+    // Build the payload first, then make the authorization decision immediately
+    // before the socket write: the per-socket revalidation is the linearization
+    // boundary. A revoke/expiry committed after it can race at most the frame
+    // already being written; the socket is then closed and receives nothing more.
+    const payload = await stateFor(snapshot, ws);
+    if (!payload) return;
+    if (!(await stillAuthorized(ws))) {
+      closeUnauthorized(ws);
+      return;
+    }
+    send(ws, payload);
   }
 
   function closeUnauthorized(ws: Socket): void {
@@ -208,7 +207,7 @@ export function createHub(sql: Sql, config: Config): Hub {
     },
   };
 
-  const sweepTimer = setInterval(() => void sweep(), 30_000);
+  const sweepTimer = setInterval(() => void sweep(), config.wsSweepIntervalMs);
   // Keep idle sessions cheap and let the process exit in tests/tools.
   (sweepTimer as unknown as { unref?: () => void }).unref?.();
 
@@ -226,11 +225,13 @@ export function createHub(sql: Sql, config: Config): Hub {
       const snapshot = await buildSnapshot(sql, sessionId);
       if (!snapshot) return;
       for (const ws of [...set]) {
+        const payload = await stateFor(snapshot, ws);
+        if (!payload) continue;
         if (!(await stillAuthorized(ws))) {
           closeUnauthorized(ws);
           continue;
         }
-        send(ws, await stateFor(snapshot, ws));
+        send(ws, payload);
       }
     },
     disconnectParticipant(sessionId, participantId) {

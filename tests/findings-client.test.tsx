@@ -208,6 +208,7 @@ describe('C1-RV-03 lost join acknowledgement keeps one logical join', () => {
       status: 'joined',
       participant_id: 'p1',
       grant: 'grant-for-test',
+      participant: { id: 'p1', nickname: 'ชื่อแรก' },
       ...participantBody(ratingQuestion, null, 2),
     };
     handler = async (url, init) => {
@@ -240,6 +241,7 @@ describe('C1-RV-03 lost join acknowledgement keeps one logical join', () => {
       status: 'joined',
       participant_id: 'p1',
       grant: 'grant-for-test',
+      participant: { id: 'p1', nickname: 'ชื่อแรก' },
       ...participantBody(ratingQuestion, null, 2),
     };
     handler = async (url, init) => {
@@ -262,6 +264,10 @@ describe('C1-RV-03 lost join acknowledgement keeps one logical join', () => {
     clickButton('เข้าร่วมกิจกรรม');
     await tick(12);
     expect(String(requests[1].body?.join_key)).toBe(String(requests[0].body?.join_key));
+    // The uncertain join payload stays immutable and the stored label is authoritative.
+    expect(String(requests[1].body?.nickname)).toBe('ชื่อแรก');
+    expect(text()).toContain('ชื่อแรก');
+    expect(text()).not.toContain('เข้าร่วมในชื่อ “ชื่อที่แก้”');
 
     // A different room is an explicit new join operation, not a retry.
     containers.__resetForTest();
@@ -348,6 +354,61 @@ describe('C1-RV-05 outcome and draft state follow the authoritative question', (
     expect(text()).not.toContain('ยังไม่ทราบผลการบันทึก');
     const submit = [...document.querySelectorAll('button')].find((button) => (button.textContent ?? '').includes('ส่งคำตอบ'));
     expect(submit).toBeDefined();
+  });
+});
+
+describe('R02-QA-04 an uncertain join keeps its original payload and shows the stored label', () => {
+  test('editing the nickname does not change the pending payload or the displayed identity', async () => {
+    const joinResponse = {
+      status: 'joined',
+      participant_id: 'p1',
+      grant: 'grant-for-test',
+      participant: { id: 'p1', nickname: 'ชื่อเดิมที่บันทึก' },
+      ...participantBody(ratingQuestion, null, 2),
+    };
+    handler = async (url, init) => {
+      if (url.endsWith('/api/join')) {
+        requests.push({ url, method: init.method ?? 'GET', body: JSON.parse(String(init.body)) as Record<string, unknown> });
+        if (requests.length === 1) throw new TypeError('lost acknowledgement');
+        return json(joinResponse, 201);
+      }
+      if (url.endsWith('/api/me')) return json(participantBody(ratingQuestion, null, 2));
+      return json({ status: 'ok' });
+    };
+    await mount('/join');
+    fill('#join-code', 'ROOM-01');
+    fill('#nickname', 'ชื่อเดิมที่บันทึก');
+    clickButton('เข้าร่วมกิจกรรม');
+    await tick();
+    expect(text()).toContain('เข้าร่วมไม่สำเร็จ');
+    fill('#nickname', 'ชื่อที่แก้ภายหลัง');
+    clickButton('เข้าร่วมกิจกรรม');
+    await tick(12);
+    expect(requests).toHaveLength(2);
+    expect(String(requests[1].body?.join_key)).toBe(String(requests[0].body?.join_key));
+    expect(String(requests[1].body?.nickname)).toBe('ชื่อเดิมที่บันทึก');
+    expect(text()).toContain('ชื่อเดิมที่บันทึก');
+    expect(text()).not.toContain('ชื่อที่แก้ภายหลัง');
+  });
+});
+
+describe('R02-QA-05 equal-revision reconciliation in the participant container', () => {
+  test('an equal-revision push carrying the own accepted answer is applied', async () => {
+    containers.__setRoomSessionForTest({ participantId: 'p1', grant: 'grant-for-test', participantLabel: 'ผู้เข้าร่วม' });
+    handler = async (url) => {
+      if (url.endsWith('/api/me')) return json(participantBody(ratingQuestion, null, 5));
+      return json({ status: 'ok' });
+    };
+    await mount('/room');
+    await tick(12);
+    expect(text()).not.toContain('บันทึกคำตอบและข้อความแล้ว');
+    const socket = FakeWebSocket.instances.at(-1)!;
+    socket.emit('open');
+    socket.emit('message', {
+      data: JSON.stringify({ type: 'state', revision: 5, session_status: 'active', question: ratingQuestion, own_response: acceptedOwn }),
+    });
+    await tick(12);
+    expect(text()).toContain('บันทึกคำตอบและข้อความแล้ว');
   });
 });
 

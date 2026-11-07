@@ -169,9 +169,10 @@ describe('C1-08 accepted answers are immutable and fresh attempts are explicit',
     const [count] = await ctx.sql<{ count: number }[]>`
       select count(*)::int as count from responses where participant_id = ${participant.participant_id}`;
     expect(count.count).toBe(1);
+    // R02-QA-02 binds the deduplicated key too, so one response has two stable receipts.
     const [receipts] = await ctx.sql<{ count: number }[]>`
       select count(*)::int as count from submission_receipts where participant_id = ${participant.participant_id}`;
-    expect(receipts.count).toBe(1);
+    expect(receipts.count).toBe(2);
   });
 
   test('a terminal non-save rejection keeps the old key and allows a fresh key while the question is open', async () => {

@@ -8,7 +8,7 @@ import {
   type Auth,
 } from './grants.ts';
 import { createRateLimiter, type RateLimiter } from './ratelimit.ts';
-import { buildSnapshot, type Snapshot } from './snapshot.ts';
+import { buildParticipantView, buildSnapshot, type ParticipantSnapshot, type Snapshot } from './snapshot.ts';
 import { fingerprint, graphemeCount, hashToken, isBlank, normalizeOptionalText } from './text.ts';
 
 export interface HubLike {
@@ -73,31 +73,12 @@ function bearer(request: Request): string | null {
   return match ? match[1] : null;
 }
 
-function participantView(session: Auth['session'], question: Question | null, response: ResponseRow | null) {
+function participantJson(view: ParticipantSnapshot) {
   return {
-    session: {
-      id: session.id,
-      join_code: session.join_code,
-      status: session.status,
-      revision: session.revision,
-      active_question_id: session.active_question_id,
-      ended_at: session.ended_at ? new Date(session.ended_at).toISOString() : null,
-    },
-    question: question
-      ? {
-          id: question.id,
-          seq: question.seq,
-          type: question.type,
-          label: question.label,
-          help_text: question.help_text,
-          options: question.options,
-          rating_min: question.rating_min,
-          rating_max: question.rating_max,
-          receiving: question.receiving,
-          closed_at: question.closed_at ? new Date(question.closed_at).toISOString() : null,
-        }
-      : null,
-    own_response: response ? serializeResponse(response) : null,
+    session: view.session,
+    question: view.question,
+    own_response: view.own_response,
+    participant: view.participant,
     server_limits: { nickname_graphemes: MAX_NICKNAME_GRAPHEMES, comment_graphemes: MAX_COMMENT_GRAPHEMES },
   };
 }
@@ -289,14 +270,14 @@ export function createApp(deps: AppDeps) {
       }
       // A join changes the visible participant count: publish the committed snapshot.
       if (outcome.isNew) hub.broadcast(outcome.session.id).catch(() => {});
-      const question = await loadQuestionById(outcome.session.active_question_id);
-      const own = question ? await loadOwnResponse(outcome.participantId, question.id) : null;
+      const view = await buildParticipantView(sql, outcome.session.id, outcome.participantId);
+      if (!view) return rejected('INTERNAL_ERROR', 'ระบบไม่พร้อมให้บริการชั่วคราว', 500);
       return json(
         {
           status: 'joined',
           participant_id: outcome.participantId,
           grant: outcome.grant,
-          ...participantView(outcome.session, question, own),
+          ...participantJson(view),
         },
         201,
       );
@@ -308,16 +289,9 @@ export function createApp(deps: AppDeps) {
       if (auth.grant.role !== 'participant' || !auth.grant.participant_id) {
         return rejected('FORBIDDEN', 'เส้นทางนี้สำหรับผู้เข้าร่วมเท่านั้น', 403);
       }
-      const [fresh] = await sql<Auth['session'][]>`
-        select id, join_code, status, active_question_id, revision, ended_at from sessions where id = ${auth.session.id}`;
-      const [current] = fresh.active_question_id
-        ? await sql<Question[]>`
-            select id, session_id, seq, type, label, help_text, options, rating_min, rating_max, receiving, closed_at
-            from questions where id = ${fresh.active_question_id}`
-        : [];
-      const question = current ?? null;
-      const own = question ? await loadOwnResponse(auth.grant.participant_id, question.id) : null;
-      return json({ status: 'ok', ...participantView(fresh, question, own) });
+      const view = await buildParticipantView(sql, auth.session.id, auth.grant.participant_id);
+      if (!view) return rejected('SESSION_NOT_FOUND', 'ไม่พบห้องนี้', 404);
+      return json({ status: 'ok', ...participantJson(view) });
     })
     .post('/api/questions/:questionId/submissions', async ({ request, params }) => {
       const authResult = await currentAuth(request);
@@ -358,13 +332,36 @@ export function createApp(deps: AppDeps) {
       type Outcome =
         | { kind: 'accepted'; response: ResponseRow; revision: number; replay: boolean; deduplicated: boolean }
         | { kind: 'rejected'; code: string; message: string; revision: number; replay: boolean }
-        | { kind: 'conflict' };
+        | { kind: 'conflict' }
+        | { kind: 'unauthorized' };
+      const tokenHash = hashToken(bearer(request) ?? '');
       let outcome: Outcome;
       try {
         outcome = await sql.begin(async (tx): Promise<Outcome> => {
           // Serialise close/submit ordering and per-attempt receipt writes.
           const [session] = await tx<{ status: 'active' | 'ended'; active_question_id: string | null; revision: number }[]>`
             select status, active_question_id, revision from sessions where id = ${auth.session.id} for update`;
+          // Authorization is rechecked inside the mutation transaction, under the
+          // same row lock that serialises revoke/expiry against this write.
+          const [grant] = await tx<{
+            role: string;
+            session_id: string;
+            participant_id: string | null;
+            expires_at: Date;
+            revoked_at: Date | null;
+          }[]>`
+            select role, session_id, participant_id, expires_at, revoked_at
+            from grants where token_hash = ${tokenHash} for update`;
+          if (
+            !grant ||
+            grant.revoked_at !== null ||
+            new Date(grant.expires_at).getTime() <= Date.now() ||
+            grant.role !== 'participant' ||
+            grant.session_id !== auth.session.id ||
+            grant.participant_id !== participantId
+          ) {
+            return { kind: 'unauthorized' };
+          }
           const [receipt] = await tx<{
             outcome: 'accepted' | 'rejected';
             code: string | null;
@@ -453,6 +450,13 @@ export function createApp(deps: AppDeps) {
             select id, question_id, rating_value, option_id, comment, accepted_at from responses
             where participant_id = ${participantId} and question_id = ${question.id} limit 1`;
           if (own) {
+            // Bind this handled key to the stable accepted outcome and fingerprint so a
+            // later replay is stable and a changed payload for the same key conflicts.
+            await tx`
+              insert into submission_receipts
+                (id, session_id, participant_id, question_id, idempotency_key, payload_fingerprint, outcome, code, message, response_id)
+              values (${crypto.randomUUID()}, ${auth.session.id}, ${participantId}, ${question.id}, ${key},
+                      ${payloadFingerprint}, 'accepted', null, null, ${own.id})`;
             return { kind: 'accepted', response: own, revision: Number(session.revision), replay: false, deduplicated: true };
           }
           if (session.status !== 'active') {
@@ -487,6 +491,9 @@ export function createApp(deps: AppDeps) {
         });
       } catch {
         return rejected('INTERNAL_ERROR', 'ระบบไม่พร้อมให้บริการชั่วคราว', 500);
+      }
+      if (outcome.kind === 'unauthorized') {
+        return rejected('UNAUTHORIZED', 'สิทธิ์ไม่ถูกต้องหรือหมดอายุ', 401);
       }
       if (outcome.kind === 'conflict') {
         return rejected('IDEMPOTENCY_CONFLICT', 'คีย์นี้เคยใช้กับคำตอบอื่น', 409, true);
@@ -531,11 +538,27 @@ export function createApp(deps: AppDeps) {
       const question = await loadQuestion(params.questionId);
       if (!question) return rejected('QUESTION_NOT_FOUND', 'ไม่พบคำถามนี้', 404);
       if (question.session_id !== auth.session.id) return rejected('FORBIDDEN', 'คำถามนี้ไม่ได้อยู่ในห้องของคุณ', 403);
-      const [receipt] = await sql<{ response_id: string | null }[]>`
-        select response_id from submission_receipts
+      const [receipt] = await sql<{
+        outcome: 'accepted' | 'rejected';
+        code: string | null;
+        message: string | null;
+        response_id: string | null;
+      }[]>`
+        select outcome, code, message, response_id from submission_receipts
         where participant_id = ${auth.grant.participant_id} and question_id = ${question.id} and idempotency_key = ${key}`;
       if (!receipt) {
         return json({ status: 'unknown', code: 'RECEIPT_NOT_FOUND', terminal: false }, 404);
+      }
+      if (receipt.outcome === 'rejected' && receipt.code) {
+        // Stable reconciliation of a certified non-save outcome after a lost acknowledgement.
+        return json({
+          status: 'rejected',
+          code: receipt.code,
+          message: receipt.message ?? 'คำขอนี้ถูกปฏิเสธก่อนหน้านี้',
+          terminal: true,
+          replay: true,
+          ...rejectionExtra(receipt.code, receipt.message ?? ''),
+        });
       }
       const [response] = await sql<ResponseRow[]>`
         select id, question_id, rating_value, option_id, comment, accepted_at from responses where id = ${receipt.response_id}`;
@@ -561,7 +584,8 @@ export function createApp(deps: AppDeps) {
       if (auth.grant.session_id !== params.sessionId) return rejected('FORBIDDEN', 'ไม่สามารถเข้าถึงห้องอื่นได้', 403);
       const sessionId: string = params.sessionId;
       const questionId: string = params.questionId;
-      const limited = limit(`facilitator:${hashToken(bearer(request) ?? '')}`, config.rate.facilitatorMax, config.rate.facilitatorWindowMs);
+      const tokenHash = hashToken(bearer(request) ?? '');
+      const limited = limit(`facilitator:${tokenHash}`, config.rate.facilitatorMax, config.rate.facilitatorWindowMs);
       if (limited) return limited;
       const [question] = await sql<Question[]>`
         select id, session_id, seq, type, label, help_text, options, rating_min, rating_max, receiving, closed_at
@@ -570,6 +594,12 @@ export function createApp(deps: AppDeps) {
       const result = await sql.begin(async (tx): Promise<{ revision: number } | { code: string; status: number }> => {
         const [session] = await tx<{ status: 'active' | 'ended'; revision: number }[]>`
           select status, revision from sessions where id = ${sessionId} for update`;
+        const [grant] = await tx<{ role: string; session_id: string; expires_at: Date; revoked_at: Date | null }[]>`
+          select role, session_id, expires_at, revoked_at from grants where token_hash = ${tokenHash} for update`;
+        if (!grant || grant.revoked_at !== null || new Date(grant.expires_at).getTime() <= Date.now() ||
+            grant.role !== 'facilitator' || grant.session_id !== sessionId) {
+          return { code: 'UNAUTHORIZED', status: 401 };
+        }
         if (session.status !== 'active') return { code: 'SESSION_ENDED', status: 409 };
         await tx`update questions set receiving = false where session_id = ${sessionId} and receiving = true`;
         await tx`update questions set receiving = true, closed_at = null where id = ${questionId}`;
@@ -578,7 +608,9 @@ export function createApp(deps: AppDeps) {
           where id = ${sessionId} returning revision`;
         return { revision: Number(bumped.revision) };
       });
-      if ('code' in result) return rejected(result.code, 'กิจกรรมนี้จบแล้ว', result.status);
+      if ('code' in result) {
+        return rejected(result.code, result.code === 'UNAUTHORIZED' ? 'สิทธิ์ไม่ถูกต้องหรือหมดอายุ' : 'กิจกรรมนี้จบแล้ว', result.status);
+      }
       hub.broadcast(sessionId).catch(() => {});
       return json({ status: 'opened', question_id: questionId, revision: result.revision });
     })
@@ -591,7 +623,8 @@ export function createApp(deps: AppDeps) {
       if (auth.grant.session_id !== params.sessionId) return rejected('FORBIDDEN', 'ไม่สามารถเข้าถึงห้องอื่นได้', 403);
       const sessionId: string = params.sessionId;
       const questionId: string = params.questionId;
-      const limited = limit(`facilitator:${hashToken(bearer(request) ?? '')}`, config.rate.facilitatorMax, config.rate.facilitatorWindowMs);
+      const tokenHash = hashToken(bearer(request) ?? '');
+      const limited = limit(`facilitator:${tokenHash}`, config.rate.facilitatorMax, config.rate.facilitatorWindowMs);
       if (limited) return limited;
       const [question] = await sql<Question[]>`
         select id, session_id, seq, type, label, help_text, options, rating_min, rating_max, receiving, closed_at
@@ -600,6 +633,12 @@ export function createApp(deps: AppDeps) {
       const result = await sql.begin(async (tx): Promise<{ revision: number } | { code: string; status: number }> => {
         const [session] = await tx<{ status: 'active' | 'ended'; revision: number }[]>`
           select status, revision from sessions where id = ${sessionId} for update`;
+        const [grant] = await tx<{ role: string; session_id: string; expires_at: Date; revoked_at: Date | null }[]>`
+          select role, session_id, expires_at, revoked_at from grants where token_hash = ${tokenHash} for update`;
+        if (!grant || grant.revoked_at !== null || new Date(grant.expires_at).getTime() <= Date.now() ||
+            grant.role !== 'facilitator' || grant.session_id !== sessionId) {
+          return { code: 'UNAUTHORIZED', status: 401 };
+        }
         if (session.status !== 'active') return { code: 'SESSION_ENDED', status: 409 };
         const [updated] = await tx<{ id: string }[]>`
           update questions set receiving = false, closed_at = coalesce(closed_at, now())
@@ -610,7 +649,13 @@ export function createApp(deps: AppDeps) {
         return { revision: Number(bumped.revision) };
       });
       if ('code' in result) {
-        return rejected(result.code, result.code === 'SESSION_ENDED' ? 'กิจกรรมนี้จบแล้ว' : 'คำถามนี้ปิดอยู่แล้ว', result.status);
+        const message =
+          result.code === 'UNAUTHORIZED'
+            ? 'สิทธิ์ไม่ถูกต้องหรือหมดอายุ'
+            : result.code === 'SESSION_ENDED'
+              ? 'กิจกรรมนี้จบแล้ว'
+              : 'คำถามนี้ปิดอยู่แล้ว';
+        return rejected(result.code, message, result.status);
       }
       hub.broadcast(sessionId).catch(() => {});
       return json({ status: 'closed', question_id: questionId, revision: result.revision });
@@ -622,18 +667,26 @@ export function createApp(deps: AppDeps) {
       if (auth.grant.role !== 'facilitator') return rejected('FORBIDDEN', 'เส้นทางนี้สำหรับผู้ควบคุมเท่านั้น', 403);
       if (!params.sessionId) return rejected('VALIDATION_FAILED', 'ต้องระบุห้อง', 422);
       if (auth.grant.session_id !== params.sessionId) return rejected('FORBIDDEN', 'ไม่สามารถเข้าถึงห้องอื่นได้', 403);
-      const limited = limit(`facilitator:${hashToken(bearer(request) ?? '')}`, config.rate.facilitatorMax, config.rate.facilitatorWindowMs);
+      const tokenHash = hashToken(bearer(request) ?? '');
+      const limited = limit(`facilitator:${tokenHash}`, config.rate.facilitatorMax, config.rate.facilitatorWindowMs);
       if (limited) return limited;
-      const result = await sql.begin(async (tx) => {
+      const result = await sql.begin(async (tx): Promise<{ revision: number; alreadyEnded: boolean } | { code: string; status: number }> => {
         const [session] = await tx<{ status: 'active' | 'ended'; revision: number }[]>`
           select status, revision from sessions where id = ${params.sessionId} for update`;
-        if (session.status === 'ended') return { revision: Number(session.revision), alreadyEnded: true } as const;
+        const [grant] = await tx<{ role: string; session_id: string; expires_at: Date; revoked_at: Date | null }[]>`
+          select role, session_id, expires_at, revoked_at from grants where token_hash = ${tokenHash} for update`;
+        if (!grant || grant.revoked_at !== null || new Date(grant.expires_at).getTime() <= Date.now() ||
+            grant.role !== 'facilitator' || grant.session_id !== params.sessionId) {
+          return { code: 'UNAUTHORIZED', status: 401 };
+        }
+        if (session.status === 'ended') return { revision: Number(session.revision), alreadyEnded: true };
         await tx`update questions set receiving = false where session_id = ${params.sessionId} and receiving = true`;
         const [bumped] = await tx<{ revision: number }[]>`
           update sessions set status = 'ended', ended_at = now(), revision = revision + 1
           where id = ${params.sessionId} returning revision`;
-        return { revision: Number(bumped.revision), alreadyEnded: false } as const;
+        return { revision: Number(bumped.revision), alreadyEnded: false };
       });
+      if ('code' in result) return rejected(result.code, 'สิทธิ์ไม่ถูกต้องหรือหมดอายุ', result.status);
       if (!result.alreadyEnded) hub.broadcast(params.sessionId).catch(() => {});
       return json({ status: 'ended', revision: result.revision, already_ended: result.alreadyEnded });
     })
@@ -644,12 +697,29 @@ export function createApp(deps: AppDeps) {
       if (auth.grant.role !== 'facilitator') return rejected('FORBIDDEN', 'เส้นทางนี้สำหรับผู้ควบคุมเท่านั้น', 403);
       if (!params.sessionId) return rejected('VALIDATION_FAILED', 'ต้องระบุห้อง', 422);
       if (auth.grant.session_id !== params.sessionId) return rejected('FORBIDDEN', 'ไม่สามารถเข้าถึงห้องอื่นได้', 403);
-      const [participant] = await sql<{ id: string }[]>`
-        select id from participants where id = ${params.participantId} and session_id = ${params.sessionId} limit 1`;
-      if (!participant) return rejected('PARTICIPANT_NOT_FOUND', 'ไม่พบผู้เข้าร่วมนี้', 404);
-      const revoked = await revokeParticipantGrants(sql, params.sessionId, params.participantId);
+      const tokenHash = hashToken(bearer(request) ?? '');
+      const result = await sql.begin(async (tx): Promise<{ revoked: number } | { code: string; status: number }> => {
+        const [grant] = await tx<{ role: string; session_id: string; expires_at: Date; revoked_at: Date | null }[]>`
+          select role, session_id, expires_at, revoked_at from grants where token_hash = ${tokenHash} for update`;
+        if (!grant || grant.revoked_at !== null || new Date(grant.expires_at).getTime() <= Date.now() ||
+            grant.role !== 'facilitator' || grant.session_id !== params.sessionId) {
+          return { code: 'UNAUTHORIZED', status: 401 };
+        }
+        const [participant] = await tx<{ id: string }[]>`
+          select id from participants where id = ${params.participantId} and session_id = ${params.sessionId} limit 1`;
+        if (!participant) return { code: 'PARTICIPANT_NOT_FOUND', status: 404 };
+        const revoked = await revokeParticipantGrants(tx as unknown as Sql, params.sessionId, params.participantId);
+        return { revoked };
+      });
+      if ('code' in result) {
+        return rejected(
+          result.code,
+          result.code === 'UNAUTHORIZED' ? 'สิทธิ์ไม่ถูกต้องหรือหมดอายุ' : 'ไม่พบผู้เข้าร่วมนี้',
+          result.status,
+        );
+      }
       hub.disconnectParticipant(params.sessionId, params.participantId);
-      return json({ status: 'revoked', revoked });
+      return json({ status: 'revoked', revoked: result.revoked });
     });
 
   return { app, limiter };

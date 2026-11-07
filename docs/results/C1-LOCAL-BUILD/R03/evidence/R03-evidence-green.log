@@ -1,0 +1,19 @@
+bun test v1.4.4 (38afee6c8)
+
+tests/findings-r02.test.ts:
+(pass) R02-QA-01 rejected receipt read returns its stable stored rejection > authenticated GET of a rejected receipt returns the stored terminal rejection [34.46ms]
+(pass) R02-QA-01 rejected receipt read returns its stable stored rejection > the rejected receipt is readable in the session-end grace window and denied after revoke [18.39ms]
+(pass) R02-QA-02 every handled key is bound to a stable outcome and fingerprint > a deduplicated new key replays stably and conflicts on a changed payload [22.58ms]
+(pass) R02-QA-03 writes recheck authorization inside the mutation transaction > a submission blocked on the session lock is rejected when the participant is revoked meanwhile [527.21ms]
+(pass) R02-QA-03 writes recheck authorization inside the mutation transaction > a submission blocked on the session lock is rejected when its grant expires meanwhile [561.76ms]
+(pass) R02-QA-03 writes recheck authorization inside the mutation transaction > a facilitator control blocked on the session lock is rejected when its grant expires meanwhile [538.70ms]
+(pass) R02-QA-05 participant state is read from one coherent snapshot > concurrent commit/read never pairs the same revision with two different own-answer states [134.08ms]
+(pass) R02-QA-05 participant state is read from one coherent snapshot > an equal-revision WS participant state still reconciles the own accepted answer [17.01ms]
+(pass) C1-RV-02 security verification gate — exact lifetime boundaries and idle sweep > an idle socket is closed by the sweep when its grant expires without any client message [624.85ms]
+(pass) C1-RV-02 security verification gate — exact lifetime boundaries and idle sweep > the exact session-end read grace boundary is enforced without extending the grant TTL [1333.40ms]
+(pass) C1-RV-02 security verification gate — exact lifetime boundaries and idle sweep > a revoked participant socket gets no state from the broadcast that other sockets receive [122.28ms]
+
+ 11 pass
+ 0 fail
+ 53 expect() calls
+Ran 11 tests across 1 file. [4.40s]

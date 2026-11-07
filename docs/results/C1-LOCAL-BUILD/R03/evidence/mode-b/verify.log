@@ -1,0 +1,26 @@
+== runner hygiene (static) ==
+no exec/no inline secret arguments
+== Docker-only test runner ==
+RUNNER_EXIT=0
+ 84 pass
+ 0 fail
+ 406 expect() calls
+Ran 84 tests across 10 files. [10.78s]
+== migration state ==
+0001_init.sql
+0002_terminal_receipts.sql
+== restart api+db ==
+ Container c1b-db-1 Restarting 
+ Container c1b-api-1 Restarting 
+ Container c1b-api-1 Started 
+ Container c1b-db-1 Started 
+RESTART_EXIT=0
+ready HTTP 200 {"status":"ready","db":"ok"}
+join label=ตรวจ R03 B revision=12
+rejected POST HTTP 422
+{"status":"rejected","code":"VALIDATION_FAILED","message":"ข้อความต้องไม่เกิน 500 ตัวอักษร","terminal":true,"replay":true,"field":"comment"}
+receipt GET HTTP 200
+== image hygiene ==
+0
+no_tests
+no_env

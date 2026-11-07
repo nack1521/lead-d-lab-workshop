@@ -1,0 +1,18 @@
+== health/ready ==
+health HTTP 200 {"status":"ok"}
+join revision=17 stored_label=ตรวจ R03 A
+== R02-QA-01 rejected POST then GET ==
+{"status":"rejected","code":"VALIDATION_FAILED","message":"ข้อความต้องไม่เกิน 500 ตัวอักษร","terminal":true,"field":"comment"}
+HTTP 422
+{"status":"rejected","code":"VALIDATION_FAILED","message":"ข้อความต้องไม่เกิน 500 ตัวอักษร","terminal":true,"replay":true,"field":"comment"}
+HTTP 200
+== R02-QA-02 dedup key binding ==
+{"status":"accepted","replay":false,"deduplicated":false,"rating":3}
+{"status":"accepted","replay":false,"deduplicated":true,"rating":3}
+-- same key B changed payload --
+{"status":"rejected","code":"IDEMPOTENCY_CONFLICT","message":"คีย์นี้เคยใช้กับคำตอบอื่น","terminal":true}
+HTTP 409
+== DB receipts ==
+rejected/VALIDATION_FAILED response=null
+accepted/- response=daba7fb2-1171-489f-bddb-74265d4bd926
+accepted/- response=daba7fb2-1171-489f-bddb-74265d4bd926

@@ -1,0 +1,98 @@
+bun test v1.4.4 (38afee6c8)
+
+tests/findings-r02.test.ts:
+44 |     expect((await api<{ terminal: boolean }>(rejected)).terminal).toBe(true);
+45 | 
+46 |     const read = await ctx.http(`/api/questions/${ctx.session.ratingQuestionId}/receipt?key=${key}`, {
+47 |       token: participant.grant,
+48 |     });
+49 |     expect(read.status).toBe(200);
+                             ^
+error: expect(received).toBe(expected)
+
+Expected: 200
+Received: 500
+
+      at <anonymous> (/Users/aiink/Nack/Lead+D-Lab/tests/findings-r02.test.ts:49:25)
+(fail) R02-QA-01 rejected receipt read returns its stable stored rejection > authenticated GET of a rejected receipt returns the stored terminal rejection [23.31ms]
+85 |     const end = await control(ctx, '/end');
+86 |     expect(end.status).toBe(200);
+87 |     const inGrace = await ctx.http(`/api/questions/${ctx.session.ratingQuestionId}/receipt?key=${key}`, {
+88 |       token: participant.grant,
+89 |     });
+90 |     expect(inGrace.status).toBe(200);
+                                ^
+error: expect(received).toBe(expected)
+
+Expected: 200
+Received: 500
+
+      at <anonymous> (/Users/aiink/Nack/Lead+D-Lab/tests/findings-r02.test.ts:90:28)
+(fail) R02-QA-01 rejected receipt read returns its stable stored rejection > the rejected receipt is readable in the session-end grace window and denied after revoke [9.37ms]
+131 |     expect(dedupBody.response.rating).toBe(3);
+132 | 
+133 |     const [binding] = await ctx.sql<{ outcome: string; payload_fingerprint: string; response_id: string }[]>`
+134 |       select outcome, payload_fingerprint, response_id from submission_receipts
+135 |       where participant_id = ${participant.participant_id} and idempotency_key = ${keyB}`;
+136 |     expect(binding?.outcome).toBe('accepted');
+                                   ^
+error: expect(received).toBe(expected)
+
+Expected: "accepted"
+Received: undefined
+
+      at <anonymous> (/Users/aiink/Nack/Lead+D-Lab/tests/findings-r02.test.ts:136:30)
+(fail) R02-QA-02 every handled key is bound to a stable outcome and fingerprint > a deduplicated new key replays stably and conflicts on a changed payload [14.44ms]
+190 |     await sleep(120);
+191 |     const revoke = await control(ctx, `/participants/${participant.participant_id}/revoke`);
+192 |     expect(revoke.status).toBe(200);
+193 |     const response = await submitPromise;
+194 |     await hold;
+195 |     expect(response.status).toBe(401);
+                                  ^
+error: expect(received).toBe(expected)
+
+Expected: 401
+Received: 201
+
+      at <anonymous> (/Users/aiink/Nack/Lead+D-Lab/tests/findings-r02.test.ts:195:29)
+(fail) R02-QA-03 writes recheck authorization inside the mutation transaction > a submission blocked on the session lock is rejected when the participant is revoked meanwhile [651.78ms]
+214 |     });
+215 |     await sleep(120);
+216 |     await ctx.sql`update grants set expires_at = now() - interval '1 second' where participant_id = ${participant.participant_id}`;
+217 |     const response = await submitPromise;
+218 |     await hold;
+219 |     expect(response.status).toBe(401);
+                                  ^
+error: expect(received).toBe(expected)
+
+Expected: 401
+Received: 201
+
+      at <anonymous> (/Users/aiink/Nack/Lead+D-Lab/tests/findings-r02.test.ts:219:29)
+(fail) R02-QA-03 writes recheck authorization inside the mutation transaction > a submission blocked on the session lock is rejected when its grant expires meanwhile [645.44ms]
+231 |     await ctx.sql`
+232 |       update grants set expires_at = now() - interval '1 second'
+233 |       where token_hash = ${sha256(ctx.session.facilitatorToken)}`;
+234 |     const response = await openPromise;
+235 |     await hold;
+236 |     expect(response.status).toBe(401);
+                                  ^
+error: expect(received).toBe(expected)
+
+Expected: 401
+Received: 200
+
+      at <anonymous> (/Users/aiink/Nack/Lead+D-Lab/tests/findings-r02.test.ts:236:29)
+(fail) R02-QA-03 writes recheck authorization inside the mutation transaction > a facilitator control blocked on the session lock is rejected when its grant expires meanwhile [636.82ms]
+(pass) R02-QA-05 participant state is read from one coherent snapshot > concurrent commit/read never pairs the same revision with two different own-answer states [81.55ms]
+(pass) R02-QA-05 participant state is read from one coherent snapshot > an equal-revision WS participant state still reconciles the own accepted answer [28.01ms]
+(fail) C1-RV-02 security verification gate — exact lifetime boundaries and idle sweep > an idle socket is closed by the sweep when its grant expires without any client message [5001.02ms]
+  ^ this test timed out after 5000ms.
+(pass) C1-RV-02 security verification gate — exact lifetime boundaries and idle sweep > the exact session-end read grace boundary is enforced without extending the grant TTL [1377.55ms]
+(pass) C1-RV-02 security verification gate — exact lifetime boundaries and idle sweep > a revoked participant socket gets no state from the broadcast that other sockets receive [144.00ms]
+
+ 4 pass
+ 7 fail
+ 27 expect() calls
+Ran 11 tests across 1 file. [9.11s]

@@ -1,0 +1,183 @@
+{
+  "schema_version": 1,
+  "task_id": "C1-LOCAL-BUILD",
+  "run_id": "R03",
+  "reported_at": "2026-11-07T18:03:26+07:00",
+  "producer": "DeepSeek Harness (single active coding writer)",
+  "authoring_tool": "DeepSeek Harness",
+  "model": "deepseek-v4.1-flash-1017",
+  "model_verification": "runtime-reported identifier; not independently verified",
+  "source_kind": "direct",
+  "baseline_commit": "2b87143",
+  "observed_head": "cce8db1ac194f2ea6d9d23b707c0c05a5841b6d0",
+  "branch": "main",
+  "dirty_paths": ["docs/AI-PROGRESS.md", "docs/handoffs/ANTIGRAVITY-C1.md", "docs/results/C1-LOCAL-BUILD/R02/evidence/mode-a-api.log"],
+  "dirty_paths_preserved": true,
+  "work_kind": "review_fix_local_build",
+  "review_input": "docs/implementation/C1-REVIEW-SUMMARY-R02.md",
+  "status": "READY_FOR_REVIEW",
+  "summary": "Fixed the R02 residual findings (R02-QA-01..05) and completed the C1-RV-02 security verification gate on build cce8db1 with genuine RED->GREEN tests at API/PostgreSQL/WS and React-container seams. Rejected receipts now read back stably, deduplicated keys are bound to a stable fingerprint/outcome, writes recheck authorization under the mutation transaction (controlled blocked-write vs revoke/expiry), the uncertain join keeps its immutable payload and shows the stored label, participant state is one repeatable-read snapshot with equal-revision reconciliation, and the WS sweep/authorization boundary is testable. Current-build regression: Mode A 84 pass / 0 fail; Mode B rebuilt Docker-only stack and a separate Docker runner 84 pass / 0 fail; restarts keep data. Real-browser flows remain NOT RUN (no browser automation); C1-15 stays PARTIAL.",
+  "detail_path": "docs/results/C1-LOCAL-BUILD/R03/result.md",
+  "commits": ["cce8db1 fix(c1): stable rejected receipts, atomic write authorization and coherent participant state"],
+  "changed_paths": [
+    ".env.example",
+    "README.md",
+    "apps/api/src/app.ts",
+    "apps/api/src/env.ts",
+    "apps/api/src/snapshot.ts",
+    "apps/api/src/ws.ts",
+    "apps/web/src/containers.tsx",
+    "apps/web/src/join-attempt.ts",
+    "compose.yaml",
+    "tests/findings-client.test.tsx",
+    "tests/findings-r02.test.ts",
+    "tests/run-in-docker.sh",
+    "tests/submission.test.ts"
+  ],
+  "findings": [
+    {
+      "finding_id": "R02-QA-01",
+      "group": "C1-RV-01",
+      "status": "FIXED",
+      "evidence_paths": [
+        "docs/results/C1-LOCAL-BUILD/R03/evidence/R03-evidence-red.log",
+        "docs/results/C1-LOCAL-BUILD/R03/evidence/R03-evidence-green.log",
+        "docs/results/C1-LOCAL-BUILD/R03/evidence/mode-a-qa01-02-evidence.log",
+        "docs/results/C1-LOCAL-BUILD/R03/evidence/mode-b/verify.log"
+      ],
+      "notes": "Receipt GET returns the stored terminal rejection (200, terminal/replay true) after a lost ack, inside session-end grace, and 401 after revoke."
+    },
+    {
+      "finding_id": "R02-QA-02",
+      "group": "C1-RV-01",
+      "status": "FIXED",
+      "evidence_paths": [
+        "docs/results/C1-LOCAL-BUILD/R03/evidence/R03-evidence-green.log",
+        "docs/results/C1-LOCAL-BUILD/R03/evidence/mode-a-qa01-02-evidence.log"
+      ],
+      "notes": "Deduplicated new key stores an accepted receipt bound to the response and its fingerprint; replay stable, changed payload 409, one response row."
+    },
+    {
+      "finding_id": "R02-QA-03",
+      "group": "C1-RV-01",
+      "status": "FIXED",
+      "evidence_paths": ["docs/results/C1-LOCAL-BUILD/R03/evidence/R03-evidence-green.log"],
+      "notes": "Grant re-read FOR UPDATE inside the mutation transaction; controlled session-lock blocked writes rejected 401 after revoke or expiry with no row/receipt; facilitator control variant included."
+    },
+    {
+      "finding_id": "R02-QA-04",
+      "group": "C1-RV-03",
+      "status": "FIXED",
+      "evidence_paths": [
+        "docs/results/C1-LOCAL-BUILD/R03/evidence/R03-client-red.log",
+        "docs/results/C1-LOCAL-BUILD/R03/evidence/R03-client-green.log"
+      ],
+      "notes": "Immutable pending join payload; nickname edit not sent; server-stored label displayed. Real-browser retest NOT RUN."
+    },
+    {
+      "finding_id": "R02-QA-05",
+      "group": "C1-RV-04",
+      "status": "FIXED_STRUCTURAL_PARTIAL_VERIFICATION",
+      "evidence_paths": [
+        "docs/results/C1-LOCAL-BUILD/R03/evidence/R03-evidence-green.log",
+        "docs/results/C1-LOCAL-BUILD/R03/evidence/R03-client-green.log"
+      ],
+      "notes": "One repeatable-read participant snapshot for /api/me, join and WS state; equal-revision reconciliation. Deterministic mid-read commit interleaving NOT achieved without production hooks; stress test and structure only."
+    },
+    {
+      "finding_id": "C1-RV-02-security-gate",
+      "group": "C1-RV-02",
+      "status": "COMPLETED_VERIFICATION_GATE",
+      "evidence_paths": ["docs/results/C1-LOCAL-BUILD/R03/evidence/R03-evidence-green.log"],
+      "notes": "Configurable idle sweep, exact 1s grace boundary, hard TTL resync, revoke-vs-broadcast; per-socket revalidation documented as the authorization/send linearization boundary; no zero-race claim."
+    }
+  ],
+  "prior_ids_preserved": {
+    "C1-RV-01": "R02-QA-01/02/03 addressed",
+    "C1-RV-02": "verification gate completed; residual static risk documented",
+    "C1-RV-03": "R02-QA-04 addressed",
+    "C1-RV-04": "R02-QA-05 addressed structurally",
+    "C1-RV-05": "RESOLVED_TARGETED_BROWSER preserved; regressions still pass",
+    "QA-C1-01..04": "retained as source IDs for C1-RV-01..04",
+    "C1-UI-01": "retained (C1-RV-05)",
+    "C1-UI-02": "retained (C1-RV-03)",
+    "R02-QA-01..05": "all addressed in this run"
+  },
+  "cases": [
+    { "case_id": "C1-01", "mode_a": "PASS", "mode_b": "NOT RUN", "evidence_paths": ["docs/results/C1-LOCAL-BUILD/R03/evidence/mode-a-qa01-02-evidence.log"], "limitations": "Mode A case; Mode B covered by C1-02." },
+    { "case_id": "C1-02", "mode_a": "NOT RUN", "mode_b": "PASS", "evidence_paths": ["docs/results/C1-LOCAL-BUILD/R03/evidence/mode-b/verify.log", "docs/results/C1-LOCAL-BUILD/R03/evidence/mode-b/container-suite.log"], "limitations": "Images rebuilt with DOCKER_BUILDKIT=0 because the sandbox blocks buildx activity." },
+    { "case_id": "C1-03", "mode_a": "PASS", "mode_b": "PASS", "evidence_paths": ["tests/findings-client.test.tsx", "tests/join.test.ts"], "limitations": "UI join flows exercised in happy-dom, not a real browser." },
+    { "case_id": "C1-04", "mode_a": "PASS", "mode_b": "PASS", "evidence_paths": ["docs/results/C1-LOCAL-BUILD/R03/evidence/mode-a-full-regression.log"], "limitations": "DB failure injected with a trigger." },
+    { "case_id": "C1-05", "mode_a": "PASS", "mode_b": "PASS", "evidence_paths": ["docs/results/C1-LOCAL-BUILD/R03/evidence/mode-a-full-regression.log"], "limitations": "Single-choice poll." },
+    { "case_id": "C1-06", "mode_a": "PASS", "mode_b": "PASS", "evidence_paths": ["docs/results/C1-LOCAL-BUILD/R03/evidence/mode-a-full-regression.log"], "limitations": "Real-browser DOM check NOT RUN." },
+    { "case_id": "C1-07", "mode_a": "PASS", "mode_b": "PASS", "evidence_paths": ["docs/results/C1-LOCAL-BUILD/R03/evidence/mode-a-full-regression.log"], "limitations": "Concurrency rounds, not a load profile." },
+    { "case_id": "C1-08", "mode_a": "PASS", "mode_b": "PASS", "evidence_paths": ["docs/results/C1-LOCAL-BUILD/R03/evidence/R03-evidence-green.log"], "limitations": "Key binding contract updated and regression assertions corrected; no browser run." },
+    { "case_id": "C1-09", "mode_a": "PASS", "mode_b": "PASS", "evidence_paths": ["docs/results/C1-LOCAL-BUILD/R03/evidence/mode-a-full-regression.log"], "limitations": "Single API instance." },
+    { "case_id": "C1-10", "mode_a": "PASS", "mode_b": "PASS", "evidence_paths": ["docs/results/C1-LOCAL-BUILD/R03/evidence/mode-a-full-regression.log"], "limitations": "Probabilistic race rounds." },
+    { "case_id": "C1-11", "mode_a": "PASS", "mode_b": "PASS", "evidence_paths": ["docs/results/C1-LOCAL-BUILD/R03/evidence/R03-client-green.log"], "limitations": "Equal-revision reconciliation covered; real crash-before-broadcast NOT RUN." },
+    { "case_id": "C1-12", "mode_a": "PASS", "mode_b": "PASS", "evidence_paths": ["docs/results/C1-LOCAL-BUILD/R03/evidence/mode-b/verify.log"], "limitations": "Host reboot NOT RUN." },
+    { "case_id": "C1-13", "mode_a": "PASS", "mode_b": "PASS", "evidence_paths": ["docs/results/C1-LOCAL-BUILD/R03/evidence/R03-evidence-green.log"], "limitations": "Exact lifetime boundaries tested at 1s/150ms scale; production TTL not waited out." },
+    { "case_id": "C1-14", "mode_a": "PASS", "mode_b": "PASS", "evidence_paths": ["docs/results/C1-LOCAL-BUILD/R03/evidence/mode-a-full-regression.log"], "limitations": "Synthetic Origin headers." },
+    { "case_id": "C1-15", "mode_a": "PARTIAL", "mode_b": "PARTIAL", "evidence_paths": ["docs/results/C1-LOCAL-BUILD/R03/evidence/mode-a-qa01-02-evidence.log", "docs/results/C1-LOCAL-BUILD/R03/evidence/R03-client-green.log"], "limitations": "Build and deep link pass; real-browser interaction NOT RUN (no browser automation)." },
+    { "case_id": "C1-16", "mode_a": "PASS", "mode_b": "PASS", "evidence_paths": ["docs/results/C1-LOCAL-BUILD/R03/evidence/c1-16-and-hygiene.log"], "limitations": "Pattern-based local scans only." }
+  ],
+  "commands": [
+    { "command": "bun test tests/findings-r02.test.ts (pre-fix)", "exit_code": 1, "outcome": "7 fail / 4 pass (genuine RED)" },
+    { "command": "bun test tests/findings-client.test.tsx (pre-fix)", "exit_code": 1, "outcome": "3 fail / 5 pass (genuine RED)" },
+    { "command": "bun test tests/findings-r02.test.ts (post-fix)", "exit_code": 0, "outcome": "11 pass" },
+    { "command": "bun test tests/findings-client.test.tsx (post-fix)", "exit_code": 0, "outcome": "8 pass" },
+    { "command": "bun x tsc --noEmit -p tsconfig.json", "exit_code": 0, "outcome": "no type errors" },
+    { "command": "bun test tests (Mode A)", "exit_code": 0, "outcome": "84 pass / 0 fail, 407 expect, 10 files" },
+    { "command": "bun run build:web", "exit_code": 0, "outcome": "production bundle rebuilt" },
+    { "command": "Mode A QA-01/02 flow", "exit_code": 0, "outcome": "rejected POST 422, receipt GET 200 stored rejection; dedup key bound; changed payload 409; DB two accepted receipts -> one response" },
+    { "command": "tests/run-in-docker.sh c1b_default", "exit_code": 0, "outcome": "84 pass / 0 fail in throwaway container (Mode B)" },
+    { "command": "Mode B restart api+db", "exit_code": 0, "outcome": "ready 200; stored label; rejected receipt GET 200; schema 0001+0002 intact" },
+    { "command": "C1-16/hygiene scans", "exit_code": 0, "outcome": "no tracked password, no sensitive logging, runner cleanup/env-by-name, production image clean" }
+  ],
+  "skill_usage": [
+    {
+      "name": "tdd",
+      "path": ".agents/skills/tdd/SKILL.md",
+      "load_status": "READ_LOADED",
+      "applied_to": "RED->GREEN at API/PostgreSQL/WS and React-container seams for R02-QA-01..05 and C1-RV-02 gate",
+      "evidence_paths": ["docs/results/C1-LOCAL-BUILD/R03/evidence/R03-evidence-red.log", "docs/results/C1-LOCAL-BUILD/R03/evidence/R03-evidence-green.log", "docs/results/C1-LOCAL-BUILD/R03/evidence/R03-client-red.log", "docs/results/C1-LOCAL-BUILD/R03/evidence/R03-client-green.log"],
+      "limitation": "File read by this writer; no host activation trace."
+    },
+    {
+      "name": "ponytail",
+      "path": ".agents/skills/ponytail/SKILL.md",
+      "load_status": "READ_LOADED",
+      "applied_to": "smallest complete change: in-transaction grant recheck, one receipt insert, one repeatable-read view, configurable sweep; no new runtime dependency",
+      "evidence_paths": ["apps/api/src/app.ts", "apps/api/src/snapshot.ts"],
+      "limitation": "Validation/security/tests were not reduced."
+    },
+    {
+      "name": "diagnosing-bugs",
+      "path": ".agents/skills/diagnosing-bugs/SKILL.md",
+      "load_status": "UNVERIFIED",
+      "applied_to": "not loaded; async-helper lock adoption defect fixed from RED output",
+      "evidence_paths": ["docs/results/C1-LOCAL-BUILD/R03/evidence/R03-evidence-red.log"],
+      "limitation": "Not a skill-run claim."
+    }
+  ],
+  "blockers": [],
+  "environment_limitations": [
+    "Sandbox blocks ~/.docker/buildx/activity; Mode B images rebuilt with DOCKER_BUILDKIT=0 (same Dockerfile/targets).",
+    "No browser automation available; real-browser retest NOT RUN (Safari automation would change global configuration)."
+  ],
+  "not_verified": [
+    "real-browser question transitions, edited-nickname journey and equal-revision reconnect",
+    "mobile devices and full accessibility",
+    "30-client load / SLA",
+    "host reboot and Docker engine restart",
+    "deterministic mid-read commit interleaving for R02-QA-05",
+    "independent QA and human acceptance"
+  ],
+  "next_gate": "Independent QA retest of cce8db1 plus targeted browser verification (R02-QA-04/05, C1-RV-02 boundary), then user trial/acceptance. Push/deploy/tunnel/publication remain unauthorized.",
+  "services_left_running": {
+    "mode_a": ["c1a-db-1 (127.0.0.1:5433)", "API 127.0.0.1:3000 logging to .local/logs/api-r03.log", "static production web 127.0.0.1:5173"],
+    "mode_b": ["c1b-db-1 (127.0.0.1:5434)", "c1b-api-1 (127.0.0.1:3001)", "c1b-web-1 (127.0.0.1:5174)"],
+    "volumes": ["c1a_c1_pgdata", "c1b_c1_pgdata"]
+  },
+  "published": false
+}

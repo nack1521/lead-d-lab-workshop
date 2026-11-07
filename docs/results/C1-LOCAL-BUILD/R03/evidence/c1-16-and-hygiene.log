@@ -1,0 +1,21 @@
+== tracked local password ==
+no tracked match
+== tracked API live-log append (must stay unstaged) ==
+ M docs/results/C1-LOCAL-BUILD/R02/evidence/mode-a-api.log
+== private live log ==
+total 8
+-rw-r--r--@ 1 aiink  staff  206 Nov  7 18:01 api-r03.log
+== grant/nickname/comment logging in source ==
+none
+== runner hygiene ==
+16:  DATABASE_URL="postgres://c1:${POSTGRES_PASSWORD}@db:5432/c1"
+25:trap cleanup EXIT INT TERM
+== production image hygiene ==
+0
+no_tests
+no_env
+== tracked files new this run ==
+ M docs/AI-PROGRESS.md
+ M docs/handoffs/ANTIGRAVITY-C1.md
+ M docs/results/C1-LOCAL-BUILD/R02/evidence/mode-a-api.log
+?? docs/results/C1-LOCAL-BUILD/R03/

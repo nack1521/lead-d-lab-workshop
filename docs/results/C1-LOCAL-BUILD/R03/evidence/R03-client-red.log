@@ -1,0 +1,55 @@
+bun test v1.4.4 (38afee6c8)
+
+tests/findings-client.test.tsx:
+(pass) C1-RV-03 lost join acknowledgement keeps one logical join > an uncertain join reuses the same operation key on unchanged retry [472.32ms]
+263 |     fill('#nickname', 'ชื่อที่แก้');
+264 |     clickButton('เข้าร่วมกิจกรรม');
+265 |     await tick(12);
+266 |     expect(String(requests[1].body?.join_key)).toBe(String(requests[0].body?.join_key));
+267 |     // The uncertain join payload stays immutable and the stored label is authoritative.
+268 |     expect(String(requests[1].body?.nickname)).toBe('ชื่อแรก');
+                                                     ^
+error: expect(received).toBe(expected)
+
+Expected: "ชื่อแรก"
+Received: "ชื่อที่แก้"
+
+      at <anonymous> (/Users/aiink/Nack/Lead+D-Lab/tests/findings-client.test.tsx:268:48)
+(fail) C1-RV-03 lost join acknowledgement keeps one logical join > a nickname-only change is still the same join; a different room code is a new join [467.17ms]
+(pass) C1-RV-05 outcome and draft state follow the authoritative question > a saved answer does not carry into the next unanswered question [485.48ms]
+(pass) C1-RV-05 outcome and draft state follow the authoritative question > an unresolved earlier attempt stays with the old question during a transition [474.27ms]
+384 |     fill('#nickname', 'ชื่อที่แก้ภายหลัง');
+385 |     clickButton('เข้าร่วมกิจกรรม');
+386 |     await tick(12);
+387 |     expect(requests).toHaveLength(2);
+388 |     expect(String(requests[1].body?.join_key)).toBe(String(requests[0].body?.join_key));
+389 |     expect(String(requests[1].body?.nickname)).toBe('ชื่อเดิมที่บันทึก');
+                                                     ^
+error: expect(received).toBe(expected)
+
+Expected: "ชื่อเดิมที่บันทึก"
+Received: "ชื่อที่แก้ภายหลัง"
+
+      at <anonymous> (/Users/aiink/Nack/Lead+D-Lab/tests/findings-client.test.tsx:389:48)
+(fail) R02-QA-04 an uncertain join keeps its original payload and shows the stored label > editing the nickname does not change the pending payload or the displayed identity [449.45ms]
+406 |     socket.emit('open');
+407 |     socket.emit('message', {
+408 |       data: JSON.stringify({ type: 'state', revision: 5, session_status: 'active', question: ratingQuestion, own_response: acceptedOwn }),
+409 |     });
+410 |     await tick(12);
+411 |     expect(text()).toContain('บันทึกคำตอบและข้อความแล้ว');
+                         ^
+error: expect(received).toContain(expected)
+
+Expected to contain: "บันทึกคำตอบและข้อความแล้ว"
+Received: "คำถามสำหรับผู้เข้าร่วมเข้าร่วมในชื่อ “ผู้เข้าร่วม”ข้อ 01คุณมั่นใจในการให้ feedback ที่ช่วยให้ทีมพัฒนาได้เพียงใด?เลือก 1 ถึง 5 ตามความรู้สึกของคุณเลือกคะแนน1 ยังไม่มั่นใจ2345 มั่นใจมากความคิดเห็นเพิ่มเติม (ไม่บังคับ)0/500 ตัวอักษรส่งคำตอบ"
+
+      at <anonymous> (/Users/aiink/Nack/Lead+D-Lab/tests/findings-client.test.tsx:411:20)
+(fail) R02-QA-05 equal-revision reconciliation in the participant container > an equal-revision push carrying the own accepted answer is applied [442.63ms]
+(pass) C1-RV-04 authoritative snapshots and truthful Live > a delayed older HTTP response cannot overwrite newer WebSocket state [467.33ms]
+(pass) C1-RV-04 authoritative snapshots and truthful Live > facilitator shows Live only after an authorized fresh snapshot [859.12ms]
+
+ 5 pass
+ 3 fail
+ 35 expect() calls
+Ran 8 tests across 1 file. [4.23s]

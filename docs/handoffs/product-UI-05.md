@@ -1,6 +1,6 @@
 # Product handoff — UI-05 state pack
 
-สถานะ: **UI05 R02 ACCEPTED_DESIGN_STATE_PACK / C1_LOCAL_BUILD_AUTHORIZED** ตาม [current approval record](../implementation/C1-LOCAL-BUILD-APPROVAL-R01.md). ใช้ [C1 START handoff](ANTIGRAVITY-C1-START-R01.md) ส่งงานในIDEที่ยืนยันได้; approvalไม่เท่ากับdispatchverifiedหรือbuildสำเร็จ. ไม่มีpermissionให้push/deployและC1ยังไม่implementationACCEPTED.
+สถานะ: **UI05 R02 ACCEPTED_DESIGN_STATE_PACK / C1_LOCAL_BUILD_AUTHORIZED** ตาม [approval record](../implementation/C1-LOCAL-BUILD-APPROVAL-R01.md). ใช้ [current tool-neutral C1 handoff](C1-LOCAL-BUILD.md) และ [coding workflow](../CODING-WORKFLOW.md): DeepSeek Harness primary / Antigravity fallback เมื่อผู้ใช้เลือกหลังcheckpoint. Approvalไม่เท่ากับtoolอ่านแล้ว/เริ่มbuildหรือbuildสำเร็จ ไม่มีpermissionให้push/deployและC1ยังไม่implementationACCEPTED.
 
 **Mandatory current amendment:** อ่าน [UI05 R02 targeted fixes / approved attempt policy](../product/UI-05-R02-TARGETED-FIXES.md) ก่อน implementation. ผู้ใช้อนุมัติ fresh attempt หลัง terminal non-save + no late commit + still open ด้วย new key แม้ payload เดิม; same key คือ stable replay ไม่ใช่ attempt ใหม่. R02 supersedes retry classification wording ของ UI05 R01/UI01/WF01 และข้อจำกัด edited-only ของ protected C1 handoff เฉพาะจุดนี้ โดยไม่แก้ไฟล์เดิมหรือเปลี่ยน scope/TTL/auth/accepted uniqueness. R02 targeted retest ทั้ง canonical Product/QA เป็น READY_FOR_HUMAN_STATE_REVIEW; [review summary](../implementation/UI-05-R02-REVIEW-SUMMARY.md) เก็บdispositionที่ตรวจแล้ว ไม่ใช่humanacceptanceหรือbuildapproval.
 
@@ -38,7 +38,7 @@
 - UI05-R02: same key/different payload ต้องเป็น conflict ไม่เขียนทับคำตอบเดิม. Accepted replay หลัง close คืน accepted outcome เดิมเมื่อยังมีสิทธิ์ ไม่ถือเป็น new write และไม่ bypass hard TTL/revocation.
 - UI05-R06: ใช้ authoritative snapshot/revision หรือ ordering contract ที่พิสูจน์ได้; event เก่าของ session/question เดิมห้ามย้อนทับ snapshot ใหม่. UI timer/connection-open อย่างเดียวไม่ทำให้ fresh.
 - UI05-R09: preserve draft ใน active tab ตาม contract เท่านั้น; ยังไม่รับรอง refresh/ปิดแท็บ และไม่เพิ่ม localStorage หรือ persistent draft storage โดยปริยาย.
-- Expiry decisions: ผู้ใช้เป็นเจ้าของ approval ของ proposed grant TTL, receipt read grace, retention/revoke และช่องทางช่วยกู้สถานะที่อนุญาต; R03 เป็นข้อเสนอเดิม ไม่ใช่ค่าที่ UI05 ตัดสินใหม่. Retention/ช่องทางกู้สถานะที่ยังไม่ตกลงต้องระบุ OPEN ก่อน implementation ของส่วนนั้น. Antigravity เสนอทางเลือก, canonical QA ตรวจ policy หลังได้รับ approval; ห้ามเสนอ HR bypass หรือสัญญาว่าอ่าน receipt ได้ตลอด.
+- Expiry decisions: ผู้ใช้เป็นเจ้าของ approval ของ proposed grant TTL, receipt read grace, retention/revoke และช่องทางช่วยกู้สถานะที่อนุญาต; R03 เป็นข้อเสนอเดิม ไม่ใช่ค่าที่ UI05 ตัดสินใหม่. Retention/ช่องทางกู้สถานะที่ยังไม่ตกลงต้องระบุ OPEN ก่อน implementation ของส่วนนั้น. active coding tool เสนอทางเลือก, canonical QA ตรวจ policy หลังได้รับ approval; ห้ามเสนอ HR bypass หรือสัญญาว่าอ่าน receipt ได้ตลอด.
 
 [Advisory R01 disposition](../product/evidence/UI-05/advisory-R01.md) เป็นการตรวจความครบถ้วนของเอกสารโดย Coordinator ไม่ใช่ผล runtime หรือ sign-off ของ Senior Tester.
 
@@ -50,10 +50,10 @@ Readback/PNG/contrast/geometry ไม่พิสูจน์ real-time, persist
 Receipt-expiry ไม่มี dedicated full-frame drawing: ใช้ unknown notice + safe unavailable reason ตาม specification โดยไม่ชี้ว่าไม่บันทึก. ต้องทดสอบ UX mapping ของ403/expiry/revoke โดยไม่เปิดเผย session อื่นก่อน release.
 
 ## เมื่อได้รับ approval และทำเสร็จ
-- ผู้เขียน application/test/migration/config คือ Antigravity เท่านั้น. ใช้ model `gemini-3.8-flash-high` หากผ่าน agy และช่องทางที่ผู้ใช้เลือก. Existing-conversation CLI binding เคย blocked; ห้ามเปลี่ยน conversation/fallback เงียบ ๆ.
+- ผู้เขียน application/test/migration/config คือ active coding tool: DeepSeek Harness primary / Antigravity fallbackตามcheckpoint. Hermesยังnon-coding. ใช้ `gemini-3.8-flash-high` เฉพาะเมื่อใช้agyในfallback ไม่ใช่modelsettingสำหรับDeepSeek; existing Antigravity bindingblockerไม่ขวางprimary ห้ามauto-switchหรือเปิดwriterแข่ง
 - เก็บ task/run result.md + result.json ตาม protocol, actual commands/exit codes, changed paths, RED/GREEN และข้อจำกัด; อัปเดต results index เป็นขั้นตอนสุดท้าย. No invented PASS.
 - `skill_usage` แยก read-loaded/applied/runtime evidence. Handoff นี้ไม่ยืนยัน IDE activation.
 - Coordinator อ่านผล, canonical Senior Tester ตรวจอิสระ, ผู้ใช้รับงาน. ไม่มี push/deploy/public tunnel/publish/paid resource โดย approval นี้.
 
 ## Current gate
-ผู้ใช้รับ UI05R02 และอนุมัติ C1 local build แล้ว ตามcurrentapprovalrecord/START handoffด้านบน. Operatorต้องverifyexistingIDEcontextและส่งSTARTครั้งเดียว; ยังไม่มีสิทธิ์อ้างdispatch/buildสำเร็จก่อนreadback. C1implementationacceptance/QAยังรอexecutionจริง; push/deployยังไม่อนุมัติ.
+ผู้ใช้รับ UI05R02 และอนุมัติ C1 local build แล้ว. Primaryเป็นDeepSeekที่ผู้ใช้เปิด/สั่งเองตามcurrenthandoff; Operatorstandbyเฉพาะfallback. ยังไม่อ้างtoolเริ่มหรือbuildสำเร็จจากการปรับเอกสาร C1implementationacceptance/QAยังรอexecutionจริง; push/deployยังไม่อนุมัติ.

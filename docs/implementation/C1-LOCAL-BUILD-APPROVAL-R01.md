@@ -1,5 +1,7 @@
 # C1 local build — Human acceptance / start authorization R01
 
+**Authoring amendment 2026-11-07:** ผู้ใช้เปลี่ยนเป็น DeepSeek Harness primary / Antigravity fallback และอนุมัติปรับเอกสาร ดู [current coding workflow](../CODING-WORKFLOW.md) และ [current C1 handoff](../handoffs/C1-LOCAL-BUILD.md). Scope/local-build approval/securityเดิมยังมีผล; tool/channel-specific wording ด้านล่างเป็นบันทึก ณ ตอนอนุมัติแรก ไม่ override current workflow. Hermes ยังคง non-coding และไม่ auto-control DeepSeek จากการปรับเอกสาร
+
 ## Current authorization
 ผู้ใช้ยืนยันตรงว่า **“รับ UI-05 R02 และให้ลุงเริ่ม C1 local build”**. บันทึกวันที่เครื่อง 2026-11-07 (+07), baseline ก่อนบันทึก `acdf6124af80c065ce5cbe00b5eda4783170a453`.
 

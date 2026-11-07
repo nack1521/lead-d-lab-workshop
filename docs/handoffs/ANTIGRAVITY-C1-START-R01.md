@@ -1,5 +1,7 @@
 # Antigravity C1 — START local build R01
 
+**FALLBACK-ONLY / STANDBY:** Current workflow เปลี่ยนเป็น DeepSeek Harness primary แล้วตาม [coding workflow](../CODING-WORKFLOW.md). ใช้ [current C1 handoff](C1-LOCAL-BUILD.md) เป็น entry point. เอกสารนี้เป็น Antigravity-specific branch เมื่อผู้ใช้ยืนยัน fallback หลังหยุด writer เดิมและทำ checkpoint เท่านั้น; ไม่ใช่คำสั่งให้ Operator auto-START ควบคู่ primary. ข้อความ START เดิมด้านล่างอ่านภายใต้ guard นี้
+
 **คำสั่งที่ผู้ใช้อนุมัติ: เริ่ม C1 local implementation ได้แล้ว ไม่ใช่ preflight-only อีกต่อไป.** อ่าน `docs/implementation/C1-LOCAL-BUILD-APPROVAL-R01.md` เป็น current authorization และทำงานเฉพาะ `/Users/aiink/Nack/Lead+D-Lab`.
 
 ## Read / precedence

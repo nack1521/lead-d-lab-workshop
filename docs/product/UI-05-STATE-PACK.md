@@ -1,6 +1,6 @@
 # UI-05 — Component/state pack และ handoff
 
-สถานะ: **R02 ACCEPTED_DESIGN_STATE_PACK / C1_LOCAL_BUILD_AUTHORIZED** — ผู้ใช้รับ UI05 R02 และให้ลุงเริ่ม local C1 แล้ว ดู [current acceptance/start record](../implementation/C1-LOCAL-BUILD-APPROVAL-R01.md) และ [C1 START handoff](../handoffs/ANTIGRAVITY-C1-START-R01.md). [Review summary](../implementation/UI-05-R02-REVIEW-SUMMARY.md) คงผล RESOLVED_STATIC ตามประวัติ ไม่ใช่ C1 runtime/implementation acceptance. Inventory/verification ด้านล่างเป็น R01 history; ใช้ R02 delta/amendmentตามprecedenceเดิม.
+สถานะ: **R02 ACCEPTED_DESIGN_STATE_PACK / C1_LOCAL_BUILD_AUTHORIZED** — ผู้ใช้รับ UI05 R02 และให้ลุงเริ่ม local C1 แล้ว ดู [current acceptance/start record](../implementation/C1-LOCAL-BUILD-APPROVAL-R01.md) และ [current C1 handoff](../handoffs/C1-LOCAL-BUILD.md) ตาม [coding workflow](../CODING-WORKFLOW.md). [Review summary](../implementation/UI-05-R02-REVIEW-SUMMARY.md) คงผล RESOLVED_STATIC ตามประวัติ ไม่ใช่ C1 runtime/implementation acceptance. Inventory/verification ด้านล่างเป็น R01 history; ใช้ R02 delta/amendmentตามprecedenceเดิม.
 
 ## ขอบเขตและแหล่งความจริง
 ผู้ใช้สั่ง “จัดมาได้เลย” ให้ขยาย components/states หลังอนุมัติ UI-04 ทั้ง 4 หน้า. ช่วงauthoringเป็นdesign/spec-onlyตามประวัติ; ล่าสุดผู้ใช้รับR02และอนุมัติlocalC1implementationแล้วตามcurrentapprovalrecordด้านบน. Push/deployยังไม่อนุมัติ.

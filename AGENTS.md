@@ -6,11 +6,13 @@
 - `lead-d-product` คือ Product & UX: requirements, journey, UX specification, acceptance criteria
 - `lead-d-qa` คือ Senior Tester & Delivery: risk-based testing, exploratory QA, realtime/data/security/privacy review, regression และ release evidence
 - Hermes ทำ non-coding เท่านั้น: อ่าน วิเคราะห์ เขียนเอกสาร/skill instructions ตรวจแอปผ่าน browser และรันเครื่องมือทดสอบที่มีอยู่ได้ ไม่เขียนหรือแก้ application code, automated tests, migrations, deployment scripts หรือ CI configuration
-- Coding ทั้งหมดทำใน Antigravity IDE ภายใต้การกำกับของผู้ใช้ ห้ามแทนด้วย coding CLI/agent อื่น
+- Coding ทำผ่าน **DeepSeek Harness เป็นหลัก** ภายใต้การกำกับของผู้ใช้; เมื่อ budget หมดหรือผู้ใช้เลือกสลับ ใช้ **Antigravity IDE (“ลุง”) เป็น fallback**. Hermes ยังคง non-coding ตามข้อก่อนหน้า ไม่เขียน application/tests/migrations/config แทนเครื่องมือทั้งสอง
+- หนึ่ง active coding writer ต่อ task/workspace. ก่อนสลับต้องหยุดผู้เขียนเดิมและเก็บ checkpoint (task/branch/commit/dirty paths/ผลทดสอบจริง/งานถัดไป) ตาม `docs/CODING-WORKFLOW.md`; WIP commit ไม่ใช่ผลทดสอบผ่าน
+- ผู้ใช้เปิด/สั่ง DeepSeek Harness เองเป็นค่าเริ่มต้น; การเลือกเครื่องมือไม่ใช่การอนุญาตให้ Hermes เปิด/ติดตั้ง/ควบคุมหรือส่ง START เอง. Antigravity Operator อยู่ standby จนผู้ใช้ยืนยัน fallback และผู้เขียนเดิมหยุดแล้ว
 - การจัดการ profile/skills และเอกสารเป็น administrative setup ไม่ใช่งาน implementation ของแอป
 
 ## Cycle และ gates
-อ่าน `docs/TEAM-WORKFLOW.md` ก่อนรับงาน ใช้ cycle: Brief → Design & Test Plan → Human Approval → Antigravity Build → QA → Fix & Retest → Human Accept → Evidence & Retro → รอบถัดไป
+อ่าน `docs/TEAM-WORKFLOW.md` และ `docs/CODING-WORKFLOW.md` ก่อนรับงาน ใช้ cycle: Brief → Design & Test Plan → Human Approval → Active Coding Tool Build → QA → Fix & Retest → Human Accept → Evidence & Retro → รอบถัดไป. Current C1 entry point คือ `docs/handoffs/C1-LOCAL-BUILD.md`; tool-only wording ในเอกสารเก่าไม่ override workflow ปัจจุบัน
 งานที่ QA ยังไม่รันคือ NOT RUN ไม่ใช่ PASS ผู้ประสานงานปิดงานได้เมื่อมีหลักฐานตรง acceptance criteria และผู้ใช้ยอมรับ
 
 ## ความปลอดภัยและการเปลี่ยนแปลง
@@ -27,10 +29,10 @@
 - Approval นี้ไม่ขยายขอบเขต coding ของ Hermes และไม่แทน approval ให้ build/install/publish/deploy/ใช้บริการมีค่าใช้จ่าย/รัน destructive helpers. Skills ที่เกี่ยวข้องใช้ได้ แต่ actions ภายในยังยึด scope และ human gates
 - แยก installed, discovered/read-loaded, applied และ runtime-verified; บันทึก skill ที่ใช้กับเคสและหลักฐานตาม result protocol. ผลตรวจล่าสุด: `docs/implementation/SKILL-AUDIT-01.md`
 - `.hermes/skills`: คำแนะนำ non-coding สำหรับ Hermes
-- `.agents/skills`: คำแนะนำ coding สำหรับ Antigravity; Hermes ที่ค้นพบ skills เหล่านี้ยังต้องทำตามขอบเขต non-coding
+- `.agents/skills`: คำแนะนำสำหรับ active coding tool ที่อ่านไฟล์ได้; ตรวจ discovery/load/activation ตาม host จริง ไม่สมมติว่า DeepSeek Harness มี Customizations/hooks แบบ Antigravity. Hermes ที่ค้นพบไฟล์ยังทำตามขอบเขต non-coding
 - ใช้ TDD เป็นวิธีทดสอบหลัก; Ponytail เสริมเรื่องความเรียบง่าย ไม่ลด validation/security/accessibility/tests
 - Caveman เป็น optional concise voice ไม่เปิดทั้งระบบ และไม่ย่อ evidence, ข้อจำกัด หรือคำเตือนจนเสียความหมาย
-- Unslop ใช้ตั้งแต่ design audit/direction/spec เพื่อหลีกเลี่ยง template และต้องมี human validation ไม่อ้างว่าคนชอบจาก skill อย่างเดียว; Hermes ทำ audit/spec และงานออกแบบ non-coding ตาม scope ที่อนุมัติ. การแก้ Figma/visual implementation ยังคงต้องผ่าน direction/scope/build gates และ Antigravity เป็นผู้แก้โค้ด ดู `docs/product/UI-01-UNSLOP-HUMAN-CENTERED.md`
+- Unslop ใช้ตั้งแต่ design audit/direction/spec เพื่อหลีกเลี่ยง template และต้องมี human validation ไม่อ้างว่าคนชอบจาก skill อย่างเดียว; Hermes ทำ audit/spec และงานออกแบบ non-coding ตาม scope ที่อนุมัติ. การแก้ Figma/visual implementation ยังคงต้องผ่าน direction/scope/build gates และ active coding tool เป็นผู้แก้โค้ด ดู `docs/product/UI-01-UNSLOP-HUMAN-CENTERED.md`
 - Handoff เก็บใน `docs/handoffs/` ไม่ใช้ OS temporary directory; tickets ใช้ `docs/tasks/` เท่านั้น ไม่เชื่อม issue tracker โดยพลการ
 - ข้อกำหนดภาษาไทยและขอบเขตงานมีลำดับเหนือ wording/default ของ third-party skills
 
@@ -38,9 +40,9 @@
 Project Lead อัปเดต `docs/AI-PROGRESS.md` หลังงานที่มีสาระ: request, AI contribution, human decision, changed artifacts, executed evidence, limitations, next gate
 บันทึกผลจริง ไม่แต่ง benchmark, เวลา/เงินที่ประหยัด, ผลทดสอบ หรือบทบาทของบอตที่ยังไม่ได้ทำงาน
 
-## ผลลัพธ์ของลุงตามรหัสเคส
-- ก่อนลุงส่งมอบคำตอบ/รายงาน รวม preflight, blocker และ fix/retest ให้อ่านและทำตาม `docs/ANTIGRAVITY-RESULT-PROTOCOL.md`: บันทึก detail+summary แยก task/run แล้วอัปเดต `docs/results/INDEX.md` เป็นขั้นตอนสุดท้าย
-- เมื่อผู้ใช้บอก “ลุงทำเสร็จแล้ว” ให้ Hermes อ่าน index และผลรอบใหม่ ตรวจหลักฐานเฉพาะเคส แทนการขอแปะบทสนทนาทั้งหมด ผล self-report ไม่ใช่ QA PASS หรือ approval ให้ build
+## ผลลัพธ์ของตัวเขียนโค้ดตามรหัสเคส
+- ทั้ง DeepSeek Harness และ Antigravity ใช้ `docs/ANTIGRAVITY-RESULT-PROTOCOL.md` (เก็บชื่อไฟล์เดิมเพื่อรักษา references/history): detail+summary แยก task/run และอัปเดต `docs/results/INDEX.md` เป็นขั้นตอนสุดท้าย. ระบุ producer/tool/model ตามจริง ไม่แก้ผลเก่าหรือ reset run เมื่อสลับ tool
+- เมื่อผู้ใช้บอก “DeepSeek ทำเสร็จแล้ว”, “ลุงทำเสร็จแล้ว” หรือ “ตัวเขียนโค้ดทำเสร็จแล้ว” ให้ Hermes อ่าน index และผลรอบใหม่ ตรวจหลักฐานเฉพาะเคส แทนการขอแปะบทสนทนาทั้งหมด ผล self-report ไม่ใช่ QA PASS หรือ approval ให้ build
 
 ## Stack status
 React บน Cloudflare เป็นทิศทางที่อนุมัติให้เดินหน้าเมื่อผ่าน verification

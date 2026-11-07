@@ -31,6 +31,19 @@ export function createAttempt(payload: AttemptPayload, now = Date.now()): Attemp
  * Only a structured application outcome that certifies the old request will not
  * commit counts as terminal non-save. Transport/proxy/generic errors stay unknown.
  */
+// Only these application outcomes certify that this attempt did not commit.
+const TERMINAL_NON_SAVE_CODES = new Set([
+  'VALIDATION_FAILED',
+  'INVALID_RATING',
+  'INVALID_OPTION',
+  'TYPE_MISMATCH',
+  'PAYLOAD_TOO_LARGE',
+  'INVALID_JSON',
+  'QUESTION_CLOSED',
+  'QUESTION_NOT_ACTIVE',
+  'SESSION_ENDED',
+]);
+
 export function classifyResponse(
   status: number,
   body: unknown,
@@ -38,9 +51,12 @@ export function classifyResponse(
   if (!body || typeof body !== 'object') return 'unknown';
   const record = body as Record<string, unknown>;
   if ((status === 200 || status === 201) && record.status === 'accepted') return 'accepted';
-  if (record.status === 'rejected' && record.terminal === true && typeof record.code === 'string') {
+  if (record.status === 'rejected' && typeof record.code === 'string') {
     if (record.code === 'IDEMPOTENCY_CONFLICT') return 'conflict';
-    if (status >= 400 && status < 500) return 'terminal_non_save';
+    // Auth, throttling, proxy and server faults never prove the original attempt cannot commit.
+    if (record.terminal === true && TERMINAL_NON_SAVE_CODES.has(record.code) && status >= 400 && status < 500) {
+      return 'terminal_non_save';
+    }
   }
   return 'unknown';
 }
@@ -62,6 +78,11 @@ export function canStartFreshAttempt(input: {
 /** Older or duplicate revisions must never overwrite newer client state. */
 export function isStaleRevision(currentRevision: number, incomingRevision: number): boolean {
   return incomingRevision <= currentRevision;
+}
+
+/** Only strictly older revisions are stale for an authoritative snapshot/resync. */
+export function isOlderRevision(currentRevision: number, incomingRevision: number): boolean {
+  return incomingRevision < currentRevision;
 }
 
 let segmenter: Intl.Segmenter | null | undefined;

@@ -43,6 +43,11 @@ describe('C1-08 client attempt policy', () => {
     expect(classifyResponse(409, { status: 'rejected', code: 'IDEMPOTENCY_CONFLICT', terminal: true })).toBe('conflict');
     expect(classifyResponse(500, { status: 'rejected', code: 'INTERNAL_ERROR', terminal: true })).toBe('unknown');
     expect(classifyResponse(502, '<html>Bad Gateway</html>')).toBe('unknown');
+    // Auth, throttling and server faults are not certified non-save outcomes even if a proxy marks them terminal.
+    expect(classifyResponse(401, { status: 'rejected', code: 'UNAUTHORIZED', terminal: true })).toBe('unknown');
+    expect(classifyResponse(429, { status: 'rejected', code: 'RATE_LIMITED', terminal: true })).toBe('unknown');
+    expect(classifyResponse(500, { status: 'rejected', code: 'INTERNAL_ERROR', terminal: true })).toBe('unknown');
+    expect(classifyResponse(403, { status: 'rejected', code: 'FORBIDDEN', terminal: true })).toBe('unknown');
     expect(classifyResponse(0, null)).toBe('unknown');
     expect(classifyResponse(201, {})).toBe('unknown');
   });

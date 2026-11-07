@@ -38,8 +38,32 @@ function json(body: unknown, status = 200): Response {
   return new Response(JSON.stringify(body), { status, headers: JSON_HEADERS });
 }
 
-function rejected(code: string, message: string, status: number, terminal = true, extra: Record<string, unknown> = {}): Response {
+function rejected(code: string, message: string, status: number, terminal = false, extra: Record<string, unknown> = {}): Response {
   return json({ status: 'rejected', code, message, terminal, ...extra }, status);
+}
+
+// Only deterministic, application-certified outcomes may be shown as terminal non-save.
+const TERMINAL_REJECTION_STATUS: Record<string, number> = {
+  VALIDATION_FAILED: 422,
+  INVALID_RATING: 422,
+  INVALID_OPTION: 422,
+  TYPE_MISMATCH: 422,
+  PAYLOAD_TOO_LARGE: 413,
+  QUESTION_CLOSED: 409,
+  QUESTION_NOT_ACTIVE: 409,
+  SESSION_ENDED: 409,
+};
+
+function rejectionStatus(code: string): number {
+  return TERMINAL_REJECTION_STATUS[code] ?? 422;
+}
+
+// Stable, message-derived field hint so a replayed terminal outcome keeps its UI hint.
+function rejectionExtra(code: string, message: string): Record<string, unknown> {
+  if (code !== 'VALIDATION_FAILED') return {};
+  if (message.includes('ข้อความ')) return { field: 'comment' };
+  if (message.includes('ชื่อเล่น')) return { field: 'nickname' };
+  return {};
 }
 
 function bearer(request: Request): string | null {
@@ -176,21 +200,21 @@ export function createApp(deps: AppDeps) {
       try {
         body = (await request.json()) as Record<string, unknown>;
       } catch {
-        return rejected('INVALID_JSON', 'ข้อมูลคำขอไม่ถูกต้อง', 400);
+        return rejected('INVALID_JSON', 'ข้อมูลคำขอไม่ถูกต้อง', 400, true);
       }
       const joinCode = typeof body.join_code === 'string' ? body.join_code.trim() : '';
       const joinKey = typeof body.join_key === 'string' ? body.join_key.trim() : '';
       if (!joinCode || !joinKey || joinKey.length > 128) {
-        return rejected('VALIDATION_FAILED', 'ต้องระบุรหัสห้องและข้อมูลการเข้าร่วม', 422);
+        return rejected('VALIDATION_FAILED', 'ต้องระบุรหัสห้องและข้อมูลการเข้าร่วม', 422, true);
       }
       if (body.nickname !== undefined && body.nickname !== null && typeof body.nickname !== 'string') {
-        return rejected('VALIDATION_FAILED', 'ชื่อเล่นต้องเป็นข้อความ', 422);
+        return rejected('VALIDATION_FAILED', 'ชื่อเล่นต้องเป็นข้อความ', 422, true);
       }
       let nickname: string | null;
       try {
         nickname = normalizeOptionalText(body.nickname);
       } catch {
-        return rejected('VALIDATION_FAILED', 'ชื่อเล่นต้องเป็นข้อความ', 422);
+        return rejected('VALIDATION_FAILED', 'ชื่อเล่นต้องเป็นข้อความ', 422, true);
       }
       if (nickname) {
         const counted = graphemeCount(nickname);
@@ -198,32 +222,81 @@ export function createApp(deps: AppDeps) {
           return rejected('VALIDATION_FAILED', 'ชื่อเล่นต้องไม่เกิน 40 ตัวอักษร', 422, true, { field: 'nickname' });
         }
       }
-      const [session] = await sql<Auth['session'][]>`
-        select id, join_code, status, active_question_id, revision, ended_at
-        from sessions where join_code = ${joinCode} limit 1`;
-      if (!session) return rejected('SESSION_NOT_FOUND', 'ไม่พบห้องนี้', 404);
-      if (session.status === 'ended') {
-        return rejected('SESSION_ENDED', 'กิจกรรมนี้จบแล้ว', 409);
+      type JoinOutcome =
+        | {
+            kind: 'joined';
+            participantId: string;
+            participantNickname: string | null;
+            grant: string;
+            session: Auth['session'];
+            isNew: boolean;
+          }
+        | { kind: 'rejected'; code: string; message: string; status: number };
+      let outcome: JoinOutcome;
+      try {
+        outcome = await sql.begin(async (tx): Promise<JoinOutcome> => {
+          const [session] = await tx<Auth['session'][]>`
+            select id, join_code, status, active_question_id, revision, ended_at
+            from sessions where join_code = ${joinCode} for update`;
+          if (!session) return { kind: 'rejected', code: 'SESSION_NOT_FOUND', message: 'ไม่พบห้องนี้', status: 404 };
+          if (session.status === 'ended') {
+            return { kind: 'rejected', code: 'SESSION_ENDED', message: 'กิจกรรมนี้จบแล้ว', status: 409 };
+          }
+          const [created] = await tx<{ id: string; nickname: string | null }[]>`
+            insert into participants (id, session_id, join_key, nickname)
+            values (${crypto.randomUUID()}, ${session.id}, ${joinKey}, ${nickname})
+            on conflict (session_id, join_key) do nothing
+            returning id, nickname`;
+          let participant = created;
+          let isNew = false;
+          if (participant) {
+            isNew = true;
+          } else {
+            const [existing] = await tx<{ id: string; nickname: string | null }[]>`
+              select id, nickname from participants
+              where session_id = ${session.id} and join_key = ${joinKey} limit 1`;
+            if (!existing) {
+              return { kind: 'rejected', code: 'INTERNAL_ERROR', message: 'ระบบไม่พร้อมให้บริการชั่วคราว', status: 500 };
+            }
+            participant = existing;
+          }
+          let revision = Number(session.revision);
+          if (isNew) {
+            const [bumped] = await tx<{ revision: number }[]>`
+              update sessions set revision = revision + 1 where id = ${session.id} returning revision`;
+            revision = Number(bumped.revision);
+          }
+          const token = await issueGrant(tx as unknown as Sql, {
+            sessionId: session.id,
+            role: 'participant',
+            participantId: participant.id,
+            ttlSeconds: config.participantGrantTtlSeconds,
+          });
+          return {
+            kind: 'joined',
+            participantId: participant.id,
+            participantNickname: participant.nickname,
+            grant: token,
+            session: { ...session, revision },
+            isNew,
+          };
+        });
+      } catch {
+        return rejected('INTERNAL_ERROR', 'ระบบไม่พร้อมให้บริการชั่วคราว', 500);
       }
-      const [participant] = await sql<{ id: string; nickname: string | null }[]>`
-        insert into participants (id, session_id, join_key, nickname)
-        values (${crypto.randomUUID()}, ${session.id}, ${joinKey}, ${nickname})
-        on conflict (session_id, join_key) do update set join_key = excluded.join_key
-        returning id, nickname`;
-      const token = await issueGrant(sql, {
-        sessionId: session.id,
-        role: 'participant',
-        participantId: participant.id,
-        ttlSeconds: config.participantGrantTtlSeconds,
-      });
-      const question = await loadQuestionById(session.active_question_id);
-      const own = question ? await loadOwnResponse(participant.id, question.id) : null;
+      if (outcome.kind === 'rejected') {
+        return rejected(outcome.code, outcome.message, outcome.status, outcome.status < 500);
+      }
+      // A join changes the visible participant count: publish the committed snapshot.
+      if (outcome.isNew) hub.broadcast(outcome.session.id).catch(() => {});
+      const question = await loadQuestionById(outcome.session.active_question_id);
+      const own = question ? await loadOwnResponse(outcome.participantId, question.id) : null;
       return json(
         {
           status: 'joined',
-          participant_id: participant.id,
-          grant: token,
-          ...participantView(session, question, own),
+          participant_id: outcome.participantId,
+          grant: outcome.grant,
+          ...participantView(outcome.session, question, own),
         },
         201,
       );
@@ -261,7 +334,7 @@ export function createApp(deps: AppDeps) {
       try {
         body = (await request.json()) as Record<string, unknown>;
       } catch {
-        return rejected('INVALID_JSON', 'ข้อมูลคำขอไม่ถูกต้อง', 400);
+        return rejected('INVALID_JSON', 'ข้อมูลคำขอไม่ถูกต้อง', 400, true);
       }
       const question = await loadQuestion(params.questionId);
       if (!question) return rejected('QUESTION_NOT_FOUND', 'ไม่พบคำถามนี้', 404);
@@ -272,64 +345,109 @@ export function createApp(deps: AppDeps) {
       if (!key || key.length > 128) {
         return rejected('VALIDATION_FAILED', 'ต้องมีคีย์ส่งคำตอบ', 422, true, { field: 'idempotency_key' });
       }
-      if (body.type !== question.type) {
-        return rejected('TYPE_MISMATCH', 'ชนิดคำตอบไม่ตรงกับคำถาม', 422);
-      }
-      let rating: number | null = null;
-      let optionId: string | null = null;
-      if (question.type === 'rating') {
-        const raw = body.rating;
-        if (typeof raw !== 'number' || !Number.isInteger(raw) || raw < (question.rating_min ?? 1) || raw > (question.rating_max ?? 5)) {
-          return rejected('INVALID_RATING', 'คะแนนต้องอยู่ในช่วงที่คำถามกำหนด', 422);
-        }
-        rating = raw;
-      } else {
-        const raw = body.option_id;
-        const allowed = (question.options ?? []).map((option) => option.id);
-        if (typeof raw !== 'string' || !allowed.includes(raw)) {
-          return rejected('INVALID_OPTION', 'ตัวเลือกไม่ตรงกับคำถามนี้', 422);
-        }
-        optionId = raw;
-      }
-      let comment: string | null;
-      try {
-        comment = normalizeOptionalText(body.comment);
-      } catch {
-        return rejected('VALIDATION_FAILED', 'ข้อความต้องเป็นข้อความ', 422, true, { field: 'comment' });
-      }
-      if (comment) {
-        const counted = graphemeCount(comment);
-        if (counted.count > MAX_COMMENT_GRAPHEMES) {
-          return rejected('VALIDATION_FAILED', 'ข้อความต้องไม่เกิน 500 ตัวอักษร', 422, true, { field: 'comment' });
-        }
-      }
+      const normalizedComment =
+        typeof body.comment === 'string' && body.comment.trim().length > 0 ? body.comment.trim() : null;
       const payloadFingerprint = fingerprint({
         question_id: question.id,
-        type: question.type,
-        rating,
-        option_id: optionId,
-        comment,
+        type: body.type ?? null,
+        rating: body.rating ?? null,
+        option_id: body.option_id ?? null,
+        comment: normalizedComment,
       });
 
       type Outcome =
         | { kind: 'accepted'; response: ResponseRow; revision: number; replay: boolean; deduplicated: boolean }
-        | { kind: 'rejected'; code: string; message: string; status: number };
+        | { kind: 'rejected'; code: string; message: string; revision: number; replay: boolean }
+        | { kind: 'conflict' };
       let outcome: Outcome;
       try {
-        outcome = await sql.begin(async (tx) => {
-          // Serialise close/submit ordering on the session row.
+        outcome = await sql.begin(async (tx): Promise<Outcome> => {
+          // Serialise close/submit ordering and per-attempt receipt writes.
           const [session] = await tx<{ status: 'active' | 'ended'; active_question_id: string | null; revision: number }[]>`
             select status, active_question_id, revision from sessions where id = ${auth.session.id} for update`;
-          const [receipt] = await tx<{ payload_fingerprint: string; response_id: string | null }[]>`
-            select payload_fingerprint, response_id from submission_receipts
+          const [receipt] = await tx<{
+            outcome: 'accepted' | 'rejected';
+            code: string | null;
+            message: string | null;
+            payload_fingerprint: string;
+            response_id: string | null;
+          }[]>`
+            select outcome, code, message, payload_fingerprint, response_id from submission_receipts
             where participant_id = ${participantId} and question_id = ${question.id} and idempotency_key = ${key}`;
           if (receipt) {
-            if (receipt.payload_fingerprint !== payloadFingerprint) {
-              return { kind: 'rejected', code: 'IDEMPOTENCY_CONFLICT', message: 'คีย์นี้เคยใช้กับคำตอบอื่น', status: 409 };
+            if (receipt.payload_fingerprint !== payloadFingerprint) return { kind: 'conflict' };
+            if (receipt.outcome === 'rejected' && receipt.code) {
+              return {
+                kind: 'rejected',
+                code: receipt.code,
+                message: receipt.message ?? 'คำขอนี้ถูกปฏิเสธก่อนหน้านี้',
+                revision: Number(session.revision),
+                replay: true,
+              };
             }
             const [existing] = await tx<ResponseRow[]>`
-              select id, question_id, rating_value, option_id, comment, accepted_at from responses where id = ${receipt.response_id}`;
-            return { kind: 'accepted', response: existing, revision: Number(session.revision), replay: true, deduplicated: false };
+              select id, question_id, rating_value, option_id, comment, accepted_at
+              from responses where id = ${receipt.response_id}`;
+            return {
+              kind: 'accepted',
+              response: existing,
+              revision: Number(session.revision),
+              replay: true,
+              deduplicated: false,
+            };
+          }
+          const [live] = await tx<{
+            type: 'rating' | 'poll';
+            rating_min: number | null;
+            rating_max: number | null;
+            options: { id: string; label: string }[] | null;
+            receiving: boolean;
+            closed_at: Date | null;
+          }[]>`
+            select type, rating_min, rating_max, options, receiving, closed_at
+            from questions where id = ${question.id}`;
+
+          const persistRejection = async (code: string, message: string) => {
+            await tx`
+              insert into submission_receipts
+                (id, session_id, participant_id, question_id, idempotency_key, payload_fingerprint, outcome, code, message, response_id)
+              values (${crypto.randomUUID()}, ${auth.session.id}, ${participantId}, ${question.id}, ${key},
+                      ${payloadFingerprint}, 'rejected', ${code}, ${message}, null)`;
+            return {
+              kind: 'rejected' as const,
+              code,
+              message,
+              revision: Number(session.revision),
+              replay: false,
+            };
+          };
+
+          if (!live) return { kind: 'conflict' };
+          if (body.type !== live.type) {
+            return await persistRejection('TYPE_MISMATCH', 'ชนิดคำตอบไม่ตรงกับคำถาม');
+          }
+          if (live.type === 'rating') {
+            const raw = body.rating;
+            const min = live.rating_min ?? 1;
+            const max = live.rating_max ?? 5;
+            if (typeof raw !== 'number' || !Number.isInteger(raw) || raw < min || raw > max) {
+              return await persistRejection('INVALID_RATING', 'คะแนนต้องอยู่ในช่วงที่คำถามกำหนด');
+            }
+          } else {
+            const raw = body.option_id;
+            const allowed = (live.options ?? []).map((option) => option.id);
+            if (typeof raw !== 'string' || !allowed.includes(raw)) {
+              return await persistRejection('INVALID_OPTION', 'ตัวเลือกไม่ตรงกับคำถามนี้');
+            }
+          }
+          if (body.comment !== undefined && body.comment !== null && typeof body.comment !== 'string') {
+            return await persistRejection('VALIDATION_FAILED', 'ข้อความต้องเป็นข้อความ');
+          }
+          if (normalizedComment) {
+            const counted = graphemeCount(normalizedComment);
+            if (counted.count > MAX_COMMENT_GRAPHEMES) {
+              return await persistRejection('VALIDATION_FAILED', 'ข้อความต้องไม่เกิน 500 ตัวอักษร');
+            }
           }
           const [own] = await tx<ResponseRow[]>`
             select id, question_id, rating_value, option_id, comment, accepted_at from responses
@@ -338,34 +456,46 @@ export function createApp(deps: AppDeps) {
             return { kind: 'accepted', response: own, revision: Number(session.revision), replay: false, deduplicated: true };
           }
           if (session.status !== 'active') {
-            return { kind: 'rejected', code: 'SESSION_ENDED', message: 'กิจกรรมนี้จบแล้ว', status: 409 };
+            return await persistRejection('SESSION_ENDED', 'กิจกรรมนี้จบแล้ว');
           }
-          const [live] = await tx<{ receiving: boolean; closed_at: Date | null }[]>`
-            select receiving, closed_at from questions where id = ${question.id}`;
-          if (session.active_question_id !== question.id || !live?.receiving) {
-            return {
-              kind: 'rejected',
-              code: live?.receiving ? 'QUESTION_NOT_ACTIVE' : 'QUESTION_CLOSED',
-              message: 'คำถามนี้ปิดรับคำตอบแล้ว',
-              status: 409,
-            };
+          if (session.active_question_id !== question.id || !live.receiving) {
+            return await persistRejection(
+              live.receiving ? 'QUESTION_NOT_ACTIVE' : 'QUESTION_CLOSED',
+              'คำถามนี้ปิดรับคำตอบแล้ว',
+            );
           }
+          const rating = live.type === 'rating' ? (body.rating as number) : null;
+          const optionId = live.type === 'poll' ? (body.option_id as string) : null;
           const [stored] = await tx<ResponseRow[]>`
             insert into responses (id, session_id, participant_id, question_id, rating_value, option_id, comment)
-            values (${crypto.randomUUID()}, ${auth.session.id}, ${participantId}, ${question.id}, ${rating}, ${optionId}, ${comment})
+            values (${crypto.randomUUID()}, ${auth.session.id}, ${participantId}, ${question.id}, ${rating}, ${optionId}, ${normalizedComment})
             returning id, question_id, rating_value, option_id, comment, accepted_at`;
           await tx`
-            insert into submission_receipts (id, session_id, participant_id, question_id, idempotency_key, payload_fingerprint, outcome, response_id)
-            values (${crypto.randomUUID()}, ${auth.session.id}, ${participantId}, ${question.id}, ${key}, ${payloadFingerprint}, 'accepted', ${stored.id})`;
+            insert into submission_receipts
+              (id, session_id, participant_id, question_id, idempotency_key, payload_fingerprint, outcome, code, message, response_id)
+            values (${crypto.randomUUID()}, ${auth.session.id}, ${participantId}, ${question.id}, ${key},
+                    ${payloadFingerprint}, 'accepted', null, null, ${stored.id})`;
           const [bumped] = await tx<{ revision: number }[]>`
             update sessions set revision = revision + 1 where id = ${auth.session.id} returning revision`;
-          return { kind: 'accepted', response: stored, revision: Number(bumped.revision), replay: false, deduplicated: false };
+          return {
+            kind: 'accepted',
+            response: stored,
+            revision: Number(bumped.revision),
+            replay: false,
+            deduplicated: false,
+          };
         });
       } catch {
         return rejected('INTERNAL_ERROR', 'ระบบไม่พร้อมให้บริการชั่วคราว', 500);
       }
+      if (outcome.kind === 'conflict') {
+        return rejected('IDEMPOTENCY_CONFLICT', 'คีย์นี้เคยใช้กับคำตอบอื่น', 409, true);
+      }
       if (outcome.kind === 'rejected') {
-        return rejected(outcome.code, outcome.message, outcome.status);
+        return rejected(outcome.code, outcome.message, rejectionStatus(outcome.code), true, {
+          ...(outcome.replay ? { replay: true } : {}),
+          ...rejectionExtra(outcome.code, outcome.message),
+        });
       }
       if (outcome.replay || outcome.deduplicated) {
         return json({
@@ -378,7 +508,13 @@ export function createApp(deps: AppDeps) {
       }
       hub.broadcast(auth.session.id).catch(() => {});
       return json(
-        { status: 'accepted', replay: false, deduplicated: false, response: serializeResponse(outcome.response), revision: outcome.revision },
+        {
+          status: 'accepted',
+          replay: false,
+          deduplicated: false,
+          response: serializeResponse(outcome.response),
+          revision: outcome.revision,
+        },
         201,
       );
     })

@@ -9,6 +9,8 @@ export interface SocketData {
   role?: 'participant' | 'facilitator';
   sessionId?: string;
   participantId?: string | null;
+  /** Raw grant kept in memory only to re-check expiry/grace/revocation on every send. */
+  token?: string;
   timer?: ReturnType<typeof setTimeout> | null;
 }
 
@@ -109,6 +111,32 @@ export function createHub(sql: Sql, config: Config): Hub {
     send(ws, await stateFor(snapshot, ws));
   }
 
+  function closeUnauthorized(ws: Socket): void {
+    send(ws, { type: 'error', code: 'UNAUTHORIZED' });
+    ws.close(4401, 'unauthorized');
+  }
+
+  /**
+   * An already-open socket is not a permanent grant. Every resync and broadcast
+   * re-checks the approved lifetime (hard expiry, session-end read grace,
+   * revocation); sockets that no longer authenticate are closed before data.
+   */
+  async function stillAuthorized(ws: Socket): Promise<boolean> {
+    if (ws.data.state !== 'authed' || !ws.data.token) return false;
+    const result = await authenticate(sql, ws.data.token, { graceSeconds: config.receiptReadGraceSeconds });
+    return result.ok;
+  }
+
+  async function sweep(): Promise<void> {
+    for (const set of [...sockets.values()]) {
+      for (const ws of [...set]) {
+        if (!(await stillAuthorized(ws))) {
+          closeUnauthorized(ws);
+        }
+      }
+    }
+  }
+
   const handlers = {
     open(ws: Socket) {
       ws.data.state = 'pending';
@@ -149,11 +177,16 @@ export function createHub(sql: Sql, config: Config): Hub {
         ws.data.role = result.auth.grant.role;
         ws.data.sessionId = result.auth.session.id;
         ws.data.participantId = result.auth.grant.participant_id;
+        ws.data.token = parsed.token;
         addToSession(ws);
         await sendCurrent(ws);
         return;
       }
       if (parsed.type === 'resync') {
+        if (!(await stillAuthorized(ws))) {
+          closeUnauthorized(ws);
+          return;
+        }
         await sendCurrent(ws);
         return;
       }
@@ -175,6 +208,10 @@ export function createHub(sql: Sql, config: Config): Hub {
     },
   };
 
+  const sweepTimer = setInterval(() => void sweep(), 30_000);
+  // Keep idle sessions cheap and let the process exit in tests/tools.
+  (sweepTimer as unknown as { unref?: () => void }).unref?.();
+
   return {
     handlers,
     add(ws) {
@@ -189,6 +226,10 @@ export function createHub(sql: Sql, config: Config): Hub {
       const snapshot = await buildSnapshot(sql, sessionId);
       if (!snapshot) return;
       for (const ws of [...set]) {
+        if (!(await stillAuthorized(ws))) {
+          closeUnauthorized(ws);
+          continue;
+        }
         send(ws, await stateFor(snapshot, ws));
       }
     },

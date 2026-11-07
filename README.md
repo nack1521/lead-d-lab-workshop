@@ -1,6 +1,6 @@
 # Lead+D Lab — Project foundation
 
-สถานะ: ผู้ใช้ยืนยัน flow WF-01-R1 แล้ว; C1 handoff พร้อมสำหรับ IDE read-only preflight. ยังไม่มี application code/live deployment; การตรวจล่าสุดพบ Docker default socket ใช้ไม่ได้ ต้อง recheck ก่อนรัน PostgreSQL
+สถานะ: C1 local tracer bullet ผ่านการแก้ finding รอบ R02 (C1-RV-01..05) — มี application code จริง (React + Elysia/Bun + PostgreSQL + authenticated native WS) และ regression suite ผ่านทั้ง Mode A/B. ยังไม่มี live deployment/public URL; real-browser interaction ของ fixing round ยัง NOT RUN ในเครื่องนี้ (ไม่มี browser automation) — ดู [executive report](docs/implementation/C1-REPORT.md)
 
 ## เริ่มอ่าน
 1. [ข้อตกลง AI](AGENTS.md)
@@ -54,6 +54,13 @@ cd .worktrees/c1-mode-b
 docker compose -p c1b --profile full up -d --build
 docker compose -p c1b ps
 docker compose -p c1b stop                 # ห้ามลบ volume
+```
+
+Tests ไม่ถูกใส่ใน production image. รัน suite แบบ Docker-only แยก container (ต้องมี PostgreSQL ที่ container เข้าถึงได้):
+
+```bash
+tests/run-in-docker.sh            # Mode B network c1b_default + c1b DB
+tests/run-in-docker.sh c1b_default
 ```
 
 ห้าม push/deploy/public tunnel/paid service/global config/destructive reset จาก workflow นี้. ผลลัพธ์จริงพร้อมคำสั่ง/exit code อยู่ `docs/results/C1-LOCAL-BUILD/R01/`.

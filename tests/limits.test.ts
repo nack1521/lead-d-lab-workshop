@@ -53,7 +53,8 @@ describe('C1-06 payload budgets', () => {
       if (res.status === 429) {
         const body = await api<{ code: string; terminal: boolean }>(res);
         expect(body.code).toBe('RATE_LIMITED');
-        expect(body.terminal).toBe(true);
+        // A throttled request is not proof that another in-flight request with the same key cannot commit.
+        expect(body.terminal).toBe(false);
         break;
       }
     }

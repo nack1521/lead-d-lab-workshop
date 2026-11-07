@@ -22,9 +22,10 @@ COPY apps/web/package.json apps/web/package.json
 RUN bun install --frozen-lockfile --production
 COPY apps/api ./apps/api
 COPY db ./db
+COPY docker/start-api.sh ./docker/start-api.sh
 USER bun
 EXPOSE 3000
-CMD ["sh", "-c", "bun run apps/api/src/migrate.ts && bun run apps/api/src/index.ts"]
+CMD ["sh", "docker/start-api.sh"]
 
 FROM oven/bun:1.4.4-alpine@sha256:4cf82f5686b196504fe119db3fcd9185b191f82ece82c40680e597228ec6070a AS web
 WORKDIR /app

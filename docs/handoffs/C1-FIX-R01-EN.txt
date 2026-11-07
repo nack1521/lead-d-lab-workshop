@@ -1,0 +1,10 @@
+Continue C1-LOCAL-BUILD with the R01 review fixes; do not bootstrap a new project.
+Workspace: /Users/aiink/Nack/Lead+D-Lab
+
+Read AGENTS.md, docs/handoffs/C1-LOCAL-BUILD.md and docs/implementation/C1-REVIEW-SUMMARY-R01.md. Consult the linked QA/browser evidence for C1-RV-01 through C1-RV-05. The join findings have two source IDs but one fix scope.
+
+Reproduce static findings before fixing; add genuine RED-to-GREEN regressions at the affected API/DB/WS and React-container seams. Preserve the approved attempt, grant-lifetime and freshness contracts. Exercise real-browser flows where your tools support them; report unsupported checks honestly. Rerun current-build regression in both approved modes. Use a separate Docker test runner rather than adding tests/dev dependencies to production images merely to run QA.
+
+Continue under the existing local-build authorization and single-writer policy. Preserve pending user work and prior evidence. Use the next unused producer run, retaining every C1-01..C1-16 and finding ID; write immutable results and update C1-REPORT and INDEX last. Do not copy old PASS results onto changed code.
+
+Use concise English; retain approved Thai UI copy. Keep changes local: no push/deploy, destructive reset or automatic tool switch. Save a transfer checkpoint before budget exhaustion. Reply with task/run, status, evidence paths and actual blockers.

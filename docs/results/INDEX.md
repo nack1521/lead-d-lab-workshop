@@ -1,6 +1,8 @@
-# Results index — อ่านไฟล์นี้ก่อนเมื่อ “ลุงทำเสร็จแล้ว”
+# Results index — latest producer results and independent reviews
 
 Paths ในตารางเริ่มจาก repository root. Latest run คือผลรอบล่าสุดที่บันทึกครบ ไม่ได้หมายถึง accepted/PASS. อ่านสรุป JSON ก่อน แล้วอ่าน detail/evidence เฉพาะเคสตาม [protocol](../ANTIGRAVITY-RESULT-PROTOCOL.md)
+
+**Current independent review — C1-LOCAL-BUILD / R01: CHANGES_REQUESTED.** See [consolidated review](../implementation/C1-REVIEW-SUMMARY-R01.md), [Senior QA](../qa/C1-LOCAL-BUILD-QA-R01.md), and [browser review](../implementation/C1-BROWSER-REVIEW-R01.md). Five blocking groups remain open. Coordinator independently reran the existing suite: 56 pass / 0 fail in each mode, plus typecheck exit 0; these results do not close the uncovered findings. Producer statuses below retain their original provenance, not QA acceptance. Next: user-operated [fix/retest prompt](../handoffs/C1-FIX-R01-EN.txt), then independent verification and human acceptance.
 
 | Task | Latest run | Producer / provenance | Status | Summary JSON | Detail | Next gate |
 |---|---|---|---|---|---|---|

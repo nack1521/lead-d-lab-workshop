@@ -1,0 +1,68 @@
+{
+  "task_id": "C1-LOCAL-BUILD",
+  "review_run": "R01",
+  "verdict": "CHANGES_REQUESTED",
+  "implementation_source_commit": "c5ed399aae53fed4c04229fecea546739f0b3b44",
+  "submitted_report_commit": "f1320d3e000651b82c7f50afc0642b2f699a2ad5",
+  "coordinator_browser_review_commit": "aafec5c87fba8f45d184d3b6083ef9fcafeb1f24",
+  "groups": [
+    {
+      "id": "C1-RV-01",
+      "priority": "High",
+      "source_ids": [
+        "QA-C1-01"
+      ],
+      "evidence_level": "STATIC_CODE_PATH",
+      "title": "Terminal non-save, stable receipts and in-flight safety",
+      "acceptance": "Certify per-attempt terminality; stable replay/fingerprint conflicts for terminal outcomes; delayed original plus rejected reconciliation must not enable a fresh attempt while late commit remains possible."
+    },
+    {
+      "id": "C1-RV-02",
+      "priority": "High",
+      "source_ids": [
+        "QA-C1-02"
+      ],
+      "evidence_level": "STATIC_CODE_PATH",
+      "title": "Already-open WebSocket grant lifetime",
+      "acceptance": "Enforce approved expiry, session-end grace and revocation on already-open sockets, resync and broadcast; test participant/facilitator variants without inventing a new lifetime policy."
+    },
+    {
+      "id": "C1-RV-03",
+      "priority": "High / Major",
+      "source_ids": [
+        "QA-C1-03",
+        "C1-UI-02"
+      ],
+      "evidence_level": "BROWSER_AND_DB_REPRODUCED_MODE_B",
+      "title": "Lost join acknowledgement creates another participant",
+      "acceptance": "Keep the pending join key and immutable payload for uncertain unchanged retry; one logical join must recover the same participant and count once. Define explicit safe room/payload-change behavior."
+    },
+    {
+      "id": "C1-RV-04",
+      "priority": "High",
+      "source_ids": [
+        "QA-C1-04"
+      ],
+      "evidence_level": "STATIC_CODE_PATH",
+      "title": "Monotonic snapshots, join visibility and truthful Live",
+      "acceptance": "Join-only count changes must advance coherent revisioned snapshots and publish after commit. Reject stale HTTP as well as WS state. Mark Live only after an authorized fresh snapshot; cover delayed HTTP, equal-revision resync and reconnect."
+    },
+    {
+      "id": "C1-RV-05",
+      "priority": "Major",
+      "source_ids": [
+        "C1-UI-01"
+      ],
+      "evidence_level": "BROWSER_AND_API_REPRODUCED_MODE_A",
+      "title": "Saved outcome incorrectly carries into the next question",
+      "acceptance": "Scope outcome/draft/read-only state to authoritative question and own response. A new unanswered question is not saved and is usable. Preserve unknown earlier attempts separately; verify rating-to-poll, return to answered question and unknown-during-transition."
+    }
+  ],
+  "independent_checks": {
+    "mode_a_existing_suite": "56 pass / 0 fail; exit 0",
+    "typecheck": "exit 0",
+    "mode_b_fresh_archived_source_container_suite": "56 pass / 0 fail; exit 0",
+    "new_regression_tests_for_findings": "NOT WRITTEN / NOT RUN",
+    "implementation_acceptance": "NOT GRANTED"
+  }
+}

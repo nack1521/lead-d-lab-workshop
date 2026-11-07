@@ -1,8 +1,8 @@
 # C1 local build — Current tool-neutral handoff
 
-สถานะ: **LOCAL_BUILD_AUTHORIZED / PRIMARY_TOOL_SELECTED_NOT_DISPATCHED**. ผู้ใช้รับUI05R02และอนุมัติC1แล้ว ต่อมาเลือก **DeepSeek Harnessเป็นหลัก / Antigravityเป็นfallbackเมื่อbudgetหมด** และอนุมัติให้ปรับเอกสาร. ผู้ใช้เปิด/สั่งcodingtoolเอง; เอกสารนี้ไม่ใช่หลักฐานว่าHarnessอ่านแล้วหรือเริ่มbuildแล้ว.
+Status: **LOCAL_BUILD_AUTHORIZED / R01_CHANGES_REQUESTED**. UI-05 R02 is accepted; DeepSeek delivered C1 R01, but implementation is not accepted. Read the [consolidated independent review](../implementation/C1-REVIEW-SUMMARY-R01.md) before fix/retest. DeepSeek remains user-operated primary and Antigravity explicit-handover fallback; local authorization is unchanged.
 
-User-operated English starter: [C1-START-EN.txt](C1-START-EN.txt). Paste it into the chosen coding tool; its existence is not evidence of dispatch or execution. Communication policy lives in `AGENTS.md`.
+Current user-operated fix prompt: [C1-FIX-R01-EN.txt](C1-FIX-R01-EN.txt). The [initial starter](C1-START-EN.txt) is retained for first-run history, not a command to bootstrap again. Prompt preparation is not dispatch. Communication policy lives in `AGENTS.md`.
 
 ## Entry / precedence
 1. อ่าน `AGENTS.md`, `docs/CODING-WORKFLOW.md`, `docs/TEAM-WORKFLOW.md`, `docs/ANTIGRAVITY-RESULT-PROTOCOL.md`, `docs/results/INDEX.md`.

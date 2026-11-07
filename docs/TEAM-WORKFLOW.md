@@ -1,5 +1,8 @@
 # Lean team — Cycle-based workflow
 
+## Current implementation review — 2026-11-07
+**C1 R01: CHANGES_REQUESTED**, not implementation acceptance. Read the [consolidated review](implementation/C1-REVIEW-SUMMARY-R01.md): five deduplicated blocking groups, two runtime-reproduced and three static code-path groups. Coordinator reran the existing suite successfully in both modes; green regression does not cover the missing scenarios. [Current fix prompt](handoffs/C1-FIX-R01-EN.txt) is user-operated only. Preserve original reports and single-writer/approval boundaries; older preparation observations below are historical.
+
 ## Current coding channel
 ผู้ใช้เลือกและอนุมัติ **DeepSeek Harness เป็นหลัก / Antigravity เป็น fallback เมื่อ budget หมด** วันที่2026-11-07. ผู้ใช้สั่ง primary tool เอง; Operator standby ไม่ auto-dispatch ลุง. Current C1 handoff: [C1 local build](handoffs/C1-LOCAL-BUILD.md); ก่อนสลับอ่าน [coding workflow / checkpoint](CODING-WORKFLOW.md). Historical Antigravity-only/channel blockers ไม่ขวาง primary และไม่อนุญาตให้มี writer สองตัวพร้อมกัน. UI05 accepted/C1 local approval/stack/case matrixเดิมคงเดิม; ยังไม่มีหลักฐานเริ่ม DeepSeek session จากการปรับเอกสารนี้
 

@@ -1,0 +1,6 @@
+== api restart readback ==
+ready HTTP 200 {"status":"ready","db":"ok"}
+{
+  "revision": 7,
+  "participant_count": 4
+}

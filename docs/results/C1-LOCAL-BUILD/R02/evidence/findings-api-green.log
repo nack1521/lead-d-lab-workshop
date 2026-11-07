@@ -1,0 +1,17 @@
+bun test v1.4.4 (38afee6c8)
+
+tests/findings-api.test.ts:
+(pass) C1-RV-01 terminal non-save is a stable per-attempt receipt > a rejected attempt is stored, replayed stably and conflicts on a changed payload [35.37ms]
+(pass) C1-RV-01 terminal non-save is a stable per-attempt receipt > concurrent same-key attempts with different payloads never commit two outcomes [14.22ms]
+(pass) C1-RV-01 terminal non-save is a stable per-attempt receipt > transient failures are not certified terminal and do not unlock a fresh attempt [617.39ms]
+(pass) C1-RV-01 terminal non-save is a stable per-attempt receipt > an internal database failure is uncertified and leaves no attempt receipt [18.33ms]
+(pass) C1-RV-02 already-open sockets enforce the approved grant lifetime > an expired facilitator socket receives no snapshot on resync and is closed [9.29ms]
+(pass) C1-RV-02 already-open sockets enforce the approved grant lifetime > a participant socket kept open past the session-end grace receives no state and is closed [26.20ms]
+(pass) C1-RV-02 already-open sockets enforce the approved grant lifetime > a broadcast does not deliver data to a socket whose grant has expired [16.19ms]
+(pass) C1-RV-04 join-only changes advance a coherent revision and publish after commit > a new participant advances the session revision, appears in snapshots and is pushed [22.04ms]
+(pass) C1-RV-04 join-only changes advance a coherent revision and publish after commit > an unchanged join retry is idempotent for the count and does not need a new revision [13.65ms]
+
+ 9 pass
+ 0 fail
+ 48 expect() calls
+Ran 9 tests across 1 file. [1120.00ms]

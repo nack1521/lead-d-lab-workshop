@@ -1,0 +1,24 @@
+== restart api+db (no volume removal) ==
+ Container c1b-db-1 Restarting 
+ Container c1b-api-1 Restarting 
+ Container c1b-api-1 Started 
+ Container c1b-db-1 Started 
+RESTART_EXIT=0
+ready HTTP 200 {"status":"ready","db":"ok"}
+== over-limit rejection is a durable terminal receipt ==
+{
+  "status": "rejected",
+  "code": "VALIDATION_FAILED",
+  "terminal": true,
+  "replay": null
+}
+== same key+payload replay ==
+{"status":"rejected","code":"VALIDATION_FAILED","message":"ข้อความต้องไม่เกิน 500 ตัวอักษร","terminal":true,"replay":true,"field":"comment"}
+HTTP 422
+== same key different payload ==
+{"status":"rejected","code":"IDEMPOTENCY_CONFLICT","message":"คีย์นี้เคยใช้กับคำตอบอื่น","terminal":true}
+HTTP 409
+== DB receipt + counts ==
+rejected/VALIDATION_FAILED
+responses=2
+participants=5

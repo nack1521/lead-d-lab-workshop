@@ -1,0 +1,92 @@
+bun test v1.4.4 (38afee6c8)
+
+tests/findings-client.test.tsx:
+200 |     expect(requests).toHaveLength(1);
+201 | 
+202 |     clickButton('เข้าร่วมกิจกรรม');
+203 |     await tick(12);
+204 |     expect(requests).toHaveLength(2);
+205 |     expect(String(requests[1].body?.join_key)).toBe(String(requests[0].body?.join_key));
+                                                     ^
+error: expect(received).toBe(expected)
+
+Expected: "fde4fd52-05e1-4a36-85b5-2d9218873c70"
+Received: "ad8c4d13-2f45-4096-b413-2bf98d197348"
+
+      at <anonymous> (/Users/aiink/Nack/Lead+D-Lab/tests/findings-client.test.tsx:205:48)
+(fail) C1-RV-03 lost join acknowledgement keeps one logical join > an uncertain join reuses the same operation key on unchanged retry [75.87ms]
+231 |     expect(requests).toHaveLength(1);
+232 | 
+233 |     fill('#nickname', 'ชื่อที่แก้');
+234 |     clickButton('เข้าร่วมกิจกรรม');
+235 |     await tick(12);
+236 |     expect(String(requests[1].body?.join_key)).toBe(String(requests[0].body?.join_key));
+                                                     ^
+error: expect(received).toBe(expected)
+
+Expected: "411b06cf-6e8f-4380-b8aa-0203b24422f3"
+Received: "c496623e-41c9-4803-bd58-6f0f5e522323"
+
+      at <anonymous> (/Users/aiink/Nack/Lead+D-Lab/tests/findings-client.test.tsx:236:48)
+(fail) C1-RV-03 lost join acknowledgement keeps one logical join > a nickname-only change is still the same join; a different room code is a new join [34.24ms]
+278 |     await tick();
+279 |     socket.emit('message', {
+280 |       data: JSON.stringify({ type: 'state', revision: 5, session_status: 'active', question: pollQuestion, own_response: null }),
+281 |     });
+282 |     await tick(12);
+283 |     expect(text()).not.toContain('บันทึกคำตอบและข้อความแล้ว');
+                             ^
+error: expect(received).not.toContain(expected)
+
+Expected to not contain: "บันทึกคำตอบและข้อความแล้ว"
+Received: "คำถามสำหรับผู้เข้าร่วมเข้าร่วมในชื่อ “ผู้เข้าร่วม”ข้อ 02อุปสรรคสำคัญที่สุดในการให้ feedback ต่อทีมคืออะไร?เลือกได้หนึ่งข้อเลือกหนึ่งข้อเวลาสำหรับดูแลทีมไม่พอขาดทักษะการให้ feedbackความคิดเห็นเพิ่มเติม (ไม่บังคับ)0/500 ตัวอักษรบันทึกคำตอบและข้อความแล้ว"
+
+      at <anonymous> (/Users/aiink/Nack/Lead+D-Lab/tests/findings-client.test.tsx:283:24)
+(fail) C1-RV-05 outcome and draft state follow the authoritative question > a saved answer does not carry into the next unanswered question [46.67ms]
+304 |     };
+305 |     await mount('/room');
+306 |     await tick(12);
+307 |     clickButton('ส่งคำตอบ');
+308 |     await tick(10);
+309 |     expect(text()).toContain('ยังไม่ทราบผลการบันทึก');
+                         ^
+error: expect(received).toContain(expected)
+
+Expected to contain: "ยังไม่ทราบผลการบันทึก"
+Received: "คำถามสำหรับผู้เข้าร่วมเข้าร่วมในชื่อ “ผู้เข้าร่วม”ข้อ 01คุณมั่นใจในการให้ feedback ที่ช่วยให้ทีมพัฒนาได้เพียงใด?เลือก 1 ถึง 5 ตามความรู้สึกของคุณเลือกคะแนน1 ยังไม่มั่นใจ2345 มั่นใจมากความคิดเห็นเพิ่มเติม (ไม่บังคับ)0/500 ตัวอักษรส่งคำตอบ"
+
+      at <anonymous> (/Users/aiink/Nack/Lead+D-Lab/tests/findings-client.test.tsx:309:20)
+(fail) C1-RV-05 outcome and draft state follow the authoritative question > an unresolved earlier attempt stays with the old question during a transition [35.07ms]
+342 |     await tick(12);
+343 |     expect(text()).toContain('อุปสรรคสำคัญที่สุดในการให้ feedback ต่อทีมคืออะไร?');
+344 | 
+345 |     socket.emit('close', { code: 1006 });
+346 |     await tick(16);
+347 |     expect(text()).toContain('อุปสรรคสำคัญที่สุดในการให้ feedback ต่อทีมคืออะไร?');
+                         ^
+error: expect(received).toContain(expected)
+
+Expected to contain: "อุปสรรคสำคัญที่สุดในการให้ feedback ต่อทีมคืออะไร?"
+Received: "คำถามสำหรับผู้เข้าร่วมเข้าร่วมในชื่อ “ผู้เข้าร่วม”ข้อ 01คุณมั่นใจในการให้ feedback ที่ช่วยให้ทีมพัฒนาได้เพียงใด?เลือก 1 ถึง 5 ตามความรู้สึกของคุณเลือกคะแนน1 ยังไม่มั่นใจ2345 มั่นใจมากความคิดเห็นเพิ่มเติม (ไม่บังคับ)0/500 ตัวอักษรส่งคำตอบ"
+
+      at <anonymous> (/Users/aiink/Nack/Lead+D-Lab/tests/findings-client.test.tsx:347:20)
+(fail) C1-RV-04 authoritative snapshots and truthful Live > a delayed older HTTP response cannot overwrite newer WebSocket state [55.48ms]
+355 |     clickButton('เชื่อมต่อ');
+356 |     const socket = FakeWebSocket.instances[0];
+357 |     expect(socket).toBeDefined();
+358 |     socket.emit('open');
+359 |     await tick();
+360 |     expect(text()).toContain('ข้อมูลเก่า · ไม่ใช่ Live');
+                         ^
+error: expect(received).toContain(expected)
+
+Expected to contain: "ข้อมูลเก่า · ไม่ใช่ Live"
+Received: "ผู้ควบคุมกิจกรรมLiveโทเค็นผู้ควบคุม (เฉพาะเครื่องนี้)กำลังเชื่อมต่อ…โทเค็น local fixture อยู่ใน .local/fixtures.json และไม่ถูกแสดงบนหน้านี้ซ้ำ"
+
+      at <anonymous> (/Users/aiink/Nack/Lead+D-Lab/tests/findings-client.test.tsx:360:20)
+(fail) C1-RV-04 authoritative snapshots and truthful Live > facilitator shows Live only after an authorized fresh snapshot [20.18ms]
+
+ 0 pass
+ 6 fail
+ 14 expect() calls
+Ran 6 tests across 1 file. [350.00ms]

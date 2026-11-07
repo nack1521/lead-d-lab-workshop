@@ -1,0 +1,18 @@
+== before restart ==
+{
+  "revision": 7,
+  "participant_count": 4
+}
+== restart db (no -v) ==
+ Container c1a-db-1 Restarting 
+ Container c1a-db-1 Started 
+EXIT=0
+ready HTTP 200 {"status":"ready","db":"ok"}
+== after db restart ==
+{
+  "revision": 7,
+  "participant_count": 4
+}
+responses=4
+receipts=5
+rejected_receipts=1

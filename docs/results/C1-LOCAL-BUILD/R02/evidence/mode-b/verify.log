@@ -1,0 +1,22 @@
+== containers ==
+NAME        STATUS                    PORTS
+c1b-api-1   Up 12 seconds (healthy)   127.0.0.1:3001->3000/tcp
+c1b-db-1    Up 39 minutes (healthy)   127.0.0.1:5434->5432/tcp
+c1b-web-1   Up 12 seconds             127.0.0.1:5174->5173/tcp
+== schema after 0002 ==
+0001_init.sql
+0002_terminal_receipts.sql
+code
+message
+outcome
+== production image excludes test dev deps ==
+0
+apps bun.lock db docker node_modules package.json 
+== fixtures ==
+fixtures ready: ROOM-01, ROOM-02; grants written to /tmp/c1-fixtures.json
+== docker-only test runner ==
+RUNNER_EXIT=0
+ 71 pass
+ 0 fail
+ 341 expect() calls
+Ran 71 tests across 9 files. [5.46s]

@@ -1,0 +1,14 @@
+bun test v1.4.4 (38afee6c8)
+
+tests/findings-client.test.tsx:
+(pass) C1-RV-03 lost join acknowledgement keeps one logical join > an uncertain join reuses the same operation key on unchanged retry [471.89ms]
+(pass) C1-RV-03 lost join acknowledgement keeps one logical join > a nickname-only change is still the same join; a different room code is a new join [492.79ms]
+(pass) C1-RV-05 outcome and draft state follow the authoritative question > a saved answer does not carry into the next unanswered question [480.53ms]
+(pass) C1-RV-05 outcome and draft state follow the authoritative question > an unresolved earlier attempt stays with the old question during a transition [484.48ms]
+(pass) C1-RV-04 authoritative snapshots and truthful Live > a delayed older HTTP response cannot overwrite newer WebSocket state [471.40ms]
+(pass) C1-RV-04 authoritative snapshots and truthful Live > facilitator shows Live only after an authorized fresh snapshot [877.34ms]
+
+ 6 pass
+ 0 fail
+ 30 expect() calls
+Ran 6 tests across 1 file. [3.38s]

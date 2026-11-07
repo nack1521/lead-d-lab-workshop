@@ -1,0 +1,31 @@
+== health/ready ==
+health HTTP 200 {"status":"ok"}
+ready HTTP 200 {"status":"ready","db":"ok"}
+== join ==
+{
+  "status": "joined",
+  "participant_id": "a6e715fe-91c2-4688-a352-a06b2cc76358",
+  "revision": 6,
+  "grant_present": true
+}
+== terminal rejection ==
+{"status":"rejected","code":"VALIDATION_FAILED","message":"ข้อความต้องไม่เกิน 500 ตัวอักษร","terminal":true,"field":"comment"}
+== stable replay ==
+{"status":"rejected","code":"VALIDATION_FAILED","message":"ข้อความต้องไม่เกิน 500 ตัวอักษร","terminal":true,"replay":true,"field":"comment"}
+HTTP 422
+== conflict ==
+{"status":"rejected","code":"IDEMPOTENCY_CONFLICT","message":"คีย์นี้เคยใช้กับคำตอบอื่น","terminal":true}
+HTTP 409
+== rate-limit / auth are uncertified ==
+unauth HTTP 401 {
+  "code": "UNAUTHORIZED",
+  "terminal": false
+}
+== join advances revision and facilitator sees count ==
+{
+  "revision": 7,
+  "participant_count": 4
+}
+== DB receipts ==
+rejected/VALIDATION_FAILED
+responses=4

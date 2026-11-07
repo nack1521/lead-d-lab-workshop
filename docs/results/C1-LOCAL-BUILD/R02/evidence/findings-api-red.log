@@ -1,0 +1,110 @@
+bun test v1.4.4 (38afee6c8)
+
+tests/findings-api.test.ts:
+783 |     query.execute()
+784 |   }
+785 | 
+786 |   function ErrorResponse(x) {
+787 |     query && (query.cursorFn || query.describeFirst) && write(Sync)
+788 |     const error = Errors.postgres(parseError(x))
+                               ^
+PostgresError: column "code" does not exist
+ severity_local: "ERROR",
+   severity: "ERROR",
+   position: "24",
+       file: "parse_relation.c",
+    routine: "errorMissingColumn",
+       code: "42703"
+
+      at ErrorResponse (/Users/aiink/Nack/Lead+D-Lab/node_modules/.bun/postgres@3.4.5/node_modules/postgres/src/connection.js:788:26)
+      at handle (/Users/aiink/Nack/Lead+D-Lab/node_modules/.bun/postgres@3.4.5/node_modules/postgres/src/connection.js:473:7)
+      at data (/Users/aiink/Nack/Lead+D-Lab/node_modules/.bun/postgres@3.4.5/node_modules/postgres/src/connection.js:315:9)
+      at emit (node:events:100:22)
+      at addChunk (internal:streams/readable:267:47)
+      at readableAddChunkPushByteMode (internal:streams/readable:245:18)
+      at pushDataToSocket (node:net:360:21)
+      at data (node:net:863:74)
+      at cachedError (/Users/aiink/Nack/Lead+D-Lab/node_modules/.bun/postgres@3.4.5/node_modules/postgres/src/query.js:170:27)
+      at new Query (/Users/aiink/Nack/Lead+D-Lab/node_modules/.bun/postgres@3.4.5/node_modules/postgres/src/query.js:36:24)
+      at sql (/Users/aiink/Nack/Lead+D-Lab/node_modules/.bun/postgres@3.4.5/node_modules/postgres/src/index.js:112:15)
+      at /Users/aiink/Nack/Lead+D-Lab/tests/findings-api.test.ts:39:32
+(fail) C1-RV-01 terminal non-save is a stable per-attempt receipt > a rejected attempt is stored, replayed stably and conflicts on a changed payload [24.28ms]
+(pass) C1-RV-01 terminal non-save is a stable per-attempt receipt > concurrent same-key attempts with different payloads never commit two outcomes [21.20ms]
+112 |       expect(first.status).toBe(201);
+113 |       const throttled = await submit(limited, participant.grant, limited.session.ratingQuestionId, payload);
+114 |       expect(throttled.status).toBe(429);
+115 |       const throttledBody = await api<{ terminal: boolean; code: string }>(throttled);
+116 |       expect(throttledBody.code).toBe('RATE_LIMITED');
+117 |       expect(throttledBody.terminal).toBe(false);
+                                           ^
+error: expect(received).toBe(expected)
+
+Expected: false
+Received: true
+
+      at <anonymous> (/Users/aiink/Nack/Lead+D-Lab/tests/findings-api.test.ts:117:38)
+(fail) C1-RV-01 terminal non-save is a stable per-attempt receipt > transient failures are not certified terminal and do not unlock a fresh attempt [137.83ms]
+150 |         idempotency_key: key,
+151 |         type: 'rating',
+152 |         rating: 2,
+153 |       });
+154 |       expect(res.status).toBe(500);
+155 |       expect((await api<{ terminal: boolean }>(res)).terminal).toBe(false);
+                                                                     ^
+error: expect(received).toBe(expected)
+
+Expected: false
+Received: true
+
+      at <anonymous> (/Users/aiink/Nack/Lead+D-Lab/tests/findings-api.test.ts:155:64)
+(fail) C1-RV-01 terminal non-save is a stable per-attempt receipt > an internal database failure is uncertified and leaves no attempt receipt [9.96ms]
+180 |         send: (data) => ws.send(JSON.stringify(data)),
+181 |         wait: (predicate, ms = 2000) =>
+182 |           new Promise<WsMessage>((res, rej) => {
+183 |             const found = messages.find(predicate);
+184 |             if (found) return res(found);
+185 |             const t = setTimeout(() => rej(new Error('timed out waiting for message')), ms);
+                                                     ^
+error: timed out waiting for message
+      at <anonymous> (/Users/aiink/Nack/Lead+D-Lab/tests/helpers.ts:185:48)
+(fail) C1-RV-02 already-open sockets enforce the approved grant lifetime > an expired facilitator socket receives no snapshot on resync and is closed [2016.52ms]
+195 |     const participant = await join(ctx);
+196 |     const socket = await openSocket(ctx.wsUrl);
+197 |     socket.send({ type: 'auth', token: participant.grant });
+198 |     await socket.wait((m) => m.type === 'state');
+199 |     const end = await control('/end');
+200 |     expect(end.status).toBe(200);
+                             ^
+error: expect(received).toBe(expected)
+
+Expected: 200
+Received: 401
+
+      at <anonymous> (/Users/aiink/Nack/Lead+D-Lab/tests/findings-api.test.ts:200:24)
+(fail) C1-RV-02 already-open sockets enforce the approved grant lifetime > a participant socket kept open past the session-end grace receives no state and is closed [25.06ms]
+180 |         send: (data) => ws.send(JSON.stringify(data)),
+181 |         wait: (predicate, ms = 2000) =>
+182 |           new Promise<WsMessage>((res, rej) => {
+183 |             const found = messages.find(predicate);
+184 |             if (found) return res(found);
+185 |             const t = setTimeout(() => rej(new Error('timed out waiting for message')), ms);
+                                                     ^
+error: timed out waiting for message
+      at <anonymous> (/Users/aiink/Nack/Lead+D-Lab/tests/helpers.ts:185:48)
+(fail) C1-RV-02 already-open sockets enforce the approved grant lifetime > a broadcast does not deliver data to a socket whose grant has expired [2006.42ms]
+180 |         send: (data) => ws.send(JSON.stringify(data)),
+181 |         wait: (predicate, ms = 2000) =>
+182 |           new Promise<WsMessage>((res, rej) => {
+183 |             const found = messages.find(predicate);
+184 |             if (found) return res(found);
+185 |             const t = setTimeout(() => rej(new Error('timed out waiting for message')), ms);
+                                                     ^
+error: timed out waiting for message
+      at <anonymous> (/Users/aiink/Nack/Lead+D-Lab/tests/helpers.ts:185:48)
+(fail) C1-RV-04 join-only changes advance a coherent revision and publish after commit > a new participant advances the session revision, appears in snapshots and is pushed [2011.72ms]
+(pass) C1-RV-04 join-only changes advance a coherent revision and publish after commit > an unchanged join retry is idempotent for the count and does not need a new revision [14.69ms]
+
+ 2 pass
+ 7 fail
+ 17 expect() calls
+Ran 9 tests across 1 file. [6.76s]

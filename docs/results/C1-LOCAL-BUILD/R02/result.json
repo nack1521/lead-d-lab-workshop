@@ -1,0 +1,182 @@
+{
+  "schema_version": 1,
+  "task_id": "C1-LOCAL-BUILD",
+  "run_id": "R02",
+  "reported_at": "2026-11-07T17:26:01+07:00",
+  "producer": "DeepSeek Harness (Agent Teams lead)",
+  "authoring_tool": "DeepSeek Harness",
+  "model": "deepseek-v4.1-flash-1017",
+  "model_verification": "runtime-reported identifier; not independently verified",
+  "source_kind": "direct",
+  "baseline_commit": "340c0d1",
+  "observed_head": "da30003a805cc6b0e133bdc9ac94ae001419e488",
+  "branch": "main",
+  "dirty_paths": ["docs/AI-PROGRESS.md", "docs/handoffs/ANTIGRAVITY-C1.md"],
+  "dirty_paths_preserved": true,
+  "work_kind": "review_fix_local_build",
+  "review_input": "docs/implementation/C1-REVIEW-SUMMARY-R01.md",
+  "status": "READY_FOR_REVIEW",
+  "summary": "Fixed all five deduplicated R01 review groups (C1-RV-01..05) on build da30003 with genuine RED->GREEN regressions at API/DB/WS and React-container seams. Durable rejected-attempt receipts, uncertified transient failures, open-socket grant lifetime enforcement, join revision/publish, stale HTTP/WS rejection, truthful Live, one operation key per uncertain join, and per-question outcome state are implemented. Current-build regression: Mode A 71 pass / 0 fail; Mode B rebuilt Docker-only stack with migration 0002 and a separate Docker test runner 71 pass / 0 fail; both-mode restarts keep data and receipts. C1-01..C1-14 and C1-16 PASS on this build; C1-15 PARTIAL because real-browser interaction remains NOT RUN (no browser automation available). No old R01 PASS was copied forward.",
+  "detail_path": "docs/results/C1-LOCAL-BUILD/R02/result.md",
+  "commits": [
+    "da30003 fix(c1): durable terminal receipts, socket grant lifetime and join visibility"
+  ],
+  "changed_paths": [
+    "README.md",
+    "apps/api/src/app.ts",
+    "apps/api/src/ws.ts",
+    "apps/web/src/containers.tsx",
+    "apps/web/src/join-attempt.ts",
+    "apps/web/src/state.ts",
+    "bun.lock",
+    "db/migrations/0002_terminal_receipts.sql",
+    "package.json",
+    "tests/findings-api.test.ts",
+    "tests/findings-client.test.tsx",
+    "tests/limits.test.ts",
+    "tests/run-in-docker.sh",
+    "tests/web-state.test.ts"
+  ],
+  "findings": [
+    {
+      "finding_id": "C1-RV-01",
+      "source_ids": ["QA-C1-01"],
+      "status": "FIXED",
+      "fix": "Durable rejected-attempt receipts (outcome/code/message/fingerprint) written under the session row lock; stable replay, fingerprint conflict, terminal rejection of only certified outcomes, auth/429/5xx terminal:false, transactional rollback with no receipt on DB failure.",
+      "evidence_paths": [
+        "docs/results/C1-LOCAL-BUILD/R02/evidence/findings-api-red.log",
+        "docs/results/C1-LOCAL-BUILD/R02/evidence/findings-api-green.log",
+        "docs/results/C1-LOCAL-BUILD/R02/evidence/mode-a/r02-http-evidence.log",
+        "docs/results/C1-LOCAL-BUILD/R02/evidence/mode-b/restart-and-receipts.log"
+      ],
+      "limitations": "Delayed-original scenario covered by session-row serialisation and durable receipts, not a network delay harness."
+    },
+    {
+      "finding_id": "C1-RV-02",
+      "source_ids": ["QA-C1-02"],
+      "status": "FIXED",
+      "fix": "Resync, broadcast and 30s sweep re-authenticate already-open sockets against expiry, session-end read grace and revocation; close 4401 before data. Participant and facilitator variants tested.",
+      "evidence_paths": [
+        "docs/results/C1-LOCAL-BUILD/R02/evidence/findings-api-green.log",
+        "tests/findings-api.test.ts"
+      ],
+      "limitations": "Sweep interval not time-advanced in tests; resync/broadcast paths executed."
+    },
+    {
+      "finding_id": "C1-RV-03",
+      "source_ids": ["QA-C1-03", "C1-UI-02"],
+      "status": "FIXED",
+      "fix": "One tab-scoped join operation key per room; uncertain retry reuses key and payload, nickname edits reuse it, a different room code is an explicit new join; server join idempotent per (session, join_key).",
+      "evidence_paths": [
+        "docs/results/C1-LOCAL-BUILD/R02/evidence/findings-client-red.log",
+        "docs/results/C1-LOCAL-BUILD/R02/evidence/findings-client-green.log",
+        "tests/findings-client.test.tsx"
+      ],
+      "limitations": "Exercised through real react-dom containers in happy-dom with stubbed transport, not a real browser."
+    },
+    {
+      "finding_id": "C1-RV-04",
+      "source_ids": ["QA-C1-04"],
+      "status": "FIXED",
+      "fix": "Join advances sessions.revision atomically and publishes after commit (retry does not bump); client drops strictly older HTTP and WS state, accepts equal-revision authenticated reconnect snapshots, Live only after fresh authorized snapshot.",
+      "evidence_paths": [
+        "docs/results/C1-LOCAL-BUILD/R02/evidence/findings-api-green.log",
+        "docs/results/C1-LOCAL-BUILD/R02/evidence/findings-client-green.log",
+        "docs/results/C1-LOCAL-BUILD/R02/evidence/mode-a/r02-http-evidence.log"
+      ],
+      "limitations": "Real-browser interleavings NOT RUN; covered at server revision seams and container seams."
+    },
+    {
+      "finding_id": "C1-RV-05",
+      "source_ids": ["C1-UI-01"],
+      "status": "FIXED",
+      "fix": "Outcome/draft/attempt/own-response state keyed by authoritative question id; new unanswered question is usable, returning to an answered question restores saved, unresolved attempts stay with their own question.",
+      "evidence_paths": [
+        "docs/results/C1-LOCAL-BUILD/R02/evidence/findings-client-red.log",
+        "docs/results/C1-LOCAL-BUILD/R02/evidence/findings-client-green.log",
+        "tests/findings-client.test.tsx"
+      ],
+      "limitations": "Real-browser rating->poll->return flow NOT RUN by this writer; QA/Coordinator browser retest remains the gate."
+    }
+  ],
+  "cases": [
+    { "case_id": "C1-01", "mode_a": "PASS", "mode_b": "NOT RUN", "evidence_paths": ["docs/results/C1-LOCAL-BUILD/R02/evidence/mode-a/r02-http-evidence.log"], "limitations": "Mode A case; Mode B proven under C1-02." },
+    { "case_id": "C1-02", "mode_a": "NOT RUN", "mode_b": "PASS", "evidence_paths": ["docs/results/C1-LOCAL-BUILD/R02/evidence/mode-b/verify.log", "docs/results/C1-LOCAL-BUILD/R02/evidence/mode-b/container-suite.log"], "limitations": "Mode B images rebuilt with DOCKER_BUILDKIT=0 because the sandbox blocks the buildx activity directory." },
+    { "case_id": "C1-03", "mode_a": "PASS", "mode_b": "PASS", "evidence_paths": ["tests/join.test.ts", "tests/findings-client.test.tsx"], "limitations": "UI join retry exercised in react-dom/happy-dom, not a real browser." },
+    { "case_id": "C1-04", "mode_a": "PASS", "mode_b": "PASS", "evidence_paths": ["docs/results/C1-LOCAL-BUILD/R02/evidence/mode-a-full-regression.log"], "limitations": "DB failure injected with a temporary trigger." },
+    { "case_id": "C1-05", "mode_a": "PASS", "mode_b": "PASS", "evidence_paths": ["docs/results/C1-LOCAL-BUILD/R02/evidence/mode-a-full-regression.log"], "limitations": "Single-choice poll only." },
+    { "case_id": "C1-06", "mode_a": "PASS", "mode_b": "PASS", "evidence_paths": ["docs/results/C1-LOCAL-BUILD/R02/evidence/mode-a-full-regression.log"], "limitations": "Real-browser DOM/XSS check NOT RUN; React render escaping covered." },
+    { "case_id": "C1-07", "mode_a": "PASS", "mode_b": "PASS", "evidence_paths": ["docs/results/C1-LOCAL-BUILD/R02/evidence/findings-api-green.log"], "limitations": "Concurrency rounds, not a load profile." },
+    { "case_id": "C1-08", "mode_a": "PASS", "mode_b": "PASS", "evidence_paths": ["docs/results/C1-LOCAL-BUILD/R02/evidence/findings-api-green.log", "docs/results/C1-LOCAL-BUILD/R02/evidence/findings-client-green.log"], "limitations": "Fresh-attempt journey verified at API and container seams, not in a real browser." },
+    { "case_id": "C1-09", "mode_a": "PASS", "mode_b": "PASS", "evidence_paths": ["docs/results/C1-LOCAL-BUILD/R02/evidence/mode-a-full-regression.log"], "limitations": "One API instance; no multi-instance fanout." },
+    { "case_id": "C1-10", "mode_a": "PASS", "mode_b": "PASS", "evidence_paths": ["docs/results/C1-LOCAL-BUILD/R02/evidence/mode-a-full-regression.log"], "limitations": "Probabilistic race rounds; grace boundary not fake-clocked." },
+    { "case_id": "C1-11", "mode_a": "PASS", "mode_b": "PASS", "evidence_paths": ["docs/results/C1-LOCAL-BUILD/R02/evidence/findings-client-green.log"], "limitations": "Process death before broadcast simulated by disconnecting the client." },
+    { "case_id": "C1-12", "mode_a": "PASS", "mode_b": "PASS", "evidence_paths": ["docs/results/C1-LOCAL-BUILD/R02/evidence/mode-a/restart-evidence.log", "docs/results/C1-LOCAL-BUILD/R02/evidence/mode-a/restart-api-evidence.log", "docs/results/C1-LOCAL-BUILD/R02/evidence/mode-b/restart-and-receipts.log"], "limitations": "Host reboot and Docker engine restart NOT RUN." },
+    { "case_id": "C1-13", "mode_a": "PASS", "mode_b": "PASS", "evidence_paths": ["docs/results/C1-LOCAL-BUILD/R02/evidence/findings-api-green.log"], "limitations": "Expiry exercised by SQL time shift; open-socket enforcement on resync/broadcast." },
+    { "case_id": "C1-14", "mode_a": "PASS", "mode_b": "PASS", "evidence_paths": ["docs/results/C1-LOCAL-BUILD/R02/evidence/mode-a-full-regression.log"], "limitations": "Synthetic Origin headers; no multiple real browser engines." },
+    { "case_id": "C1-15", "mode_a": "PARTIAL", "mode_b": "PARTIAL", "evidence_paths": ["docs/results/C1-LOCAL-BUILD/R02/evidence/mode-a/r02-http-evidence.log", "docs/results/C1-LOCAL-BUILD/R02/evidence/findings-client-green.log"], "limitations": "Production build and deep link verified; approved Thai copy and container flows exercised in react-dom/happy-dom. Real-browser interaction NOT RUN (no browser automation available). PARTIAL must not be read as a passed browser check." },
+    { "case_id": "C1-16", "mode_a": "PASS", "mode_b": "PASS", "evidence_paths": ["docs/results/C1-LOCAL-BUILD/R02/evidence/c1-16-security-scan.log", "docs/results/C1-LOCAL-BUILD/R02/evidence/mode-b/verify.log"], "limitations": "Pattern-based local scans only; no SAST/DAST." }
+  ],
+  "commands": [
+    { "command": "bun test tests/findings-api.test.ts (pre-fix)", "exit_code": 1, "outcome": "7 fail / 2 pass (genuine RED)" },
+    { "command": "bun test tests/findings-client.test.tsx (pre-fix)", "exit_code": 1, "outcome": "6 fail / 0 pass (genuine RED)" },
+    { "command": "bun test tests/findings-api.test.ts (post-fix)", "exit_code": 0, "outcome": "9 pass" },
+    { "command": "bun test tests/findings-client.test.tsx (post-fix)", "exit_code": 0, "outcome": "6 pass" },
+    { "command": "bun x tsc --noEmit -p tsconfig.json", "exit_code": 0, "outcome": "no type errors" },
+    { "command": "bun run migrate (Mode A)", "exit_code": 0, "outcome": "0002_terminal_receipts.sql applied" },
+    { "command": "bun test tests (Mode A)", "exit_code": 0, "outcome": "71 pass / 0 fail, 342 expect(), 9 files" },
+    { "command": "bun run build:web", "exit_code": 0, "outcome": "production bundle rebuilt" },
+    { "command": "Mode A live HTTP flow", "exit_code": 0, "outcome": "join revision 6->7; terminal 422; replay 422 replay:true; conflict 409; 401 terminal:false; facilitator count 4; DB rejected receipt" },
+    { "command": "docker compose restart db (Mode A)", "exit_code": 0, "outcome": "ready 200; revision 7; participants 4; rejected receipts persist" },
+    { "command": "Mode A API process restart", "exit_code": 0, "outcome": "ready 200; snapshot revision 7, participants 4" },
+    { "command": "Mode B build/up (DOCKER_BUILDKIT=0)", "exit_code": 0, "outcome": "api/db/web healthy on 3001/5434/5174 with migration 0002" },
+    { "command": "tests/run-in-docker.sh c1b_default", "exit_code": 0, "outcome": "71 pass / 0 fail inside a throwaway container from committed source" },
+    { "command": "Mode B restart api db", "exit_code": 0, "outcome": "ready 200; durable rejection replay/conflict; data intact" },
+    { "command": "production image hygiene scan", "exit_code": 0, "outcome": "no tests, no .env, happy-dom count 0, no secret env" }
+  ],
+  "skill_usage": [
+    {
+      "name": "tdd",
+      "path": ".agents/skills/tdd/SKILL.md",
+      "load_status": "READ_LOADED",
+      "applied_to": "RED->GREEN regressions at API/DB/WS and React-container seams for C1-RV-01..05",
+      "evidence_paths": ["docs/results/C1-LOCAL-BUILD/R02/evidence/findings-api-red.log", "docs/results/C1-LOCAL-BUILD/R02/evidence/findings-api-green.log", "docs/results/C1-LOCAL-BUILD/R02/evidence/findings-client-red.log", "docs/results/C1-LOCAL-BUILD/R02/evidence/findings-client-green.log"],
+      "limitation": "File read by this writer; no host activation trace."
+    },
+    {
+      "name": "ponytail",
+      "path": ".agents/skills/ponytail/SKILL.md",
+      "load_status": "READ_LOADED",
+      "applied_to": "smallest complete fix: one migration, in-transaction receipts, no new runtime dependencies, test-only dev dependency kept out of production images",
+      "evidence_paths": ["package.json", "db/migrations/0002_terminal_receipts.sql"],
+      "limitation": "Validation, security and tests were not reduced."
+    },
+    {
+      "name": "diagnosing-bugs",
+      "path": ".agents/skills/diagnosing-bugs/SKILL.md",
+      "load_status": "UNVERIFIED",
+      "applied_to": "not loaded; two harness defects fixed from observed red-run logs",
+      "evidence_paths": ["docs/results/C1-LOCAL-BUILD/R02/evidence/findings-client-red.log"],
+      "limitation": "Not a skill-run claim."
+    }
+  ],
+  "blockers": [],
+  "environment_limitations": [
+    "Sandbox blocks ~/.docker/buildx/activity, so Mode B images were rebuilt with DOCKER_BUILDKIT=0 (same Dockerfile/targets).",
+    "No browser automation is available in this session (no Playwright/Puppeteer/Chrome; Safari automation would require a global configuration change). Real-browser retest of C1-RV-03/05 and C1-15 remains NOT RUN."
+  ],
+  "not_verified": [
+    "real-browser question transitions, lost join/submission acknowledgements and reconnect",
+    "mobile devices and full accessibility",
+    "30-client load / SLA",
+    "host reboot and Docker engine restart",
+    "independent QA and human acceptance"
+  ],
+  "next_gate": "Independent QA/browser verification of da30003 against C1-RV-01..05 acceptances, then user trial/acceptance. Push/deploy/tunnel/image publication remain unauthorized.",
+  "services_left_running": {
+    "mode_a": ["c1a-db-1 (127.0.0.1:5433)", "API 127.0.0.1:3000", "static production web 127.0.0.1:5173"],
+    "mode_b": ["c1b-db-1 (127.0.0.1:5434)", "c1b-api-1 (127.0.0.1:3001)", "c1b-web-1 (127.0.0.1:5174)"],
+    "volumes": ["c1a_c1_pgdata", "c1b_c1_pgdata"]
+  },
+  "published": false
+}

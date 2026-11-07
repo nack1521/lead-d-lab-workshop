@@ -1,0 +1,21 @@
+== tracked files with local password ==
+no tracked match
+== grant/token logging in source ==
+none
+== api log scan ==
+not logged
+not logged
+not logged
+== production image env/context ==
+no_env
+no_tests
+0
+== image env ==
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/bun-node-fallback-bin
+BUN_RUNTIME_TRANSPILER_CACHE_PATH=0
+BUN_INSTALL_BIN=/usr/local/bin
+
+== tracked dev/test-only deps location ==
+tests/findings-api.test.ts
+tests/findings-client.test.tsx
+tests/run-in-docker.sh

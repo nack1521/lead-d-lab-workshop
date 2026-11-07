@@ -2,7 +2,8 @@ import { createSql } from './db.ts';
 import { loadConfig } from './env.ts';
 import { migrate } from './migrate.ts';
 import { issueGrant } from './grants.ts';
-import { writeFile } from 'node:fs/promises';
+import { mkdir, writeFile } from 'node:fs/promises';
+import { dirname } from 'node:path';
 
 /**
  * Local fixture bootstrap: two synthetic sessions, a rating question and a poll.
@@ -86,8 +87,10 @@ try {
     note: 'Local synthetic fixtures. Contains local-only facilitator grants; untracked and never committed.',
     fixtures,
   };
-  await writeFile('.local/fixtures.json', JSON.stringify(output, null, 2));
-  console.log(`fixtures ready: ${fixtures.map((f) => f.join_code).join(', ')}; grants written to .local/fixtures.json`);
+  const outputPath = process.env.BOOTSTRAP_OUTPUT ?? '.local/fixtures.json';
+  await mkdir(dirname(outputPath), { recursive: true });
+  await writeFile(outputPath, JSON.stringify(output, null, 2));
+  console.log(`fixtures ready: ${fixtures.map((f) => f.join_code).join(', ')}; grants written to ${outputPath}`);
 } finally {
   await sql.end({ timeout: 5 });
 }

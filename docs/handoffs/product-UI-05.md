@@ -1,6 +1,6 @@
 # Product handoff — UI-05 state pack
 
-สถานะ: **PREPARED / NOT DISPATCHED**. เอกสารสำหรับลุงอ่านเมื่อได้รับ approval ของ slice; ไม่ใช่คำสั่งให้เริ่ม coding. UI-05 รอ visual acceptance, C1 ยังรอ explicit local-build approval.
+สถานะ: **UI05 R02 ACCEPTED_DESIGN_STATE_PACK / C1_LOCAL_BUILD_AUTHORIZED** ตาม [current approval record](../implementation/C1-LOCAL-BUILD-APPROVAL-R01.md). ใช้ [C1 START handoff](ANTIGRAVITY-C1-START-R01.md) ส่งงานในIDEที่ยืนยันได้; approvalไม่เท่ากับdispatchverifiedหรือbuildสำเร็จ. ไม่มีpermissionให้push/deployและC1ยังไม่implementationACCEPTED.
 
 **Mandatory current amendment:** อ่าน [UI05 R02 targeted fixes / approved attempt policy](../product/UI-05-R02-TARGETED-FIXES.md) ก่อน implementation. ผู้ใช้อนุมัติ fresh attempt หลัง terminal non-save + no late commit + still open ด้วย new key แม้ payload เดิม; same key คือ stable replay ไม่ใช่ attempt ใหม่. R02 supersedes retry classification wording ของ UI05 R01/UI01/WF01 และข้อจำกัด edited-only ของ protected C1 handoff เฉพาะจุดนี้ โดยไม่แก้ไฟล์เดิมหรือเปลี่ยน scope/TTL/auth/accepted uniqueness. R02 targeted retest ทั้ง canonical Product/QA เป็น READY_FOR_HUMAN_STATE_REVIEW; [review summary](../implementation/UI-05-R02-REVIEW-SUMMARY.md) เก็บdispositionที่ตรวจแล้ว ไม่ใช่humanacceptanceหรือbuildapproval.
 
@@ -56,4 +56,4 @@ Receipt-expiry ไม่มี dedicated full-frame drawing: ใช้ unknown n
 - Coordinator อ่านผล, canonical Senior Tester ตรวจอิสระ, ผู้ใช้รับงาน. ไม่มี push/deploy/public tunnel/publish/paid resource โดย approval นี้.
 
 ## Current gate
-ให้ผู้ใช้ดู UI-05 และตัดสินใจ visual acceptance ก่อน; explicit C1 build approval เป็นอีก decision หนึ่ง. ตอนส่งเอกสารนี้ยังไม่ dispatch, install, build หรือเผยแพร่.
+ผู้ใช้รับ UI05R02 และอนุมัติ C1 local build แล้ว ตามcurrentapprovalrecord/START handoffด้านบน. Operatorต้องverifyexistingIDEcontextและส่งSTARTครั้งเดียว; ยังไม่มีสิทธิ์อ้างdispatch/buildสำเร็จก่อนreadback. C1implementationacceptance/QAยังรอexecutionจริง; push/deployยังไม่อนุมัติ.

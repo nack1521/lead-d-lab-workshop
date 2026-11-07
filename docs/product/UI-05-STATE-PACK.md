@@ -1,9 +1,9 @@
 # UI-05 — Component/state pack และ handoff
 
-สถานะ: **R02 READY_FOR_HUMAN_STATE_REVIEW** — canonical Product/QA targeted retest ครบและ findings เดิมเป็น RESOLVED_STATIC ใน design/spec scope ดู [review summary](../implementation/UI-05-R02-REVIEW-SUMMARY.md). [Current R02 amendment](UI-05-R02-TARGETED-FIXES.md) มี user-approved fresh-attempt policy; revised visual acceptance ยัง PENDING และ C1 coding ยัง HOLD. Inventory/verification ด้านล่างเป็น R01 history; ใช้ R02 delta ตาม precedence ที่ระบุ.
+สถานะ: **R02 ACCEPTED_DESIGN_STATE_PACK / C1_LOCAL_BUILD_AUTHORIZED** — ผู้ใช้รับ UI05 R02 และให้ลุงเริ่ม local C1 แล้ว ดู [current acceptance/start record](../implementation/C1-LOCAL-BUILD-APPROVAL-R01.md) และ [C1 START handoff](../handoffs/ANTIGRAVITY-C1-START-R01.md). [Review summary](../implementation/UI-05-R02-REVIEW-SUMMARY.md) คงผล RESOLVED_STATIC ตามประวัติ ไม่ใช่ C1 runtime/implementation acceptance. Inventory/verification ด้านล่างเป็น R01 history; ใช้ R02 delta/amendmentตามprecedenceเดิม.
 
 ## ขอบเขตและแหล่งความจริง
-ผู้ใช้สั่ง “จัดมาได้เลย” ให้ขยาย components/states หลังอนุมัติ UI-04 ทั้ง 4 หน้า. รอบนี้ทำ native Figma + specification/handoff เท่านั้น; C1 coding, install, push และ deploy ยัง hold.
+ผู้ใช้สั่ง “จัดมาได้เลย” ให้ขยาย components/states หลังอนุมัติ UI-04 ทั้ง 4 หน้า. ช่วงauthoringเป็นdesign/spec-onlyตามประวัติ; ล่าสุดผู้ใช้รับR02และอนุมัติlocalC1implementationแล้วตามcurrentapprovalrecordด้านบน. Push/deployยังไม่อนุมัติ.
 - Visual baseline: [UI-04](UI-04-SELECTIVE-GLASS.md), approval commit `26718bffce807b5ce80395360840c5b790713545`. คง Soft Monochrome + Selective Glass, IBM Plex Sans Thai Regular/Medium, opaque content, glass เฉพาะ action controls พร้อมพื้นที่สำรอง.
 - Flow/state authority: [UI-01 component contract](UI-01-COMPONENT-STATES.md) + [WF-01-R1](WF-01-R1-DELIVERY.md). Native variant เป็น presentation ไม่ใช่หลักฐาน server outcome หรือ source ของ authorization.
 - [เปิด UI-05 ใน Figma](https://www.figma.com/design/RUOnC9Q15LA7DCc6rzhZtN?node-id=47-48), page `1:2`, root `47:48`; ไม่ทับ approved root `40:43` หรืองานเก่า. ไม่ publish library หรือแก้ global styles/variables.
@@ -84,7 +84,7 @@ UI-C03 textarea, C04 rating, C05 poll, C07 context, C08 aggregate, C09 coverage 
 - เก็บ PNG จริงจาก Figma 9 panels พร้อม SHA-256; ดูภาพจริงทั้ง participant/desktop/components. แก้ secondary/disabled differentiation, poll privacy/limit และ human-language microcopy แล้ว capture รอบ final. ไม่ reconstruct ภาพหรือจำลอง API success.
 
 ## Not done / acceptance gates
-**NOT RUN:** app/database/WS/receipt/retry/race/security/30-client load, keyboard/IME/screen reader/mobile browser, reduced-motion/transparency behavior, real reflow/zoom และ human usability. Independent canonical Product/QA R01 เป็น CHANGES_REQUESTED ตามประวัติ; R02 targeted retest กลับมาครบและ findings เดิมเป็น RESOLVED_STATIC ใน design/spec scope โดยทั้งสองให้ READY_FOR_HUMAN_STATE_REVIEW ตาม summary ด้านบน. New state visual acceptance **PENDING**; UI-04 approval เดิมไม่ถูกขยายเอง.
+**NOT RUN:** app/database/WS/receipt/retry/race/security/30-client load, keyboard/IME/screen reader/mobile browser, reduced-motion/transparency behavior, real reflow/zoom และ human usability. Independent canonical Product/QA R01 เป็น CHANGES_REQUESTED ตามประวัติ; R02 targeted retest กลับมาครบและ findings เดิมเป็น RESOLVED_STATIC ใน design/spec scope โดยทั้งสองให้ READY_FOR_HUMAN_STATE_REVIEW ตาม summary ด้านบน. ผู้ใช้รับ UI05 R02 แล้วในระดับdesign/specตามcurrentapprovalrecord; ไม่ใช่runtimeหรือunseenexpiryimplementationacceptance และไม่เปลี่ยนขอบเขตapproval UI04 เดิม.
 
 [Advisory R01 disposition](evidence/UI-05/advisory-R01.md): รับ read-only risk review ภายหลัง draft delivery และเติม handoff เรื่อง payload conflict, accepted replay หลัง close, event ordering, draft lifetime และเจ้าของ expiry decisions. ไม่มี Figma/runtime change และไม่เปลี่ยนผล static verification เดิม.
 

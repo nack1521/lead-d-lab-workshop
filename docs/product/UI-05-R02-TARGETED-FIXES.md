@@ -1,6 +1,6 @@
 # UI-05 R02 — Targeted design/spec fixes
 
-สถานะ: **READY_FOR_HUMAN_STATE_REVIEW หลัง independent targeted retest R02**. Product และ QA ส่งผลครบและให้ findings เดิมเป็น RESOLVED_STATIC ใน targeted design/spec scope ดู [consolidated review summary](../implementation/UI-05-R02-REVIEW-SUMMARY.md). ผู้ใช้อนุมัติ design/spec fixes และ fresh-attempt policy แล้ว แต่ revised visual acceptance ยัง PENDING และ C1 build approval ยัง HOLD; ไม่ใช่ runtime/security/accessibility PASS.
+สถานะ: **ACCEPTED_DESIGN_STATE_PACK / C1_LOCAL_BUILD_AUTHORIZED** — ผู้ใช้ยืนยัน “รับ UI-05 R02 และให้ลุงเริ่ม C1 local build” วันที่2026-11-07. ดู [current acceptance/start record](../implementation/C1-LOCAL-BUILD-APPROVAL-R01.md). Retest findings เดิมคง RESOLVED_STATIC ตาม [review summary](../implementation/UI-05-R02-REVIEW-SUMMARY.md); ไม่ใช่ runtime/security/accessibility PASS หรือ C1 implementation acceptance. IDE dispatch/build execution ต้องมีหลักฐานแยก.
 
 ## Authority / precedence
 - [Approval record](evidence/UI-05-R02/approval-R01.json) เก็บคำตอบผู้ใช้ตรงตามที่เลือก. เปลี่ยนเฉพาะความหมาย attempt หลัง terminal non-save; ไม่เปลี่ยน stable replay, uniqueness, atomicity, auth, TTL/grace หรือ retention.
@@ -87,6 +87,6 @@ P05/P06 noticeใช้คำว่า **“คำตอบและข้อค
 - Firstauthoringcallล้มเหลวเพราะสมมติinstanceชื่อState=...; readcanvasยืนยันไม่มีpartialR02rootและinspectชื่อจริงUI05/noticeแล้วแก้selectorก่อนretry. ไม่สร้างrootซ้ำ. จากภาพcompositionพบpollnoticeยังอ้างคะแนน จึงแก้เฉพาะP05/P06แล้วcapturephonepanelpost-fix.
 
 ## Gates / ownership
-Canonical Product/QA targeted retest กลับมาครบ: READY_FOR_HUMAN_STATE_REVIEW ทั้งสองฝ่าย; findingsเดิมเป็น RESOLVED_STATIC เฉพาะขอบเขตที่ตรวจตามconsolidatedsummary. ไม่ใช้producerFIXED_DRAFTปิดfindingsเองและไม่ปิดUI05taskแทนผู้ใช้. EvidenceJSON/state-ledgerคงsnapshotก่อนretestตามจริง; currentstatusอยู่ในsummaryนี้. HumanrevisedvisualacceptanceยังPENDING; C1coding/install/containers/agy/push/deployยังHOLD. Runtime/DB/WS/security/a11y/mobile/30clientloadทั้งหมดNOTRUN. Expiryframe/policymappingยังdeferredตามR01ไม่ถูกอนุมัติจากretrydecision.
+Canonical Product/QA targeted retest กลับมาครบ: READY_FOR_HUMAN_STATE_REVIEW ทั้งสองฝ่าย; findingsเดิมเป็น RESOLVED_STATIC เฉพาะขอบเขตที่ตรวจตามconsolidatedsummary. ไม่ใช้producerFIXED_DRAFTปิดfindingsเองและไม่ปิดUI05taskแทนผู้ใช้. EvidenceJSON/state-ledgerคงsnapshotก่อนretestตามจริง; currentstatusอยู่ในsummaryนี้. Humanrevisedvisualacceptance=ACCEPTED_DESIGN_STATE_PACK และ C1localbuild=AUTHORIZED ตามcurrentapprovalrecord; IDEdispatch/executionยังต้องverify. Push/deploy/publicationยังไม่อนุมัติ. Runtime/DB/WS/security/a11y/mobile/30clientloadทั้งหมดNOTRUN. Expiryframe/policymappingยังdeferredตามR01ไม่ถูกอนุมัติจากretrydecision.
 
 AIprogress: ผู้ใช้อนุมัติdesign/specfixและfresh-attemptpolicy; CoordinatorทำnativeFigma/doc/evidence ไม่เขียนapplication/test/config. รักษาsharedAI-PROGRESS/C1handoffที่dirty; progressรอบนี้เก็บในR02. ใช้lead-d-workshop-cycle, writing-for-agents และFigma-use/generate-designสำหรับlocaldraftfix ไม่อ้างIDE/runtimeactivation. ไม่มีpublishedlibrary/globaltokensหรือpaidassetsใหม่.

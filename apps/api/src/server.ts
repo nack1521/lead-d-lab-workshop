@@ -2,7 +2,7 @@ import type { Server } from 'bun';
 import { createApp } from './app.ts';
 import type { Sql } from './db.ts';
 import type { Config } from './env.ts';
-import { createHub, handleUpgrade, type Hub, type SocketData } from './ws.ts';
+import { createHub, handleUpgrade, type Hub, type HubTestHooks, type SocketData } from './ws.ts';
 
 export interface RunningServer {
   server: Server<SocketData>;
@@ -21,8 +21,8 @@ function corsRejection(code: string, message: string): Response {
   });
 }
 
-export function startServer(config: Config, sql: Sql): RunningServer {
-  const hub = createHub(sql, config);
+export function startServer(config: Config, sql: Sql, hooks?: HubTestHooks): RunningServer {
+  const hub = createHub(sql, config, hooks);
   const { app } = createApp({ sql, config, hub });
 
   const server = Bun.serve<SocketData>({

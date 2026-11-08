@@ -34,7 +34,15 @@ export function originAllowed(origin: string | null, allowed: string[]): boolean
   return allowed.includes(origin);
 }
 
-export function createHub(sql: Sql, config: Config): Hub {
+/**
+ * Test-only observation seam for the authorization/send boundary. Inert by
+ * default; production server construction never passes hooks.
+ */
+export interface HubTestHooks {
+  beforeSend?: (ws: Socket) => Promise<void> | void;
+}
+
+export function createHub(sql: Sql, config: Config, hooks?: HubTestHooks): Hub {
   const sockets = new Map<string, Set<Socket>>();
 
   function send(ws: Socket, payload: unknown): void {
@@ -107,6 +115,7 @@ export function createHub(sql: Sql, config: Config): Hub {
       closeUnauthorized(ws);
       return;
     }
+    await hooks?.beforeSend?.(ws);
     send(ws, payload);
   }
 
@@ -231,6 +240,7 @@ export function createHub(sql: Sql, config: Config): Hub {
           closeUnauthorized(ws);
           continue;
         }
+        await hooks?.beforeSend?.(ws);
         send(ws, payload);
       }
     },

@@ -4,6 +4,7 @@ import { createSql, type Sql } from '../apps/api/src/db.ts';
 import { loadConfig, type Config } from '../apps/api/src/env.ts';
 import { issueGrant } from '../apps/api/src/grants.ts';
 import { startServer, type RunningServer } from '../apps/api/src/server.ts';
+import type { HubTestHooks } from '../apps/api/src/ws.ts';
 
 export const TEST_ORIGIN = 'http://127.0.0.1:5199';
 
@@ -70,12 +71,16 @@ export async function dropTestDatabase(databaseUrl: string): Promise<void> {
   }
 }
 
-export async function setupCtx(overrides: Partial<Config> = {}): Promise<Ctx> {
+export async function setupCtx(
+  overrides: Partial<Config> = {},
+  hooks?: HubTestHooks,
+  wrapSql?: (sql: Sql) => Sql,
+): Promise<Ctx> {
   const databaseUrl = await createTestDatabase();
   const sql = createSql(databaseUrl, 12);
   await migrate(sql, 'db/migrations');
   const config: Config = { ...baseConfig(), ...overrides, databaseUrl, apiPort: 0 };
-  const api = startServer(config, sql);
+  const api = startServer(config, wrapSql ? wrapSql(sql) : sql, hooks);
   const session = await seedSession(sql, config, 'ROOM-T1');
 
   const http = async (path: string, init: RequestInit & { origin?: string | null; token?: string } = {}) => {

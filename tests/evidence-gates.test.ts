@@ -383,6 +383,74 @@ describe('C1-EG-02 controlled WebSocket authorization/send boundary', () => {
   });
 });
 
+describe('C1-FU-01 concurrent admitted sends around the per-socket auth decision', () => {
+  test('concurrent broadcasts admit more than one in-flight frame after a revoke/expiry; later sends are denied', async () => {
+    let armed = false;
+    let blocked = 0;
+    let releaseGate = () => {};
+    const gate = new Promise<void>((resolve) => {
+      releaseGate = resolve;
+    });
+    const ctx = await setupCtx(
+      { rate: generousRate },
+      {
+        beforeSend: async (ws: Socket) => {
+          if (armed && ws.data.role === 'participant') {
+            blocked += 1;
+            await gate;
+          }
+        },
+      },
+    );
+    try {
+      const participant = await join(ctx);
+      const socket = await openSocket(ctx.wsUrl);
+      socket.send({ type: 'auth', token: participant.grant });
+      await socket.wait((message) => message.type === 'state');
+      const initialStates = socket.messages.filter((message) => message.type === 'state').length;
+
+      armed = true;
+      const opens = await Promise.all([
+        control(ctx, `/questions/${ctx.session.ratingQuestionId}/open`),
+        control(ctx, `/questions/${ctx.session.ratingQuestionId}/open`),
+        control(ctx, `/questions/${ctx.session.ratingQuestionId}/open`),
+      ]);
+      expect(opens.every((response) => response.status === 200)).toBe(true);
+      await waitFor(() => blocked >= 3);
+
+      // All three sends passed revalidation before this expiry; each is already admitted.
+      await ctx.sql`
+        update grants set expires_at = now() - interval '1 millisecond'
+        where participant_id = ${participant.participant_id}`;
+      armed = false;
+      releaseGate();
+
+      const deadline = Date.now() + 4000;
+      while (
+        socket.messages.filter((message) => message.type === 'state').length < initialStates + 3 &&
+        Date.now() < deadline
+      ) {
+        await sleep(25);
+      }
+      const admitted = socket.messages.filter((message) => message.type === 'state').length - initialStates;
+      console.log(`C1-FU-01 admitted post-revalidation frames under concurrent sends: ${admitted}`);
+      // Established behavior: more than one already-admitted frame is possible;
+      // the earlier one-in-flight-frame wording is not supported.
+      expect(admitted).toBeGreaterThanOrEqual(2);
+
+      socket.send({ type: 'resync' });
+      const error = await socket.wait((message) => message.type === 'error');
+      expect(error.code).toBe('UNAUTHORIZED');
+      expect((await socket.closed).code).toBe(4401);
+      const afterClose = socket.messages.filter((message) => message.type === 'state').length;
+      await sleep(100);
+      expect(socket.messages.filter((message) => message.type === 'state').length).toBe(afterClose);
+    } finally {
+      await ctx.close();
+    }
+  });
+});
+
 function sha256(value: string): string {
   const hasher = new Bun.CryptoHasher('sha256');
   hasher.update(value);

@@ -21,13 +21,13 @@ These equality cases are the current behavior and are recorded as the interpreta
 3. If the decision is "invalid", the socket receives `{type:'error', code:'UNAUTHORIZED'}` and is closed with 4401; no data frame is sent.
 4. If the decision is "valid", the already-built payload is written.
 
-The **per-socket re-authentication in step 2 is the authorization/send linearization point**. A revoke or expiry that commits after that point can interleave with the frame already being written — at most that one in-flight frame is possible. After it:
+The **per-socket re-authentication in step 2 is the authorization/send linearization point**. A revoke or expiry that commits after that point can interleave with any send already admitted by a concurrent resync/broadcast. Under concurrent sends, several already-admitted frames (one per in-flight send) can therefore be delivered; there is no proven one-frame bound. After them:
 
 - explicit participant revocation also closes matching sockets immediately (`disconnectParticipant`), typically before the blocked send;
-- the next send/resync for that socket fails revalidation (error + 4401);
+- no send that reaches revalidation after the revoke/expiry is admitted; the next send/resync fails revalidation (error + 4401);
 - the idle sweep (`WS_SWEEP_INTERVAL_MS`, default 30 s) closes sockets whose grants stop being valid without any client action.
 
-No claim is made that a revoke can never race a frame in flight; no stricter retention or expiry policy was introduced.
+No claim is made that a revoke can never race frames in flight, and the earlier one-in-flight-frame wording is corrected: concurrent sends may each deliver one already-admitted frame. No stricter retention or expiry policy was introduced.
 
 ## Executed evidence (R04)
 

@@ -193,13 +193,17 @@ afterEach(async () => {
   handler = async () => json({ status: 'error' }, 500);
 });
 
-afterAll(() => {
+afterAll(async () => {
+  // Let delayed React state updates settle, then restore only the network
+  // globals. The DOM globals stay installed for the rest of this test process
+  // so any late React callback still finds `window` instead of throwing in a
+  // later, unrelated test file; subsequent files do not use the DOM.
+  await new Promise((resolve) => setTimeout(resolve, 300));
   const target = globalThis as unknown as Record<string, unknown>;
-  for (const key of INSTALLED_GLOBALS) {
+  for (const key of ['fetch', 'WebSocket'] as const) {
     if (originalGlobals[key] === undefined) delete target[key];
     else target[key] = originalGlobals[key];
   }
-  window.close();
 });
 
 describe('C1-RV-03 lost join acknowledgement keeps one logical join', () => {

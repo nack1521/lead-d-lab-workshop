@@ -1,0 +1,134 @@
+bun test v1.4.4 (38afee6c8)
+
+tests/findings-api.test.ts:
+(pass) C1-RV-01 terminal non-save is a stable per-attempt receipt > a rejected attempt is stored, replayed stably and conflicts on a changed payload [29.61ms]
+(pass) C1-RV-01 terminal non-save is a stable per-attempt receipt > concurrent same-key attempts with different payloads never commit two outcomes [14.47ms]
+(pass) C1-RV-01 terminal non-save is a stable per-attempt receipt > transient failures are not certified terminal and do not unlock a fresh attempt [671.51ms]
+(pass) C1-RV-01 terminal non-save is a stable per-attempt receipt > an internal database failure is uncertified and leaves no attempt receipt [32.73ms]
+(pass) C1-RV-02 already-open sockets enforce the approved grant lifetime > an expired facilitator socket receives no snapshot on resync and is closed [9.65ms]
+(pass) C1-RV-02 already-open sockets enforce the approved grant lifetime > a participant socket kept open past the session-end grace receives no state and is closed [30.50ms]
+(pass) C1-RV-02 already-open sockets enforce the approved grant lifetime > a broadcast does not deliver data to a socket whose grant has expired [19.03ms]
+(pass) C1-RV-04 join-only changes advance a coherent revision and publish after commit > a new participant advances the session revision, appears in snapshots and is pushed [30.13ms]
+(pass) C1-RV-04 join-only changes advance a coherent revision and publish after commit > an unchanged join retry is idempotent for the count and does not need a new revision [10.62ms]
+
+tests/web-state.test.ts:
+(pass) C1-08 client attempt policy > a fresh attempt is only allowed after a terminal non-save while the question is open and the grant is valid [0.11ms]
+(pass) C1-08 client attempt policy > classifies only structured terminal application outcomes as fresh-attempt eligible [0.16ms]
+(pass) C1-08 client attempt policy > a retry or reconcile reuses the same key and immutable payload [0.12ms]
+(pass) C1-11 revision guard > older or equal revisions never overwrite newer client state [0.04ms]
+(pass) C1-06 client grapheme counting and draft handling > Thai combining marks and emoji ZWJ count as one grapheme each [0.23ms]
+(pass) C1-06 client grapheme counting and draft handling > whitespace-only comments become absent and other text is preserved verbatim [0.10ms]
+(pass) C1-06 client grapheme counting and draft handling > fallback counts are clearly labelled as approximate [0.05ms]
+
+tests/submission.test.ts:
+(pass) C1-04 atomic rating + comment commit on real PostgreSQL > rating and comment commit together and are readable from the database [19.35ms]
+(pass) C1-04 atomic rating + comment commit on real PostgreSQL > a database failure during receipt insert leaves no partial rating or comment [16.54ms]
+(pass) C1-07 unchanged retry and key conflict > sequential unchanged retry returns the stable outcome and adds no rows [12.39ms]
+(pass) C1-07 unchanged retry and key conflict > concurrent unchanged retries count once and never duplicate the answer [25.60ms]
+(pass) C1-07 unchanged retry and key conflict > the same key with different payload is a clear conflict and never overwrites [13.58ms]
+(pass) C1-08 accepted answers are immutable and fresh attempts are explicit > a new key after acceptance returns the accepted answer without overwrite or duplicate [15.74ms]
+(pass) C1-08 accepted answers are immutable and fresh attempts are explicit > a terminal non-save rejection keeps the old key and allows a fresh key while the question is open [10.38ms]
+(pass) C1-08 accepted answers are immutable and fresh attempts are explicit > an unknown receipt is reported as unknown, not as permission for a new key [10.19ms]
+(pass) C1-05 poll submissions and typed validation > poll option plus comment commits; wrong option and wrong type are rejected without rows [20.22ms]
+(pass) C1-05 poll submissions and typed validation > rating outside the question bounds is rejected [10.84ms]
+(pass) C1-06 comment boundaries and Unicode > 500 graphemes accepted, 501 rejected, whitespace-only becomes absent [17.49ms]
+(pass) C1-06 comment boundaries and Unicode > Thai combining marks and emoji ZWJ are counted as graphemes server-side [6.77ms]
+(pass) C1-06 comment boundaries and Unicode > HTML-like comment is stored as data and no markup is interpreted [12.04ms]
+
+tests/join.test.ts:
+(pass) C1-01 Mode A health/readiness against real PostgreSQL > health reports ok and readiness proves a real DB round trip [4.39ms]
+(pass) C1-03 anonymous join > join without an account issues an opaque participant grant [7.45ms]
+(pass) C1-03 anonymous join > blank and whitespace-only nicknames are absent; duplicate nicknames are allowed [12.72ms]
+(pass) C1-03 anonymous join > an unchanged join retry returns the same participant, not a new one [8.65ms]
+(pass) C1-03 anonymous join > unknown room returns 404 and a terminal rejection body [0.96ms]
+(pass) C1-06 nickname grapheme limits and safe text > 40 graphemes are accepted and 41 graphemes rejected with Thai message [3.72ms]
+(pass) C1-06 nickname grapheme limits and safe text > emoji ZWJ and Thai combining marks count as single graphemes [7.94ms]
+(pass) C1-06 nickname grapheme limits and safe text > HTML-like nickname is stored as data and never rendered as markup [3.36ms]
+
+tests/findings-r02.test.ts:
+(pass) R02-QA-01 rejected receipt read returns its stable stored rejection > authenticated GET of a rejected receipt returns the stored terminal rejection [19.15ms]
+(pass) R02-QA-01 rejected receipt read returns its stable stored rejection > the rejected receipt is readable in the session-end grace window and denied after revoke [21.10ms]
+(pass) R02-QA-02 every handled key is bound to a stable outcome and fingerprint > a deduplicated new key replays stably and conflicts on a changed payload [27.18ms]
+(pass) R02-QA-03 writes recheck authorization inside the mutation transaction > a submission blocked on the session lock is rejected when the participant is revoked meanwhile [534.04ms]
+(pass) R02-QA-03 writes recheck authorization inside the mutation transaction > a submission blocked on the session lock is rejected when its grant expires meanwhile [532.95ms]
+(pass) R02-QA-03 writes recheck authorization inside the mutation transaction > a facilitator control blocked on the session lock is rejected when its grant expires meanwhile [535.52ms]
+(pass) R02-QA-05 participant state is read from one coherent snapshot > concurrent commit/read never pairs the same revision with two different own-answer states [118.29ms]
+(pass) R02-QA-05 participant state is read from one coherent snapshot > an equal-revision WS participant state still reconciles the own accepted answer [14.31ms]
+(pass) C1-RV-02 security verification gate — exact lifetime boundaries and idle sweep > an idle socket is closed by the sweep when its grant expires without any client message [627.08ms]
+(pass) C1-RV-02 security verification gate — exact lifetime boundaries and idle sweep > the exact session-end read grace boundary is enforced without extending the grant TTL [1348.10ms]
+(pass) C1-RV-02 security verification gate — exact lifetime boundaries and idle sweep > a revoked participant socket gets no state from the broadcast that other sockets receive [174.69ms]
+
+tests/findings-client.test.tsx:
+(pass) C1-RV-03 lost join acknowledgement keeps one logical join > an uncertain join reuses the same operation key on unchanged retry [478.56ms]
+(pass) C1-RV-03 lost join acknowledgement keeps one logical join > a nickname-only change is still the same join; a different room code is a new join [490.69ms]
+(pass) C1-RV-05 outcome and draft state follow the authoritative question > a saved answer does not carry into the next unanswered question [473.81ms]
+(pass) C1-RV-05 outcome and draft state follow the authoritative question > an unresolved earlier attempt stays with the old question during a transition [484.31ms]
+(pass) R02-QA-04 an uncertain join keeps its original payload and shows the stored label > editing the nickname does not change the pending payload or the displayed identity [459.39ms]
+(pass) R02-QA-05 equal-revision reconciliation in the participant container > an equal-revision push carrying the own accepted answer is applied [451.35ms]
+(pass) C1-RV-04 authoritative snapshots and truthful Live > a delayed older HTTP response cannot overwrite newer WebSocket state [469.51ms]
+(pass) C1-RV-04 authoritative snapshots and truthful Live > facilitator shows Live only after an authorized fresh snapshot [880.32ms]
+
+tests/facilitator-ws.test.ts:
+(pass) C1-09 authenticated facilitator aggregate over the database commit > facilitator receives the snapshot and pushed aggregate without nickname or comment [63.10ms]
+(pass) C1-09 authenticated facilitator aggregate over the database commit > a participant socket receives own state only, never the facilitator aggregate [16.10ms]
+(pass) C1-13 role, session and grant isolation > participant cannot call facilitator control or aggregate endpoints [10.41ms]
+(pass) C1-13 role, session and grant isolation > participant cannot submit to a question of another session [12.37ms]
+(pass) C1-13 role, session and grant isolation > missing, expired and revoked grants are rejected on read and write [22.45ms]
+(pass) C1-13 role, session and grant isolation > facilitator of one session cannot read or control another session [5.06ms]
+(pass) C1-13 role, session and grant isolation > WS sends nothing before authentication and drops unauthenticated messages [256.11ms]
+(pass) C1-14 CORS and WebSocket origin contract > allowed origin passes preflight and receives explicit CORS headers [0.53ms]
+(pass) C1-14 CORS and WebSocket origin contract > denied and null origins are refused for HTTP and for WS upgrade [2.53ms]
+(pass) C1-14 CORS and WebSocket origin contract > an allowed origin does not replace the grant [0.29ms]
+
+tests/web-views.test.tsx:
+(pass) C1-15 approved Thai copy and labels render in the participant view > join instructions use the approved participant entry copy [1.46ms]
+(pass) C1-15 approved Thai copy and labels render in the participant view > rating question keeps approved label, scale endpoints and multiline comment field [0.48ms]
+(pass) C1-15 approved Thai copy and labels render in the participant view > a multi-line draft is preserved verbatim in the textarea [0.24ms]
+(pass) C1-15 approved Thai copy and labels render in the participant view > terminal non-save shows the Thai error, draft, and fresh attempt actions [0.20ms]
+(pass) C1-15 approved Thai copy and labels render in the participant view > unknown state offers reconcile and never claims the answer was saved [0.17ms]
+(pass) C1-15 approved Thai copy and labels render in the participant view > HTML-like comment and nickname render as escaped text, not markup [0.14ms]
+(pass) C1-15 approved Thai copy and labels render in the participant view > closed question renders read-only and hides submit [0.13ms]
+(pass) C1-15 facilitator view states > live snapshot renders aggregate counts without nickname or comment [0.32ms]
+(pass) C1-15 facilitator view states > stale state is labelled old data and mutations are disabled [0.16ms]
+
+tests/lan-guards.test.ts:
+(pass) LAN-FU-02 fail-closed private interface/address and SAN agreement > missing, ambiguous, public, wildcard, loopback and VPN selections are rejected [0.39ms]
+(pass) LAN-FU-02 fail-closed private interface/address and SAN agreement > a single private candidate or an explicit valid private address is selected [0.03ms]
+(pass) LAN-FU-02 fail-closed private interface/address and SAN agreement > the listener entry refuses to start when the retained certificate SAN does not exactly match the selection [12.99ms]
+(pass) LAN-FU-04 strict-compatible certificates and exact-SAN reuse/renewal > leaf is strict-compatible, has the exact SAN and is reused for the same address with the same CA [551.96ms]
+(pass) LAN-FU-04 strict-compatible certificates and exact-SAN reuse/renewal > changed address and short-validity leaf renew instead of being reused [603.66ms]
+(pass) LAN-FU-01 bounded WebSocket proxy > healthy upstream forwards frames, preserves Origin and supports reconnect [47.28ms]
+(pass) LAN-FU-01 bounded WebSocket proxy > unavailable upstream closes the client with 1011 and releases both sides [1.52ms]
+(pass) LAN-FU-01 bounded WebSocket proxy > delayed upstream handshake hits the deadline and closes with 1013 [303.82ms]
+(pass) LAN-FU-01 bounded WebSocket proxy > oversize client frame is denied before forwarding and closes 1009 [5.19ms]
+(pass) LAN-FU-01 bounded WebSocket proxy > queue caps bound frames waiting for an unopened upstream and close 1013 [2.91ms]
+(pass) LAN-FU-03 verifier fails closed > an unavailable LAN target produces a nonzero verifier exit [55.78ms]
+
+tests/evidence-gates.test.ts:
+(pass) C1-EG-01 controlled participant-snapshot interleave on real PostgreSQL > HTTP: a commit between component reads yields a complete old view and a complete new view [159.31ms]
+(pass) C1-EG-01 controlled participant-snapshot interleave on real PostgreSQL > WS: a commit between broadcast build and send yields complete old/new participant frames [169.57ms]
+(pass) C1-EG-02 precise lifetime equality at the real authorization seam > hard TTL equality is expired, grace equality is still readable, hard TTL wins over grace [126.07ms]
+(pass) C1-EG-02 precise lifetime equality at the real authorization seam > facilitator hard-TTL equality is also expired at the exact expiry instant [116.04ms]
+(pass) C1-EG-02 controlled WebSocket authorization/send boundary > valid side: an authorized participant receives the broadcast frame [135.79ms]
+(pass) C1-EG-02 controlled WebSocket authorization/send boundary > expiry inside the revalidation→send window admits exactly the in-flight frame, then denies [156.12ms]
+(pass) C1-EG-02 controlled WebSocket authorization/send boundary > revoke inside the window is covered by the explicit disconnect: no state frame is delivered [301.25ms]
+C1-FU-01 admitted post-revalidation frames under concurrent sends: 3
+(pass) C1-FU-01 concurrent admitted sends around the per-socket auth decision > concurrent broadcasts admit more than one in-flight frame after a revoke/expiry; later sends are denied [354.78ms]
+
+tests/limits.test.ts:
+(pass) C1-06 payload budgets > HTTP body larger than 16KB is refused without creating a row [9.92ms]
+(pass) C1-06 payload budgets > WS frame larger than 4KB closes the socket [0.65ms]
+(pass) C1-06 payload budgets > participant rate budget returns a structured 429 and stops new rows [38.49ms]
+
+tests/lifecycle.test.ts:
+(pass) C1-10 deterministic close/submit ordering and replay after close > an accepted answer replays after the question closes; new keys are refused [36.03ms]
+(pass) C1-10 deterministic close/submit ordering and replay after close > stale questions do not receive answers and closed questions stay closed [39.07ms]
+(pass) C1-10 deterministic close/submit ordering and replay after close > concurrent submit and close always resolve to one serial order [131.54ms]
+(pass) C1-10 deterministic close/submit ordering and replay after close > session end stops new writes but a bounded read of own receipt still works [29.89ms]
+(pass) C1-11 reconnect and authoritative snapshot recovery > a submission committed while the facilitator socket is down appears on reconnect [22.08ms]
+(pass) C1-11 reconnect and authoritative snapshot recovery > resync returns the same authoritative snapshot revision [4.55ms]
+
+ 103 pass
+ 0 fail
+ 491 expect() calls
+Ran 103 tests across 12 files. [14.94s]

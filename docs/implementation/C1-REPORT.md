@@ -1,9 +1,9 @@
-# C1 local build — Executive report (current: R04 evidence gates)
+# C1 local build — Executive report (current: R05 follow-up)
 
-Status: **READY_FOR_REVIEW** — verification-only R04 closed the two evidence gates from the R03 review (C1-EG-01 controlled participant-snapshot interleave; C1-EG-02 WS authorization/send boundary with precise lifetime equality). No new defect and no application/policy change. Canonical detail: [C1-LOCAL-BUILD / R04](../results/C1-LOCAL-BUILD/R04/result.md) · [result.json](../results/C1-LOCAL-BUILD/R04/result.json) · [evidence](../results/C1-LOCAL-BUILD/R04/evidence/README.md) · [boundary](../implementation/C1-WS-AUTHORIZATION-BOUNDARY.md). R01–R03 remain unchanged history. This is the coding-tool self-report, not independent QA or human acceptance.
+Status: **READY_FOR_REVIEW** — R05 corrected the C1-FU-01 concurrent-send assurance (verified: concurrent already-admitted sends can deliver more than one frame; no one-frame bound, no policy change) and preserved all prior evidence gates. R04 closed the two evidence gates from the R03 review (C1-EG-01 controlled participant-snapshot interleave; C1-EG-02 WS authorization/send boundary with precise lifetime equality). No new defect and no application/policy change. Canonical detail: [C1-LOCAL-BUILD / R04](../results/C1-LOCAL-BUILD/R04/result.md) · [result.json](../results/C1-LOCAL-BUILD/R04/result.json) · [evidence](../results/C1-LOCAL-BUILD/R04/evidence/README.md) · [boundary](../implementation/C1-WS-AUTHORIZATION-BOUNDARY.md). R01–R03 remain unchanged history. This is the coding-tool self-report, not independent QA or human acceptance.
 
 ## Baseline and provenance
-- Task `C1-LOCAL-BUILD`, run `R04`, branch `main`; start HEAD `6c75daa`, build HEAD `62bfa8d` (not pushed).
+- Task `C1-LOCAL-BUILD`, run `R05`, branch `main`; start HEAD `3ab71c4`, build HEAD `42e7bb8` (not pushed).
 - Producer: **DeepSeek Harness** (single active coding writer). Model `deepseek-v4.1-flash-1017` is the runtime-reported id and remains unverified.
 - Protected dirty files `docs/AI-PROGRESS.md` and `docs/handoffs/ANTIGRAVITY-C1.md` were not staged or modified.
 
@@ -43,4 +43,4 @@ No application behavior changed in R04; the suite was re-run on the current buil
 - TTL/grace equality is proven at the authorization seam with real DB timestamps (chosen instants); production 4h/8h/15m durations are not waited out. Exhaustive scheduler interleavings are not proven.
 
 ## Next gate
-Independent QA/browser retest of `62bfa8d` (real-browser C1-15/R02-QA-04 evidence), then user trial/acceptance. Push, deploy, tunnel, image publication, paid services, global configuration and destructive reset remain unauthorized. Services stay running with volumes for the next reviewer; normal stop only, never `down -v` or prune.
+Independent QA of C1-R05 + LAN-R02 and the pending physical iPhone test, then user trial/acceptance. Push, deploy, tunnel, image publication, paid services, global configuration and destructive reset remain unauthorized. Services stay running with volumes for the next reviewer; normal stop only, never `down -v` or prune.

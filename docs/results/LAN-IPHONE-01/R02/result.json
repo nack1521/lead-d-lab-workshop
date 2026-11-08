@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "task_id": "LAN-IPHONE-01",
+  "run_id": "R02",
+  "reported_at": "2026-11-08T17:24:40+07:00",
+  "producer": "DeepSeek Harness (single active coding writer)",
+  "authoring_tool": "DeepSeek Harness",
+  "model": "deepseek-v4.1-flash-1017",
+  "source_kind": "direct",
+  "baseline_commit": "3ab71c4",
+  "observed_head": "42e7bb8",
+  "branch": "main",
+  "work_kind": "lan_followup_guards",
+  "status": "BLOCKED_PENDING_USER_ACTION",
+  "lan_url": "https://192.168.1.98:8443",
+  "summary": "Closed the LAN follow-up groups: bounded WebSocket proxy (frame/queue/byte caps + upstream deadline + cleanup), fail-closed private interface/SAN selection with exact-SAN reuse/renewal and retained CA identity, strict-compatible leaf extensions (AKI/SKI), and a fail-closed verifier with assertions, strictly-newer fresh-push evidence, real poll-first stale 409 and nonzero failure exit. Re-verified LAN HTTPS/API/DB/WS evidence (ok:true) and Mode A 103/0; Mode B runner 0 fail with 4 host-tooling skips. Physical iPhone remains NOT RUN / PENDING_USER_ACTION; exact OpenSSL-3.5 strict Python retest NOT RUN (host lacks that interpreter).",
+  "detail_path": "docs/results/LAN-IPHONE-01/R02/result.md",
+  "findings": [
+    {"finding_id": "LAN-FU-01", "source_id": "QA-LAN-01", "status": "PASS", "evidence_paths": ["tests/lan-guards.test.ts", "docs/results/LAN-IPHONE-01/R02/evidence/lan-guards.log"]},
+    {"finding_id": "LAN-FU-02", "source_id": "QA-LAN-03", "status": "PASS", "evidence_paths": ["lan/address.ts", "docs/results/LAN-IPHONE-01/R02/evidence/entry-fail-closed.log", "tests/lan-guards.test.ts"]},
+    {"finding_id": "LAN-FU-03", "source_id": "LAN-COORD-01", "status": "PASS", "evidence_paths": ["lan/verify.ts", "docs/results/LAN-IPHONE-01/R02/evidence/lan-verify.log", "tests/lan-guards.test.ts"]},
+    {"finding_id": "LAN-FU-04", "source_id": "LAN-COORD-02", "status": "PASS_STRUCTURAL_STRICT_PYTHON_RETEST_NOT_RUN", "evidence_paths": ["docs/results/LAN-IPHONE-01/R02/evidence/cert-renewal.log", "docs/results/LAN-IPHONE-01/R02/evidence/tls-and-verify-evidence.log", "tests/lan-guards.test.ts"]},
+    {"finding_id": "LAN-FU-04", "source_id": "LAN-COORD-03", "status": "PASS_STRUCTURAL_STRICT_PYTHON_RETEST_NOT_RUN", "evidence_paths": ["docs/results/LAN-IPHONE-01/R02/evidence/cert-renewal.log"]},
+    {"finding_id": "LAN-DOC-01", "source_id": "QA-LAN-02", "status": "RESOLVED_CURRENT_DOCS_PRESERVED", "evidence_paths": ["README.md"]}
+  ],
+  "cases": [
+    {"case_id": "LAN-01", "status": "PARTIAL", "limitations": "iPhone same-network membership unconfirmed."},
+    {"case_id": "LAN-02", "status": "BLOCKED_PENDING_USER_ACTION", "limitations": "Physical iPhone Safari/cert trust NOT RUN; model/iOS unknown."},
+    {"case_id": "LAN-03", "status": "PASS", "limitations": "Executed through real HTTPS entry/API/DB; phone UI NOT RUN."},
+    {"case_id": "LAN-04", "status": "PASS", "limitations": "Facilitator WS/HTTP automated; browser UI NOT RUN."},
+    {"case_id": "LAN-05", "status": "PASS", "limitations": "Automated same-origin/negatives; real Safari network panel NOT RUN."},
+    {"case_id": "LAN-06", "status": "PASS", "limitations": "Mode B host-tooling tests skipped (4)."},
+    {"case_id": "LAN-07", "status": "PASS", "limitations": "Device certificate removal is a user action."}
+  ],
+  "commands": [
+    {"command": "bun run lan:certs", "exit_code": 0, "outcome": "leaf renewed with AKI/SKI; CA identity preserved"},
+    {"command": "LAN_BIND=0.0.0.0 bun lan/lan-entry.ts", "exit_code": 2, "outcome": "WILDCARD_ADDRESS fail closed"},
+    {"command": "LAN_BIND=8.8.8.8 bun lan/lan-entry.ts", "exit_code": 2, "outcome": "ADDRESS_NOT_ON_INTERFACE fail closed"},
+    {"command": "LAN_BIND=127.0.0.1 bun lan/lan-entry.ts", "exit_code": 2, "outcome": "LOOPBACK_ADDRESS fail closed"},
+    {"command": "NODE_EXTRA_CA_CERTS=… bun lan/verify.ts", "exit_code": 0, "outcome": "ok:true; fresh push 85→86; stale poll-first 409; DB readback"},
+    {"command": "bun test tests", "exit_code": 0, "outcome": "103 pass / 0 fail"},
+    {"command": "tests/run-in-docker.sh c1b_default", "exit_code": 0, "outcome": "0 fail; 4 host-tooling skips"},
+    {"command": "openssl verify -x509_strict", "exit_code": 0, "outcome": "leaf chain OK"}
+  ],
+  "environment_limitations": [
+    "No OpenSSL 3.5 strict Python interpreter on this host; exact Coordinator strict-Python retest NOT RUN (no global install).",
+    "Mode B archive-only runner lacks openssl/active cert/private fixtures; 4 LAN guard tests skipped, not passed.",
+    "Physical iPhone, mobile/accessibility/load/security certification NOT RUN."
+  ],
+  "blockers": ["Physical iPhone certificate trust and Safari test: PENDING_USER_ACTION"],
+  "next_gate": "User completes CA trust + iPhone Safari test; then independent review/QA. No public deploy/tunnel.",
+  "services_left_running": {"lan_entry": "https://192.168.1.98:8443", "mode_a": ["127.0.0.1:3000", "127.0.0.1:5173", "db 5433"], "mode_b": ["3001", "5174", "db 5434"]},
+  "published": false
+}

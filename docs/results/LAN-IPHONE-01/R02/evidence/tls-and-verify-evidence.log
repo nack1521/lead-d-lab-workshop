@@ -1,0 +1,6 @@
+== trusted TLS clients after strict-leaf renewal ==
+curl HTTP 200
+bun_fetch 200
+.local/lan-certs/server.crt: OK
+strict_python_openssl3_unavailable (host python is LibreSSL; exact 3.14/OpenSSL3.5 retest NOT RUN)
+== LAN verifier through HTTPS entry ==

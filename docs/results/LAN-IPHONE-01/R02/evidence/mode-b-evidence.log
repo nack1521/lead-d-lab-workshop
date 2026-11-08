@@ -1,0 +1,6 @@
+RUNNER_EXIT=1
+ 4 fail
+ 480 expect() calls
+Ran 103 tests across 12 files. [12.47s]
+RESTART_EXIT=0
+mode_b_ready HTTP 200

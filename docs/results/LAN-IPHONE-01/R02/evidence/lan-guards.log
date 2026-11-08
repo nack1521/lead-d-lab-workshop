@@ -1,0 +1,19 @@
+bun test v1.4.4 (38afee6c8)
+
+tests/lan-guards.test.ts:
+(pass) LAN-FU-02 fail-closed private interface/address and SAN agreement > missing, ambiguous, public, wildcard, loopback and VPN selections are rejected [3.69ms]
+(pass) LAN-FU-02 fail-closed private interface/address and SAN agreement > a single private candidate or an explicit valid private address is selected [0.68ms]
+(pass) LAN-FU-02 fail-closed private interface/address and SAN agreement > the listener entry refuses to start when the retained certificate SAN does not exactly match the selection [21.47ms]
+(pass) LAN-FU-04 strict-compatible certificates and exact-SAN reuse/renewal > leaf is strict-compatible, has the exact SAN and is reused for the same address with the same CA [414.20ms]
+(pass) LAN-FU-04 strict-compatible certificates and exact-SAN reuse/renewal > changed address and short-validity leaf renew instead of being reused [535.45ms]
+(pass) LAN-FU-01 bounded WebSocket proxy > healthy upstream forwards frames, preserves Origin and supports reconnect [59.08ms]
+(pass) LAN-FU-01 bounded WebSocket proxy > unavailable upstream closes the client with 1011 and releases both sides [1.37ms]
+(pass) LAN-FU-01 bounded WebSocket proxy > delayed upstream handshake hits the deadline and closes with 1013 [376.67ms]
+(pass) LAN-FU-01 bounded WebSocket proxy > oversize client frame is denied before forwarding and closes 1009 [1.73ms]
+(pass) LAN-FU-01 bounded WebSocket proxy > queue caps bound frames waiting for an unopened upstream and close 1013 [1.23ms]
+(pass) LAN-FU-03 verifier fails closed > an unavailable LAN target produces a nonzero verifier exit [95.33ms]
+
+ 11 pass
+ 0 fail
+ 33 expect() calls
+Ran 11 tests across 1 file. [1.57s]

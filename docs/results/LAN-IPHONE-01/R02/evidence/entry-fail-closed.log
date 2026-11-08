@@ -1,0 +1,6 @@
+WILDCARD_ADDRESS: refusing a wildcard LAN bind address
+wildcard_exit=2
+ADDRESS_NOT_ON_INTERFACE: LAN_BIND 8.8.8.8 is not on a local interface
+public_exit=2
+LOOPBACK_ADDRESS: refusing a loopback address as the LAN entry
+loopback_exit=2

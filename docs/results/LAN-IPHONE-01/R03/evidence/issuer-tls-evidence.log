@@ -1,0 +1,14 @@
+== issuer explicit-address validation (real CLI) ==
+ADDRESS_NOT_ON_INTERFACE: LAN_BIND 8.8.8.8 is not on a local interface
+error: LAN_IP=8.8.8.8 is not an intended private LAN address on this host
+public_issuer_exit=2
+WILDCARD_ADDRESS: refusing a wildcard LAN bind address
+error: LAN_IP=0.0.0.0 is not an intended private LAN address on this host
+wildcard_issuer_exit=2
+generated_files=       0
+== strict TLS unchanged ==
+curl HTTP 200
+bun_fetch 200
+.local/lan-certs/server.crt: OK
+strict_openssl_exit=0
+ca_fingerprint_prefix=e2a52e8d7939d0c3

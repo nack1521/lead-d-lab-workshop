@@ -1,0 +1,23 @@
+bun test v1.4.4 (38afee6c8)
+
+tests/lan-guards.test.ts:
+(pass) LAN-FU-02 fail-closed private interface/address and SAN agreement > missing, ambiguous, public, wildcard, loopback and VPN selections are rejected [0.44ms]
+(pass) LAN-FU-02 fail-closed private interface/address and SAN agreement > a single private candidate or an explicit valid private address is selected [0.05ms]
+(pass) LAN-FU-02 fail-closed private interface/address and SAN agreement > the listener entry refuses to start when the retained certificate SAN does not exactly match the selection [12.53ms]
+(pass) LAN-FU-04 strict-compatible certificates and exact-SAN reuse/renewal > leaf is strict-compatible, has the exact SAN and is reused for the same address with the same CA [474.43ms]
+(pass) LAN-FU-04 strict-compatible certificates and exact-SAN reuse/renewal > issuer refuses an explicit unsafe address and incomplete CA pairs fail closed [301.13ms]
+(pass) LAN-FU-04 strict-compatible certificates and exact-SAN reuse/renewal > a healthy non-forced rerun actually reuses the leaf and key [426.84ms]
+(pass) LAN-FU-04 strict-compatible certificates and exact-SAN reuse/renewal > changed address and short-validity leaf renew instead of being reused [472.85ms]
+(pass) LAN-FU-01 bounded WebSocket proxy > healthy upstream forwards frames, preserves Origin and supports reconnect [46.24ms]
+(pass) LAN-FU-01 bounded WebSocket proxy > unavailable upstream closes the client with 1011 and releases both sides [0.95ms]
+(pass) LAN-FU-01 bounded WebSocket proxy > delayed upstream handshake hits the deadline and closes with 1013 [306.03ms]
+(pass) LAN-FU-01 bounded WebSocket proxy > oversize client frame is denied before forwarding and closes 1009 [2.42ms]
+(pass) LAN-FU-01 bounded WebSocket proxy > queue caps bound frames waiting for an unopened upstream and close 1013 [1.79ms]
+(pass) slow downstream client is closed within a finite budget and the upstream is released [26.63ms]
+(pass) slow upstream builds bounded client-side buffer and the client is closed 1013 [5.12ms]
+(pass) LAN-FU-03 verifier fails closed > an unavailable LAN target produces a nonzero verifier exit [64.14ms]
+
+ 15 pass
+ 0 fail
+ 49 expect() calls
+Ran 15 tests across 1 file. [2.16s]

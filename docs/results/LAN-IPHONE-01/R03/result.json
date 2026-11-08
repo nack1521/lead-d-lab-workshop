@@ -1,0 +1,50 @@
+{
+  "schema_version": 1,
+  "task_id": "LAN-IPHONE-01",
+  "run_id": "R03",
+  "reported_at": "2026-11-08T18:22:16+07:00",
+  "producer": "DeepSeek Harness (single active coding writer)",
+  "authoring_tool": "DeepSeek Harness",
+  "model": "deepseek-v4.1-flash-1017",
+  "source_kind": "direct",
+  "baseline_commit": "0c0182e",
+  "observed_head": "fdba66a",
+  "branch": "main",
+  "work_kind": "lan_residual_guards",
+  "status": "BLOCKED_PENDING_USER_ACTION",
+  "lan_url": "https://192.168.1.98:8443",
+  "summary": "Closed the remaining LAN residuals: post-OPEN bidirectional backpressure with supported Bun buffered-amount APIs (bounded close 1013 + release both sides, slow raw client/upstream tests), explicit issuer LAN_IP validation through the shared private-address contract, verifier prior-state snapshot/exact restore/control-revision+DB correlation/socket cleanup and CLI typecheck coverage, and partial-CA-pair fail-closed recovery while preserving CA identity and non-forced leaf/key reuse. Mode A 107/0; Mode B Docker runner 100/0 with 7 declared skips; typecheck and both builds exit 0; trusted HTTPS verifier exit 0 with exact restoration. Physical iPhone remains NOT RUN/PENDING_USER_ACTION.",
+  "detail_path": "docs/results/LAN-IPHONE-01/R03/result.md",
+  "findings": [
+    {"finding_id": "LAN-FU-01", "source_id": "R02-QA-LAN-01", "status": "FIXED", "evidence_paths": ["tests/lan-guards.test.ts", "docs/results/LAN-IPHONE-01/R03/evidence/lan-guards.log"]},
+    {"finding_id": "LAN-FU-02", "source_id": "QA-LAN-03", "status": "FIXED", "evidence_paths": ["lan/generate-certs.sh", "docs/results/LAN-IPHONE-01/R03/evidence/issuer-tls-evidence.log"]},
+    {"finding_id": "LAN-FU-03", "source_id": "R02-QA-LAN-02", "status": "FIXED", "evidence_paths": ["lan/verify.ts", "docs/results/LAN-IPHONE-01/R03/evidence/lan-verify.log"]},
+    {"finding_id": "LAN-FU-04", "source_id": "R02-QA-LAN-03", "status": "FIXED", "evidence_paths": ["tests/lan-guards.test.ts", "docs/results/LAN-IPHONE-01/R03/evidence/issuer-tls-evidence.log"]},
+    {"finding_id": "LAN-DOC-01", "source_id": "QA-LAN-02", "status": "RESOLVED_CURRENT_DOCS_PRESERVED", "evidence_paths": ["README.md"]}
+  ],
+  "cases": [
+    {"case_id": "LAN-01", "status": "PARTIAL", "limitations": "iPhone same-network membership unconfirmed."},
+    {"case_id": "LAN-02", "status": "BLOCKED_PENDING_USER_ACTION", "limitations": "Physical iPhone Safari/cert trust NOT RUN."},
+    {"case_id": "LAN-03", "status": "PASS", "limitations": "HTTPS/API/DB automated; phone UI NOT RUN."},
+    {"case_id": "LAN-04", "status": "PASS", "limitations": "WSS automated; browser UI NOT RUN."},
+    {"case_id": "LAN-05", "status": "PASS", "limitations": "Automated same-origin/negatives."},
+    {"case_id": "LAN-06", "status": "PASS", "limitations": "Mode B 7 host-tooling skips declared."},
+    {"case_id": "LAN-07", "status": "PASS", "limitations": "Device certificate removal is a user action."}
+  ],
+  "commands": [
+    {"command": "bun test tests", "exit_code": 0, "outcome": "107 pass / 0 fail"},
+    {"command": "tests/run-in-docker.sh c1b_default", "exit_code": 0, "outcome": "100 pass / 7 skip / 0 fail"},
+    {"command": "bun x tsc --noEmit -p tsconfig.json", "exit_code": 0, "outcome": "includes lan/**/*.ts"},
+    {"command": "bun run build:web / build:web:lan", "exit_code": 0, "outcome": "both builds succeed"},
+    {"command": "NODE_EXTRA_CA_CERTS=… bun lan/verify.ts", "exit_code": 0, "outcome": "failures []; exact restore; control revision 118 = pushed revision; DB total matches; sockets closed"},
+    {"command": "LAN_IP=8.8.8.8 / 0.0.0.0 sh lan/generate-certs.sh", "exit_code": 2, "outcome": "issuer refuses; zero files generated"}
+  ],
+  "environment_limitations": [
+    "Physical iPhone and certificate trust remain user actions (NOT RUN).",
+    "Mode B archive-only runner skips 7 host-tooling/raw-socket cases (declared, not passed).",
+    "No memory-exhaustion/load test on the live listener; slow-peer bounds use controlled raw sockets."
+  ],
+  "blockers": ["Physical iPhone certificate trust + Safari test: PENDING_USER_ACTION"],
+  "next_gate": "User completes CA trust and iPhone Safari test; then independent review. No public deploy/tunnel.",
+  "published": false
+}

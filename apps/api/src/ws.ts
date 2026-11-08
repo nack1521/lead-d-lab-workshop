@@ -106,16 +106,20 @@ export function createHub(sql: Sql, config: Config, hooks?: HubTestHooks): Hub {
     const snapshot = await buildSnapshot(sql, ws.data.sessionId);
     if (!snapshot) return;
     // Build the payload first, then make the authorization decision immediately
-    // before the socket write: the per-socket revalidation is the linearization
-    // boundary. A revoke/expiry committed after it can race at most the frame
-    // already being written; the socket is then closed and receives nothing more.
+    // before the socket write: the per-socket revalidation is the authorization/
+    // send linearization point. A revoke/expiry committed after it can race any
+    // send already admitted by a concurrent resync/broadcast (one per in-flight
+    // send, not a one-frame bound); no later send passes revalidation, and
+    // explicit revocation closes the socket. No zero-network-race guarantee is
+    // claimed and no extra scheduling yield is added when no test hook is set.
     const payload = await stateFor(snapshot, ws);
     if (!payload) return;
     if (!(await stillAuthorized(ws))) {
       closeUnauthorized(ws);
       return;
     }
-    await hooks?.beforeSend?.(ws);
+    const beforeSend = hooks?.beforeSend;
+    if (beforeSend) await beforeSend(ws);
     send(ws, payload);
   }
 
@@ -240,7 +244,8 @@ export function createHub(sql: Sql, config: Config, hooks?: HubTestHooks): Hub {
           closeUnauthorized(ws);
           continue;
         }
-        await hooks?.beforeSend?.(ws);
+        const beforeSend = hooks?.beforeSend;
+        if (beforeSend) await beforeSend(ws);
         send(ws, payload);
       }
     },

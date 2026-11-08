@@ -1,8 +1,8 @@
 # C1 local build — Current tool-neutral handoff
 
-Status: **LOCAL_BUILD_AUTHORIZED / C1-FU-01_RESOLVED_TARGETED / LAN_RESIDUALS_OPEN**. Read the [current consolidation](../implementation/C1-R05-LAN-R02-REVIEW-SUMMARY.md). Canonical retest resolves C1-FU-01 within its controlled schedule; existing successful C1 evidence remains. Four remaining groups are LAN-only. Coordinator strict TLS, actual certificate reuse and current browser checks pass as scoped; this is not full C1/human/mobile acceptance. DeepSeek remains user-operated primary and Antigravity explicit-handover fallback.
+Status: **LOCAL_BUILD_AUTHORIZED / C1-FU-01_RESOLVED_TARGETED / LAN_R03_PEER_REVIEW_PENDING**. Read the [current LAN R03 runtime retest](../implementation/LAN-R03-COORDINATOR-RETEST.md). Four prior LAN residual paths pass targeted Coordinator execution; canonical static review is pending. C1 evidence remains unchanged, not full human/mobile acceptance. DeepSeek remains user-operated primary and Antigravity explicit-handover fallback.
 
-Current follow-up is [LAN-only residual contract](LAN-R02-RESIDUALS.md) with [English prompt](LAN-R02-RESIDUAL-EN.txt). Do not create another C1 fix run without a justified C1 code change; old C1/LAN starters are historical. No generic rerun/bootstrap, automatic dispatch or provider switch. Communication policy lives in `AGENTS.md`.
+The [LAN residual prompt](LAN-R02-RESIDUAL-EN.txt) produced R03 and is now historical; its [contract](LAN-R02-RESIDUALS.md) remains the retest input. Await canonical review, not another automatic coding run. Do not create another C1 fix run without a justified C1 change, bootstrap/reset, dispatch or switch provider automatically. Communication policy lives in `AGENTS.md`.
 
 ## Entry / precedence
 1. อ่าน `AGENTS.md`, `docs/CODING-WORKFLOW.md`, `docs/TEAM-WORKFLOW.md`, `docs/ANTIGRAVITY-RESULT-PROTOCOL.md`, `docs/results/INDEX.md`.

@@ -1,0 +1,51 @@
+[
+  {
+    "command": "bun test tests",
+    "exit_code": 0,
+    "pass": [
+      "107"
+    ],
+    "fail": [
+      "0"
+    ],
+    "skip": [],
+    "expect": [
+      "509"
+    ]
+  },
+  {
+    "command": "bun run typecheck",
+    "exit_code": 0,
+    "pass": [],
+    "fail": [],
+    "skip": [],
+    "expect": []
+  },
+  {
+    "command": "sh tests/run-in-docker.sh c1b_default",
+    "exit_code": 0,
+    "source_cleanup": true,
+    "pass": [
+      "100"
+    ],
+    "fail": [
+      "0"
+    ],
+    "skip": [
+      "7"
+    ],
+    "expect": [
+      "478"
+    ]
+  },
+  {
+    "build": "production",
+    "exit_code": 0,
+    "served_dist_changed": false
+  },
+  {
+    "build": "lan",
+    "exit_code": 0,
+    "served_dist_changed": false
+  }
+]

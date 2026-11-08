@@ -1,0 +1,8 @@
+{
+  "PID": 56663,
+  "started_local": "Sun Nov  8 18:17:54 2026",
+  "project_cwd_matches": true,
+  "entry_command_matches": true,
+  "source_modified_after_start": [],
+  "note": "Commit timestamp alone does not prove a stale process; file edit time and project/entry identity checked separately."
+}

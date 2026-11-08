@@ -1,0 +1,24 @@
+[
+  {
+    "ip": "8.8.8.8",
+    "exit_code": 2,
+    "created_files": false
+  },
+  {
+    "ip": "0.0.0.0",
+    "exit_code": 2,
+    "created_files": false
+  },
+  {
+    "surviving_component": "ca.crt",
+    "exit_code": 2,
+    "survivor_unchanged": true,
+    "no_other_files_created": true
+  },
+  {
+    "surviving_component": "ca.key",
+    "exit_code": 2,
+    "survivor_unchanged": true,
+    "no_other_files_created": true
+  }
+]

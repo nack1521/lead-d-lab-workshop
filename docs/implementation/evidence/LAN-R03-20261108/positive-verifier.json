@@ -1,0 +1,130 @@
+{
+  "exit_code": 0,
+  "output": {
+    "prior_state": {
+      "status": "active",
+      "activeQuestionId": "c9ebe455-9397-42b7-a2de-c5abfa76d1a4",
+      "questions": [
+        {
+          "id": "c9ebe455-9397-42b7-a2de-c5abfa76d1a4",
+          "receiving": true,
+          "closedAt": null
+        },
+        {
+          "id": "19024183-6e5d-416f-b02b-6137fab13c5d",
+          "receiving": false,
+          "closedAt": null
+        }
+      ]
+    },
+    "prior_state_restorable": true,
+    "lan_health": {
+      "status": 200,
+      "body": {
+        "status": "ok",
+        "mode": "lan-https",
+        "upstream": "http://127.0.0.1:3000"
+      }
+    },
+    "web_entry": {
+      "status": 200,
+      "spaRoot": true
+    },
+    "ca_certificate": {
+      "status": 200,
+      "contentType": "application/x-x509-ca-cert"
+    },
+    "join": {
+      "status": 201,
+      "participant_id_present": true,
+      "stored_label": "ผู้ร่วมทดสอบ LAN"
+    },
+    "rating_submission": {
+      "status": 201,
+      "replay_status": 200
+    },
+    "own_view": {
+      "status": 200,
+      "revision": 121
+    },
+    "facilitator_open_poll": {
+      "status": 200
+    },
+    "poll_first_stale_rating": {
+      "status": 409,
+      "code": "QUESTION_CLOSED"
+    },
+    "poll_submission": {
+      "status": 201
+    },
+    "negative": {
+      "evil_origin_status": 403,
+      "participant_facilitator_status": 403,
+      "missing_auth_status": 401
+    },
+    "facilitator_ws": {
+      "initial_revision": 124,
+      "snapshot_has_counts": true
+    },
+    "facilitator_ws_fresh_push": {
+      "initial_revision": 124,
+      "control_revision": 125,
+      "pushed_revision": 125,
+      "question_matches": true,
+      "db_total_matches": true
+    },
+    "facilitator_ws_reconnect": {
+      "revision": 125
+    },
+    "db_readback": {
+      "output": [
+        "42",
+        "62"
+      ],
+      "exit_code": 0
+    },
+    "socket_close_codes": [
+      1005,
+      1005,
+      1005
+    ],
+    "checks": {
+      "fixture_state_supported_for_exact_restore": true,
+      "lan_health_200": true,
+      "web_entry_spa": true,
+      "ca_certificate_public": true,
+      "join_201": true,
+      "rating_201": true,
+      "rating_multiline_comment": true,
+      "rating_replay_200_stable": true,
+      "own_view_200": true,
+      "own_view_coherent": true,
+      "facilitator_open_poll_200": true,
+      "stale_probe_join_201": true,
+      "poll_first_stale_rating_409_terminal": true,
+      "poll_201": true,
+      "evil_origin_403": true,
+      "participant_facilitator_403": true,
+      "missing_auth_401": true,
+      "facilitator_snapshot_received": true,
+      "facilitator_snapshot_privacy": true,
+      "participant_state_received": true,
+      "participant_state_own_answer": true,
+      "facilitator_reopen_rating_200": true,
+      "facilitator_fresh_push_matches_control_revision": true,
+      "facilitator_fresh_push_question_matches_control": true,
+      "control_revision_matches_db": true,
+      "control_active_question_matches_db": true,
+      "control_question_receiving_in_db": true,
+      "fresh_push_rating_total_matches_db": true,
+      "facilitator_reconnect_snapshot": true,
+      "facilitator_reconnect_revision_not_older": true,
+      "db_readback_exit_0": true,
+      "all_opened_sockets_closed": true,
+      "fixture_restored_prior_active_question": true,
+      "fixture_restored_exactly": true
+    },
+    "ok": true,
+    "failures": []
+  }
+}

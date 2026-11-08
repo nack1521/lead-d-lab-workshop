@@ -1,0 +1,2 @@
+
+$ bun x tsc --noEmit -p tsconfig.json

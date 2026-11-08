@@ -1,0 +1,13 @@
+{
+  "report_HEAD": "a3b3ed241c963116a58c5c7d83368e10629f0854",
+  "python": "3.14.9",
+  "TLS": "OpenSSL 3.5.9 29 Sep 2026",
+  "strict_enabled": true,
+  "https_ready_status": 200,
+  "CA_fingerprint": "5893933fc7c530e60be2099f6d37a124467848c6edc86700f25ac82cf1a3a167",
+  "CA_unchanged": true,
+  "phone": "NOT RUN",
+  "trust_changed": false,
+  "LAN_process": "56663 bun Sun Nov  8 18:17:54 2026",
+  "LAN_source_commit": "48a3930178e3d59665ee7198143d0702559bd41e 2026-11-08 18:19:11 +0700"
+}

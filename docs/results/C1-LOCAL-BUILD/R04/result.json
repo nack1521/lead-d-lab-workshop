@@ -1,0 +1,141 @@
+{
+  "schema_version": 1,
+  "task_id": "C1-LOCAL-BUILD",
+  "run_id": "R04",
+  "reported_at": "2026-11-08T14:54:17+07:00",
+  "producer": "DeepSeek Harness (single active coding writer)",
+  "authoring_tool": "DeepSeek Harness",
+  "model": "deepseek-v4.1-flash-1017",
+  "model_verification": "runtime-reported identifier; not independently verified",
+  "source_kind": "direct",
+  "baseline_commit": "6c75daa",
+  "observed_head": "62bfa8d54c4f01a54a2d08648032637c16f6e850",
+  "branch": "main",
+  "dirty_paths": ["docs/AI-PROGRESS.md", "docs/handoffs/ANTIGRAVITY-C1.md", "docs/results/C1-LOCAL-BUILD/R02/evidence/mode-a-api.log"],
+  "dirty_paths_preserved": true,
+  "work_kind": "verification_only_evidence_gates",
+  "review_input": "docs/implementation/C1-REVIEW-SUMMARY-R03.md",
+  "status": "READY_FOR_REVIEW",
+  "summary": "Verification-only follow-up on build 62bfa8d: no new defect and no application behavior/policy change. C1-EG-01 executed a controlled commit between component reads of a real PostgreSQL participant snapshot via a test-boundary barrier around the existing DB client; the HTTP view and participant WS frame show a complete old view and a later complete new view with coherent revision/question/own-answer/identity. C1-EG-02 documented the per-socket authorization/send linearization boundary and executed precise equality cases (hard TTL equality expired, session-end grace equality readable, hard TTL wins inside grace, revocation immediate) plus controlled expiry/revocation exactly between revalidation and send using an inert test-only hub hook: expiry admits exactly the in-flight frame then closes 4401; revocation is covered by the explicit disconnect with no state frame. Both-mode regression: Mode A 91 pass / 0 fail; Mode B Docker-only runner 91 pass / 0 fail; restart healthy. Real-browser and independent QA remain NOT RUN.",
+  "detail_path": "docs/results/C1-LOCAL-BUILD/R04/result.md",
+  "boundary_doc": "docs/implementation/C1-WS-AUTHORIZATION-BOUNDARY.md",
+  "commits": ["62bfa8d test(c1): controlled evidence gates for participant snapshots and WS send boundary"],
+  "changed_paths": [
+    "apps/api/src/server.ts",
+    "apps/api/src/ws.ts",
+    "tests/evidence-gates.test.ts",
+    "tests/helpers.ts",
+    "tests/sql-barrier.ts"
+  ],
+  "findings": [
+    {
+      "finding_id": "C1-EG-01",
+      "source_id": "R02-QA-05",
+      "group": "C1-RV-04",
+      "status": "PASS",
+      "evidence_paths": [
+        "docs/results/C1-LOCAL-BUILD/R04/evidence/evidence-gates.log",
+        "tests/evidence-gates.test.ts"
+      ],
+      "notes": "Controlled commit between component reads on real PostgreSQL repeatable read, via a test-boundary barrier at the existing DB client seam. HTTP old/new participant views and WS old/new frames are complete and internally coherent. Not an exhaustive scheduler proof; crash-before-broadcast NOT RUN."
+    },
+    {
+      "finding_id": "C1-EG-02",
+      "source_id": "C1-RV-02",
+      "group": "C1-RV-02",
+      "status": "PASS",
+      "evidence_paths": [
+        "docs/results/C1-LOCAL-BUILD/R04/evidence/evidence-gates.log",
+        "docs/implementation/C1-WS-AUTHORIZATION-BOUNDARY.md",
+        "tests/evidence-gates.test.ts"
+      ],
+      "notes": "Boundary documented (per-socket revalidation is the linearization point; explicit disconnect; at most the already-built in-flight frame). Equality: hard TTL equality expired, grace equality readable (+1ms GRACE_EXPIRED), hard TTL wins in grace, revocation immediate, facilitator TTL equality expired. Controlled expiry/revoke in the revalidation-to-send window: in-flight frame admitted then 4401; revoke delivers no state frame. No zero-race claim."
+    }
+  ],
+  "prior_ids_preserved": {
+    "R02-QA-01": "RESOLVED_TARGETED",
+    "R02-QA-02": "RESOLVED_TARGETED",
+    "R02-QA-03": "RESOLVED_TARGETED",
+    "R02-QA-04": "RESOLVED_TARGETED (browser retest remains Coordinator-owned)",
+    "R02-QA-05": "STRUCTURAL_FIX_VERIFIED; gap closed by C1-EG-01",
+    "C1-RV-01": "addressed R02/R03",
+    "C1-RV-02": "tested paths pass; boundary/equality evidence now by C1-EG-02",
+    "C1-RV-03": "addressed R02/R03",
+    "C1-RV-04": "addressed R02/R03; C1-EG-01 evidence",
+    "C1-RV-05": "RESOLVED_TARGETED_BROWSER retained; regressions pass",
+    "QA-C1-01..04": "retained as source IDs",
+    "C1-UI-01": "retained (C1-RV-05)",
+    "C1-UI-02": "retained (C1-RV-03)"
+  },
+  "cases": [
+    { "case_id": "C1-01", "mode_a": "PASS", "mode_b": "NOT RUN", "evidence_paths": ["docs/results/C1-LOCAL-BUILD/R04/evidence/mode-a-full-regression.log"], "limitations": "Mode A case; Mode B covered by C1-02." },
+    { "case_id": "C1-02", "mode_a": "NOT RUN", "mode_b": "PASS", "evidence_paths": ["docs/results/C1-LOCAL-BUILD/R04/evidence/mode-b/container-suite.log", "docs/results/C1-LOCAL-BUILD/R04/evidence/mode-b/verify.log"], "limitations": "Images built with DOCKER_BUILDKIT=0 due to sandboxed buildx path." },
+    { "case_id": "C1-03", "mode_a": "PASS", "mode_b": "PASS", "evidence_paths": ["tests/findings-client.test.tsx"], "limitations": "UI join flows in happy-dom, not a real browser." },
+    { "case_id": "C1-04", "mode_a": "PASS", "mode_b": "PASS", "evidence_paths": ["docs/results/C1-LOCAL-BUILD/R04/evidence/mode-a-full-regression.log"], "limitations": "DB failure injected with a trigger." },
+    { "case_id": "C1-05", "mode_a": "PASS", "mode_b": "PASS", "evidence_paths": ["docs/results/C1-LOCAL-BUILD/R04/evidence/mode-a-full-regression.log"], "limitations": "Single-choice poll." },
+    { "case_id": "C1-06", "mode_a": "PASS", "mode_b": "PASS", "evidence_paths": ["docs/results/C1-LOCAL-BUILD/R04/evidence/mode-a-full-regression.log"], "limitations": "Real-browser DOM check NOT RUN." },
+    { "case_id": "C1-07", "mode_a": "PASS", "mode_b": "PASS", "evidence_paths": ["docs/results/C1-LOCAL-BUILD/R04/evidence/mode-a-full-regression.log"], "limitations": "Concurrency rounds, not load." },
+    { "case_id": "C1-08", "mode_a": "PASS", "mode_b": "PASS", "evidence_paths": ["docs/results/C1-LOCAL-BUILD/R04/evidence/mode-a-full-regression.log"], "limitations": "No real-browser run." },
+    { "case_id": "C1-09", "mode_a": "PASS", "mode_b": "PASS", "evidence_paths": ["docs/results/C1-LOCAL-BUILD/R04/evidence/mode-a-full-regression.log"], "limitations": "Single API instance." },
+    { "case_id": "C1-10", "mode_a": "PASS", "mode_b": "PASS", "evidence_paths": ["docs/results/C1-LOCAL-BUILD/R04/evidence/mode-a-full-regression.log"], "limitations": "Probabilistic race rounds." },
+    { "case_id": "C1-11", "mode_a": "PASS", "mode_b": "PASS", "evidence_paths": ["docs/results/C1-LOCAL-BUILD/R04/evidence/evidence-gates.log"], "limitations": "Crash-before-broadcast NOT RUN." },
+    { "case_id": "C1-12", "mode_a": "PASS", "mode_b": "PASS", "evidence_paths": ["docs/results/C1-LOCAL-BUILD/R04/evidence/mode-b/verify.log"], "limitations": "Host reboot NOT RUN." },
+    { "case_id": "C1-13", "mode_a": "PASS", "mode_b": "PASS", "evidence_paths": ["docs/results/C1-LOCAL-BUILD/R04/evidence/evidence-gates.log"], "limitations": "Production-duration TTL waits not performed; equality proven at chosen instants." },
+    { "case_id": "C1-14", "mode_a": "PASS", "mode_b": "PASS", "evidence_paths": ["docs/results/C1-LOCAL-BUILD/R04/evidence/mode-a-full-regression.log"], "limitations": "Synthetic Origin headers." },
+    { "case_id": "C1-15", "mode_a": "PARTIAL", "mode_b": "PARTIAL", "evidence_paths": ["docs/results/C1-LOCAL-BUILD/R04/evidence/mode-a-full-regression.log"], "limitations": "Build/deep-link pass; real-browser interaction NOT RUN." },
+    { "case_id": "C1-16", "mode_a": "PASS", "mode_b": "PASS", "evidence_paths": ["docs/results/C1-LOCAL-BUILD/R04/evidence/mode-b/verify.log"], "limitations": "Pattern-based local scans only." }
+  ],
+  "commands": [
+    { "command": "bun test tests/evidence-gates.test.ts", "exit_code": 0, "outcome": "7 pass (C1-EG-01 HTTP+WS, C1-EG-02 equality+valid/expiry/revoke boundary)" },
+    { "command": "bun test tests (Mode A)", "exit_code": 0, "outcome": "91 pass / 0 fail, 455 expect, 11 files" },
+    { "command": "bun x tsc --noEmit -p tsconfig.json", "exit_code": 0, "outcome": "no type errors" },
+    { "command": "tests/run-in-docker.sh c1b_default (Mode B)", "exit_code": 0, "outcome": "91 pass / 0 fail, 453 expect, 11 files" },
+    { "command": "Mode B restart api+db", "exit_code": 0, "outcome": "ready 200, containers healthy, runner no exec/inline secret, image no tests/happy-dom" }
+  ],
+  "skill_usage": [
+    {
+      "name": "tdd",
+      "path": ".agents/skills/tdd/SKILL.md",
+      "load_status": "READ_LOADED",
+      "applied_to": "barrier-driven verification tests at existing DB-client and WS seams; results recorded as evidence, not invented defect RED",
+      "evidence_paths": ["tests/evidence-gates.test.ts", "docs/results/C1-LOCAL-BUILD/R04/evidence/evidence-gates.log"],
+      "limitation": "Verification-only run; no defect RED expected."
+    },
+    {
+      "name": "ponytail",
+      "path": ".agents/skills/ponytail/SKILL.md",
+      "load_status": "READ_LOADED",
+      "applied_to": "two minimal additions only: test-only DB-client barrier and inert hub beforeSend hook; no production behavior/policy change",
+      "evidence_paths": ["tests/sql-barrier.ts", "apps/api/src/ws.ts"],
+      "limitation": "Test seam is explicitly inert in production construction."
+    },
+    {
+      "name": "diagnosing-bugs",
+      "path": ".agents/skills/diagnosing-bugs/SKILL.md",
+      "load_status": "UNVERIFIED",
+      "applied_to": "first table-lock approach deadlocked with writer FK checks; replaced by DB-client barrier (documented)",
+      "evidence_paths": ["docs/results/C1-LOCAL-BUILD/R04/result.md"],
+      "limitation": "Not a skill-run claim."
+    }
+  ],
+  "blockers": [],
+  "environment_limitations": [
+    "Sandbox blocks ~/.docker/buildx/activity; Mode B images built with DOCKER_BUILDKIT=0 (same Dockerfile/targets).",
+    "No browser automation available; real-browser retest NOT RUN."
+  ],
+  "not_verified": [
+    "real-browser interaction and browser-level R02-QA-04/05 evidence",
+    "mobile devices and full accessibility",
+    "30-client load / SLA",
+    "host reboot and real crash-before-broadcast",
+    "exhaustive scheduler interleavings and production-duration TTL/grace waits",
+    "independent QA and human acceptance"
+  ],
+  "next_gate": "Independent QA/browser retest of the current build, then user trial/acceptance. Push/deploy/tunnel/publication remain unauthorized.",
+  "services_left_running": {
+    "mode_a": ["c1a-db-1 (127.0.0.1:5433)", "API 127.0.0.1:3000", "static production web 127.0.0.1:5173"],
+    "mode_b": ["c1b-db-1 (127.0.0.1:5434)", "c1b-api-1 (127.0.0.1:3001)", "c1b-web-1 (127.0.0.1:5174)"],
+    "volumes": ["c1a_c1_pgdata", "c1b_c1_pgdata"]
+  },
+  "published": false
+}

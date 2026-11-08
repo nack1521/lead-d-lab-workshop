@@ -1,0 +1,15 @@
+bun test v1.4.4 (38afee6c8)
+
+tests/evidence-gates.test.ts:
+(pass) C1-EG-01 controlled participant-snapshot interleave on real PostgreSQL > HTTP: a commit between component reads yields a complete old view and a complete new view [187.30ms]
+(pass) C1-EG-01 controlled participant-snapshot interleave on real PostgreSQL > WS: a commit between broadcast build and send yields complete old/new participant frames [164.34ms]
+(pass) C1-EG-02 precise lifetime equality at the real authorization seam > hard TTL equality is expired, grace equality is still readable, hard TTL wins over grace [107.91ms]
+(pass) C1-EG-02 precise lifetime equality at the real authorization seam > facilitator hard-TTL equality is also expired at the exact expiry instant [98.60ms]
+(pass) C1-EG-02 controlled WebSocket authorization/send boundary > valid side: an authorized participant receives the broadcast frame [139.98ms]
+(pass) C1-EG-02 controlled WebSocket authorization/send boundary > expiry inside the revalidation→send window admits exactly the in-flight frame, then denies [144.82ms]
+(pass) C1-EG-02 controlled WebSocket authorization/send boundary > revoke inside the window is covered by the explicit disconnect: no state frame is delivered [210.73ms]
+
+ 7 pass
+ 0 fail
+ 48 expect() calls
+Ran 7 tests across 1 file. [1097.00ms]

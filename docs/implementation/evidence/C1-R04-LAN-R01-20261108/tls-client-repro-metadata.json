@@ -1,0 +1,37 @@
+{
+  "finding_ids": [
+    "LAN-COORD-02",
+    "LAN-COORD-03"
+  ],
+  "source": "Coordinator execution only; not Senior QA TLS execution",
+  "observed_head": "093cce97a812af3e3baa9ed999f73b29184bae51",
+  "python_runtime": "3.14.9",
+  "python_tls_library": "OpenSSL 3.5.9 29 Sep 2026",
+  "python_context_verify_flags": 557088,
+  "strict_enabled": true,
+  "python_repro_code": "import ssl, urllib.request; ctx = ssl.create_default_context(cafile='.local/lan-certs/ca.crt'); urllib.request.urlopen('https://192.168.1.98:8443/lan-health', context=ctx, timeout=5).read()",
+  "python_execution_note": "Run the code with an existing compatible Python interpreter; the observed runtime is Hermes execute_code, not an assumed system python3. Do not install a global runtime or access profile credentials.",
+  "strict_TLS": {
+    "result": "FAIL",
+    "error_type": "SSLCertVerificationError",
+    "error": "[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: Missing Authority Key Identifier (_ssl.c:1082)"
+  },
+  "normal_client_command": [
+    "curl",
+    "--cacert",
+    ".local/lan-certs/ca.crt",
+    "--silent",
+    "--show-error",
+    "--max-time",
+    "8",
+    "--write-out",
+    "\n%{http_code}",
+    "https://192.168.1.98:8443/lan-health"
+  ],
+  "normal_client_exit": 0,
+  "normal_client_http_status": "200",
+  "curl_version": "curl 8.7.1 (x86_64-apple-darwin26.0) libcurl/8.7.1 (SecureTransport) LibreSSL/3.3.6 zlib/1.2.12 nghttp2/1.69.0",
+  "openssl_cli_version": "LibreSSL 3.3.6",
+  "no_global_trust_or_TLS_bypass": true,
+  "physical_iPhone": "NOT RUN / no new evidence"
+}

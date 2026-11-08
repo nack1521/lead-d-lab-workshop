@@ -12,6 +12,11 @@ try {
   if (command === 'address') {
     const selection = selectLanAddress({ explicit: process.env.LAN_BIND ?? process.env.LAN_IP });
     console.log(selection.address);
+  } else if (command === 'validate-address') {
+    const [ip] = args;
+    if (!ip) throw new Error('usage: validate-address <ip>');
+    const selection = selectLanAddress({ explicit: ip });
+    console.log(JSON.stringify({ address: selection.address, interfaceName: selection.interfaceName }));
   } else if (command === 'cert-plan') {
     const [dir, ip, host] = args;
     if (!dir || !ip) throw new Error('usage: cert-plan <cert-dir> <ip> [mdns-host]');

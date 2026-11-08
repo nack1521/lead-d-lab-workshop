@@ -9,10 +9,21 @@ set -eu
 
 ROOT=$(cd "$(dirname "$0")/.." && pwd)
 CERT_DIR="${LAN_CERT_DIR:-$ROOT/.local/lan-certs}"
+EXPLICIT_IP="${LAN_IP:-}"
 LAN_IP="${LAN_IP:-$(cd "$ROOT" && bun run lan/config-cli.ts address)}"
 LOCAL_HOST="${LAN_HOSTNAME:-$(scutil --get LocalHostName 2>/dev/null || true)}"
 CERT_DAYS="${LAN_CERT_DAYS:-397}"
 FORCE="${LAN_CERTS_FORCE:-0}"
+
+# The issuer must validate an explicitly supplied address through the same
+# intended-private-address contract as the listener. Isolated test material may
+# opt in explicitly (LAN_ALLOW_TEST_ADDRESS=1) without weakening production checks.
+if [ -n "$EXPLICIT_IP" ] && [ "${LAN_ALLOW_TEST_ADDRESS:-0}" != "1" ]; then
+  (cd "$ROOT" && bun run lan/config-cli.ts validate-address "$LAN_IP") >/dev/null || {
+    echo "error: LAN_IP=$LAN_IP is not an intended private LAN address on this host" >&2
+    exit 2
+  }
+fi
 
 mkdir -p "$CERT_DIR"
 chmod 700 "$CERT_DIR"
@@ -22,7 +33,14 @@ CA_CRT="$CERT_DIR/ca.crt"
 SRV_KEY="$CERT_DIR/server.key"
 SRV_CRT="$CERT_DIR/server.crt"
 
-if [ ! -f "$CA_KEY" ] || [ ! -f "$CA_CRT" ]; then
+HAS_CA_KEY=0; [ -f "$CA_KEY" ] && HAS_CA_KEY=1
+HAS_CA_CRT=0; [ -f "$CA_CRT" ] && HAS_CA_CRT=1
+if [ "$HAS_CA_KEY" != "$HAS_CA_CRT" ]; then
+  echo "error: incomplete development CA pair in $CERT_DIR (one of ca.key/ca.crt is missing)." >&2
+  echo "Refusing to overwrite the surviving component. Restore the missing file from your own backup or request an explicit CA replacement decision." >&2
+  exit 2
+fi
+if [ "$HAS_CA_KEY" = "0" ] && [ "$HAS_CA_CRT" = "0" ]; then
   cat >"$CERT_DIR/ca.cnf" <<'CONF'
 [req]
 distinguished_name = dn

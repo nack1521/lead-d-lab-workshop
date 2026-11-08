@@ -21,6 +21,10 @@ export interface LanWsLimits {
   maxQueuedFrames: number;
   maxQueuedBytes: number;
   upstreamDeadlineMs: number;
+  /** Bounded outstanding bytes toward a slow client (server WS buffered amount). */
+  maxClientBufferedBytes: number;
+  /** Bounded outstanding bytes toward a slow upstream (client WS buffered amount). */
+  maxUpstreamBufferedBytes: number;
 }
 
 export interface LanEntryConfig {
@@ -55,6 +59,8 @@ export const DEFAULT_LAN_WS_LIMITS: LanWsLimits = {
   maxQueuedFrames: Number(process.env.LAN_WS_MAX_QUEUED_FRAMES ?? 32),
   maxQueuedBytes: Number(process.env.LAN_WS_MAX_QUEUED_BYTES ?? 64 * 1024),
   upstreamDeadlineMs: Number(process.env.LAN_UPSTREAM_DEADLINE_MS ?? 5000),
+  maxClientBufferedBytes: Number(process.env.LAN_WS_MAX_CLIENT_BUFFERED_BYTES ?? 1024 * 1024),
+  maxUpstreamBufferedBytes: Number(process.env.LAN_WS_MAX_UPSTREAM_BUFFERED_BYTES ?? 1024 * 1024),
 };
 
 const JSON_HEADERS = { 'content-type': 'application/json; charset=utf-8' };
@@ -201,6 +207,12 @@ export function createLanEntry(config: LanEntryConfig) {
             ws.send(data);
           } catch {
             releaseSocket(ws);
+            return;
+          }
+          // Bounded downstream (upstream -> slow client) backpressure: close and
+          // release both sides once the server-side buffer exceeds the budget.
+          if (ws.getBufferedAmount() > config.limits.maxClientBufferedBytes) {
+            deny(ws, 1013, 'client backpressure limit exceeded');
           }
         });
         upstreamSocket.addEventListener('close', (event) => {
@@ -225,6 +237,11 @@ export function createLanEntry(config: LanEntryConfig) {
             upstreamSocket.send(message as string | Buffer);
           } catch {
             deny(ws, 1011, 'upstream send failed');
+            return;
+          }
+          // Bounded upstream (client -> slow upstream) backpressure.
+          if (upstreamSocket.bufferedAmount > config.limits.maxUpstreamBufferedBytes) {
+            deny(ws, 1013, 'upstream backpressure limit exceeded');
           }
           return;
         }

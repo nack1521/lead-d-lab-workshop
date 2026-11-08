@@ -31,6 +31,7 @@ const results: JsonRecord = {};
 const checks: Record<string, unknown> = {};
 const failures: string[] = [];
 const sockets: WebSocket[] = [];
+const openedSockets: { ws: WebSocket; closed: Promise<number> }[] = [];
 
 function check(name: string, condition: boolean, detail?: unknown): void {
   if (!condition) failures.push(name);
@@ -59,14 +60,13 @@ function openSocket(origin: string, token: string): Promise<{ ws: WebSocket; mes
     sockets.push(ws);
     const messages: JsonRecord[] = [];
     const timer = setTimeout(() => reject(new Error('ws did not open')), 4000);
+    const closed = new Promise<number>((done) => ws.addEventListener('close', (event) => done((event as CloseEvent).code)));
     ws.addEventListener('open', () => {
       clearTimeout(timer);
       ws.send(JSON.stringify({ type: 'auth', token }));
-      resolve({
-        ws,
-        messages,
-        closed: new Promise<number>((done) => ws.addEventListener('close', (event) => done((event as CloseEvent).code))),
-      });
+      const handle = { ws, messages, closed };
+      openedSockets.push(handle);
+      resolve(handle);
     });
     ws.addEventListener('message', (event) => messages.push(JSON.parse(String(event.data)) as JsonRecord));
     ws.addEventListener('error', () => {
@@ -88,8 +88,41 @@ async function waitFor(messages: JsonRecord[], predicate: (m: JsonRecord) => boo
 
 const snapshotRevision = (message: JsonRecord): number => Number((message.snapshot as { revision?: number } | undefined)?.revision ?? -1);
 
-let facilitySockets: { ws: WebSocket }[] = [];
+let facilitySockets: WebSocket[] = [];
+interface FixtureSnapshot {
+  status: string;
+  activeQuestionId: string | null;
+  questions: { id: string; receiving: boolean; closedAt: string | null }[];
+}
+
+let prior: FixtureSnapshot | null = null;
+let priorRestorable = false;
 try {
+  const [sessionRow] = await sql<{ status: string; active_question_id: string | null }[]>`
+    select status, active_question_id from sessions where id = ${room.session_id}`;
+  const questionRows = await sql<{ id: string; receiving: boolean; closed_at: Date | null }[]>`
+    select id, receiving, closed_at from questions where session_id = ${room.session_id} order by seq`;
+  prior = {
+    status: sessionRow?.status ?? 'unknown',
+    activeQuestionId: sessionRow?.active_question_id ?? null,
+    questions: questionRows.map((q) => ({ id: q.id, receiving: q.receiving, closedAt: q.closed_at ? q.closed_at.toISOString() : null })),
+  };
+  const receiving = prior.questions.filter((q) => q.receiving);
+  // Only states that can be restored exactly through the existing approved API
+  // are exercised; end/unend and closed_at resurrection are not invented.
+  priorRestorable =
+    prior.status === 'active' &&
+    receiving.length === 1 &&
+    prior.activeQuestionId === receiving[0].id &&
+    prior.questions.every((q) => q.closedAt === null);
+  check('fixture_state_supported_for_exact_restore', priorRestorable, prior);
+  results.prior_state = prior;
+  results.prior_state_restorable = priorRestorable;
+  if (!priorRestorable) {
+    failures.push('fixture_state_unsupported');
+    throw new Error('fixture lifecycle state is not supported for exact restoration; no mutation performed');
+  }
+
   let health: Response | null = null;
   try {
     health = await fetch(`${LAN_ORIGIN}/lan-health`);
@@ -203,10 +236,40 @@ try {
     token: facilitatorGrant,
   });
   check('facilitator_reopen_rating_200', openRating.status === 200);
-  const pushed = await waitFor(facilitatorSocket.messages, (m) => m.type === 'snapshot' && snapshotRevision(m) > initialRevision);
+  const controlRevision = Number((openRating.body as { revision?: number }).revision ?? -1);
+  const pushed = await waitFor(
+    facilitatorSocket.messages,
+    (m) =>
+      m.type === 'snapshot' &&
+      snapshotRevision(m) === controlRevision &&
+      (m.snapshot as { active_question_id?: string } | undefined)?.active_question_id === room.rating_question_id,
+  );
   const pushedRevision = snapshotRevision(pushed);
-  check('facilitator_fresh_push_newer_revision', pushedRevision > initialRevision);
-  results.facilitator_ws_fresh_push = { initial_revision: initialRevision, pushed_revision: pushedRevision, strictly_newer: pushedRevision > initialRevision };
+  check('facilitator_fresh_push_matches_control_revision', pushedRevision === controlRevision);
+  check(
+    'facilitator_fresh_push_question_matches_control',
+    (pushed.snapshot as { active_question_id?: string }).active_question_id === room.rating_question_id,
+  );
+  const [dbAfterControl] = await sql<{ revision: number; active_question_id: string | null; receiving: boolean }[]>`
+    select s.revision, s.active_question_id, q.receiving
+    from sessions s join questions q on q.id = ${room.rating_question_id}
+    where s.id = ${room.session_id}`;
+  check('control_revision_matches_db', dbAfterControl?.revision === controlRevision);
+  check('control_active_question_matches_db', dbAfterControl?.active_question_id === room.rating_question_id);
+  check('control_question_receiving_in_db', dbAfterControl?.receiving === true);
+  const ratingAggregate = (pushed.snapshot as { questions?: { question_id: string; total: number }[] }).questions?.find(
+    (q) => q.question_id === room.rating_question_id,
+  );
+  const [dbRatingCount] = await sql<{ count: number }[]>`
+    select count(*)::int as count from responses where question_id = ${room.rating_question_id}`;
+  check('fresh_push_rating_total_matches_db', (ratingAggregate?.total ?? -1) === (dbRatingCount?.count ?? -2));
+  results.facilitator_ws_fresh_push = {
+    initial_revision: initialRevision,
+    control_revision: controlRevision,
+    pushed_revision: pushedRevision,
+    question_matches: true,
+    db_total_matches: (ratingAggregate?.total ?? -1) === (dbRatingCount?.count ?? -2),
+  };
 
   facilitatorSocket.ws.close();
   const reconnect = await openSocket(LAN_ORIGIN, facilitatorGrant);
@@ -236,24 +299,51 @@ try {
 } catch (error) {
   check('verifier_exception', false, error instanceof Error ? error.message : String(error));
 } finally {
-  for (const socket of facilitySockets) {
+  const closeResults = await Promise.all(
+    openedSockets.map(async ({ ws, closed }) => {
+      try {
+        ws.close();
+      } catch {
+        // already closed
+      }
+      return Promise.race([closed, new Promise<number>((resolve) => setTimeout(() => resolve(-1), 2000))]);
+    }),
+  );
+  check('all_opened_sockets_closed', closeResults.every((code) => code !== -1), closeResults);
+  results.socket_close_codes = closeResults;
+
+  let restored = false;
+  let restoredExact = false;
+  const snapshot = prior;
+  if (snapshot && priorRestorable) {
     try {
-      socket.ws.close();
+      const restore = await call(`/api/facilitator/sessions/${room.session_id}/questions/${snapshot.activeQuestionId}/open`, {
+        method: 'POST',
+        token: facilitatorGrant,
+      });
+      restored = restore.status === 200;
+      if (restored) {
+        const [sessionRow] = await sql<{ status: string; active_question_id: string | null }[]>`
+          select status, active_question_id from sessions where id = ${room.session_id}`;
+        const questionRows = await sql<{ id: string; receiving: boolean; closed_at: Date | null }[]>`
+          select id, receiving, closed_at from questions where session_id = ${room.session_id} order by seq`;
+        restoredExact =
+          sessionRow?.status === snapshot.status &&
+          sessionRow?.active_question_id === snapshot.activeQuestionId &&
+          questionRows.length === snapshot.questions.length &&
+          questionRows.every(
+            (q, index) =>
+              q.id === snapshot.questions[index].id &&
+              q.receiving === snapshot.questions[index].receiving &&
+              (q.closed_at ? q.closed_at.toISOString() : null) === snapshot.questions[index].closedAt,
+          );
+      }
     } catch {
-      // already closed
+      restored = false;
     }
   }
-  let restored = false;
-  try {
-    const restore = await call(`/api/facilitator/sessions/${room.session_id}/questions/${room.rating_question_id}/open`, {
-      method: 'POST',
-      token: facilitatorGrant,
-    });
-    restored = restore.status === 200;
-  } catch {
-    restored = false;
-  }
-  check('fixture_restored_rating_open', restored);
+  check('fixture_restored_prior_active_question', restored);
+  check('fixture_restored_exactly', restoredExact);
   await sql.end({ timeout: 5 });
 }
 

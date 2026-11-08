@@ -1,5 +1,6 @@
 import { afterAll, describe, expect, test } from 'bun:test';
-import { createServer } from 'node:net';
+import { createHash } from 'node:crypto';
+import { createServer, type Socket as NetSocket } from 'node:net';
 import { existsSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -91,6 +92,7 @@ describe('LAN-FU-04 strict-compatible certificates and exact-SAN reuse/renewal',
         LAN_IP: ip,
         LAN_HOSTNAME: 'lan-guard-test',
         LAN_CERT_DAYS: String(days),
+        LAN_ALLOW_TEST_ADDRESS: '1',
         LAN_CERTS_FORCE: '1',
         LAN_RENEW_WINDOW_SECONDS: String(30 * 24 * 60 * 60),
       },
@@ -112,6 +114,47 @@ describe('LAN-FU-04 strict-compatible certificates and exact-SAN reuse/renewal',
     // Rerun keeps the CA identity.
     generate(dir, '192.168.1.50');
     expect(readFileSync(caPath, 'utf8')).toBe(caBefore);
+  });
+
+  test.skipIf(!hasOpenssl)('issuer refuses an explicit unsafe address and incomplete CA pairs fail closed', () => {
+    const unsafeDir = tempDir();
+    for (const candidate of ['8.8.8.8', '0.0.0.0', '127.0.0.1']) {
+      const result = Bun.spawnSync(['sh', join(root, 'lan/generate-certs.sh')], {
+        cwd: root,
+        env: { ...process.env, LAN_CERT_DIR: unsafeDir, LAN_IP: candidate },
+      });
+      expect(result.exitCode).not.toBe(0);
+      expect(existsSync(join(unsafeDir, 'ca.crt'))).toBe(false);
+    }
+
+    const partialDir = tempDir();
+    generate(partialDir, '192.168.1.50');
+    const caKey = join(partialDir, 'ca.key');
+    const caKeyContent = readFileSync(caKey, 'utf8');
+    rmSync(join(partialDir, 'ca.crt'));
+    const partial = Bun.spawnSync(['sh', join(root, 'lan/generate-certs.sh')], {
+      cwd: root,
+      env: { ...process.env, LAN_CERT_DIR: partialDir, LAN_IP: '192.168.1.50', LAN_ALLOW_TEST_ADDRESS: '1' },
+    });
+    expect(partial.exitCode).toBe(2);
+    expect(readFileSync(caKey, 'utf8')).toBe(caKeyContent);
+    expect(existsSync(join(partialDir, 'ca.crt'))).toBe(false);
+    expect(partial.stderr.toString()).toContain('incomplete development CA pair');
+  });
+
+  test.skipIf(!hasOpenssl)('a healthy non-forced rerun actually reuses the leaf and key', () => {
+    const dir = tempDir();
+    generate(dir, '192.168.1.50');
+    const certHash = createHash('sha256').update(readFileSync(join(dir, 'server.crt'))).digest('hex');
+    const keyHash = createHash('sha256').update(readFileSync(join(dir, 'server.key'))).digest('hex');
+    const rerun = Bun.spawnSync(['sh', join(root, 'lan/generate-certs.sh')], {
+      cwd: root,
+      env: { ...process.env, LAN_CERT_DIR: dir, LAN_IP: '192.168.1.50', LAN_HOSTNAME: 'lan-guard-test', LAN_ALLOW_TEST_ADDRESS: '1' },
+    });
+    expect(rerun.exitCode).toBe(0);
+    expect(rerun.stdout.toString()).toContain('reusing existing leaf');
+    expect(createHash('sha256').update(readFileSync(join(dir, 'server.crt'))).digest('hex')).toBe(certHash);
+    expect(createHash('sha256').update(readFileSync(join(dir, 'server.key'))).digest('hex')).toBe(keyHash);
   });
 
   test.skipIf(!hasOpenssl)('changed address and short-validity leaf renew instead of being reused', () => {
@@ -233,6 +276,41 @@ async function blackHole(): Promise<{ port: number; close: () => void }> {
   };
 }
 
+async function slowWebSocketUpstream(): Promise<{ port: number; close: () => void }> {
+  const sockets = new Set<NetSocket>();
+  const server = createServer((socket) => {
+    sockets.add(socket);
+    socket.on('error', () => {});
+    socket.on('close', () => sockets.delete(socket));
+    let buffer = Buffer.alloc(0);
+    const onData = (chunk: Buffer) => {
+      buffer = Buffer.concat([buffer, chunk]);
+      const end = buffer.indexOf('\r\n\r\n');
+      if (end === -1) return;
+      socket.off('data', onData);
+      const request = buffer.subarray(0, end).toString('utf8');
+      const key = /Sec-WebSocket-Key:\s*(.+)/i.exec(request)?.[1]?.trim() ?? '';
+      const accept = createHash('sha1').update(`${key}258EAFA5-E914-47DA-95CA-C5AB0DC85B11`).digest('base64');
+      socket.write(
+        'HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\n' +
+          `Sec-WebSocket-Accept: ${accept}\r\n\r\n`,
+      );
+      // Stop reading: the entry's client-side buffer must stay bounded.
+      socket.pause();
+    };
+    socket.on('data', onData);
+  });
+  await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
+  const port = (server.address() as { port: number }).port;
+  return {
+    port,
+    close: () => {
+      for (const socket of sockets) socket.destroy();
+      server.close();
+    },
+  };
+}
+
 describe('LAN-FU-01 bounded WebSocket proxy', () => {
   test('healthy upstream forwards frames, preserves Origin and supports reconnect', async () => {
     const upstream = await startEchoUpstream();
@@ -315,6 +393,56 @@ describe('LAN-FU-01 bounded WebSocket proxy', () => {
     }
   });
 });
+
+  test('slow downstream client is closed within a finite budget and the upstream is released', async () => {
+    let upstreamCloses = 0;
+    const flood = Bun.serve({
+      hostname: '127.0.0.1',
+      port: 0,
+      fetch(request, srv) {
+        return srv.upgrade(request) ? undefined : new Response('ok');
+      },
+      websocket: {
+        open(ws) {
+          for (let index = 0; index < 400; index += 1) ws.send('y'.repeat(4096));
+        },
+        message() {},
+        close() {
+          upstreamCloses += 1;
+        },
+      },
+    });
+    const entry = await startEntry(flood.port ?? 0, { maxClientBufferedBytes: 1024 });
+    const raw = new (await import('node:net')).Socket();
+    await new Promise<void>((resolve) => {
+      raw.connect(entry.port, '127.0.0.1', () => resolve());
+    });
+    const key = Buffer.from('0123456789abcdef').toString('base64');
+    raw.write(
+      `GET /ws HTTP/1.1\r\nHost: 127.0.0.1:${entry.port}\r\nUpgrade: websocket\r\nConnection: Upgrade\r\n` +
+        `Sec-WebSocket-Key: ${key}\r\nSec-WebSocket-Version: 13\r\nOrigin: https://192.168.1.98:8443\r\n\r\n`,
+    );
+    // Never read: the entry must bound its own buffer and release the upstream.
+    await waitUntil(() => upstreamCloses === 1, 5000);
+    expect(upstreamCloses).toBe(1);
+    raw.destroy();
+    entry.stop();
+    flood.stop(true);
+  });
+
+  test('slow upstream builds bounded client-side buffer and the client is closed 1013', async () => {
+    const slow = await slowWebSocketUpstream();
+    const entry = await startEntry(slow.port, { maxUpstreamBufferedBytes: 8192 });
+    try {
+      const client = await connect(`ws://127.0.0.1:${entry.port}/ws`);
+      for (let index = 0; index < 200; index += 1) client.ws.send('z'.repeat(4096));
+      const closed = await client.closed;
+      expect(closed.code).toBe(1013);
+    } finally {
+      entry.stop();
+      slow.close();
+    }
+  });
 
 describe('LAN-FU-03 verifier fails closed', () => {
   test.skipIf(!hasFixtureFile)('an unavailable LAN target produces a nonzero verifier exit', async () => {

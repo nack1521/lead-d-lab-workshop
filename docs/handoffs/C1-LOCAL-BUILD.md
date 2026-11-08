@@ -1,8 +1,8 @@
 # C1 local build — Current tool-neutral handoff
 
-Status: **LOCAL_BUILD_AUTHORIZED / R05_RUNTIME_RETESTED / PEER_REVIEW_PENDING**. Read the [current Coordinator retest](../implementation/C1-R05-LAN-R02-COORDINATOR-RETEST.md). Independent native suite 103/0 and Docker-only 99/0 with four explicit host-tooling skips; current participant browsers, strict TLS and real verifier failure/restoration paths pass as scoped. OPEN-side proxy buffering and verifier cleanup/correlation remain for canonical review. Physical iPhone is pending user action; no acceptance/publication. Prior reviews are history, not repeat commands. DeepSeek remains user-operated primary and Antigravity explicit-handover fallback.
+Status: **LOCAL_BUILD_AUTHORIZED / C1-FU-01_RESOLVED_TARGETED / LAN_RESIDUALS_OPEN**. Read the [current consolidation](../implementation/C1-R05-LAN-R02-REVIEW-SUMMARY.md). Canonical retest resolves C1-FU-01 within its controlled schedule; existing successful C1 evidence remains. Four remaining groups are LAN-only. Coordinator strict TLS, actual certificate reuse and current browser checks pass as scoped; this is not full C1/human/mobile acceptance. DeepSeek remains user-operated primary and Antigravity explicit-handover fallback.
 
-The [previous follow-up prompt](C1-R04-LAN-R01-FIX-EN.txt) produced C1 R05/LAN R02 and is now historical; its [narrow contract](C1-R04-LAN-R01-FOLLOWUP.md) remains the review input. Await precise canonical review before another follow-up, not a blanket rerun/bootstrap. Prompt preparation is not dispatch. Communication policy lives in `AGENTS.md`.
+Current follow-up is [LAN-only residual contract](LAN-R02-RESIDUALS.md) with [English prompt](LAN-R02-RESIDUAL-EN.txt). Do not create another C1 fix run without a justified C1 code change; old C1/LAN starters are historical. No generic rerun/bootstrap, automatic dispatch or provider switch. Communication policy lives in `AGENTS.md`.
 
 ## Entry / precedence
 1. อ่าน `AGENTS.md`, `docs/CODING-WORKFLOW.md`, `docs/TEAM-WORKFLOW.md`, `docs/ANTIGRAVITY-RESULT-PROTOCOL.md`, `docs/results/INDEX.md`.

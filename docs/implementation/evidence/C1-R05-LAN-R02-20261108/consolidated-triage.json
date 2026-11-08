@@ -1,0 +1,105 @@
+{
+  "status": "C1_TARGETED_FINDING_RESOLVED / LAN_CHANGES_REQUESTED",
+  "source_head": "1eb31f48101dcf34198177e64ae1127778ad60d3",
+  "code_head": "df4b52352786784cd71a62d4b5a3d92fac571d35",
+  "groups": [
+    {
+      "group": "C1-FU-01",
+      "status": "RESOLVED_TARGETED",
+      "severity": "Medium",
+      "sources": [
+        "QA-R04-01"
+      ],
+      "evidence": "Senior QA controlled expiry observed 3 admitted frames; corrected wording and conditional hook await; no exhaustive-race claim"
+    },
+    {
+      "group": "LAN-FU-01",
+      "status": "OPEN",
+      "severity": "High",
+      "sources": [
+        "QA-LAN-01",
+        "R02-QA-LAN-01"
+      ],
+      "scope": "OPEN-side bounded buffering/backpressure and slow-peer cleanup; retain pre-open guard successes",
+      "classification": "static availability risk; no exploit/load proven"
+    },
+    {
+      "group": "LAN-FU-02",
+      "status": "PARTIAL_OPEN",
+      "severity": "Medium",
+      "sources": [
+        "QA-LAN-03"
+      ],
+      "scope": "Explicit issuer LAN_IP must not bypass shared selection/validation",
+      "retained": "Actual listener invalid-address/SAN startup rejection verified by Coordinator; no observed public exposure"
+    },
+    {
+      "group": "LAN-FU-03",
+      "status": "PARTIAL_OPEN",
+      "severity": "Medium",
+      "sources": [
+        "LAN-COORD-01",
+        "R02-QA-LAN-02"
+      ],
+      "scope": "Exact prior-state restoration/refusal, committed-revision/payload/DB correlation, actual socket cleanup and CLI typecheck coverage",
+      "retained": "Original wrong-status false green and exit signaling fixed in reproduced paths; rating-first failure restoration passes",
+      "classification": "static diagnostic-harness residual; no observed voting failure"
+    },
+    {
+      "group": "LAN-FU-04",
+      "status": "PARTIAL_OPEN",
+      "severity": "Medium",
+      "sources": [
+        "LAN-COORD-02",
+        "LAN-COORD-03",
+        "R02-QA-LAN-03"
+      ],
+      "scope": "Partial existing CA pair must fail closed without silent identity replacement",
+      "retained": "Coordinator actual strict Python TLS, same-SAN non-forced leaf/key reuse and changed-address renewal pass; active CA unchanged"
+    },
+    {
+      "group": "LAN-DOC-01",
+      "status": "RESOLVED_CURRENT_DOCS",
+      "severity": "Medium",
+      "sources": [
+        "QA-LAN-02"
+      ],
+      "scope": "No-warning-bypass out-of-band public CA transfer retained"
+    }
+  ],
+  "open_group_count": 4,
+  "open_group_severity": {
+    "High": 1,
+    "Medium": 3
+  },
+  "original_TLS_and_reuse_failure_paths": "RESOLVED_TARGETED; partial-pair recovery remains separate",
+  "Coordinator_execution": {
+    "native_full": {
+      "pass": 103,
+      "fail": 0,
+      "expect": 493
+    },
+    "Docker_full": {
+      "pass": 99,
+      "fail": 0,
+      "skip": 4,
+      "expect": 478
+    }
+  },
+  "Senior_QA_execution": {
+    "safe_C1_subset": {
+      "pass": 92,
+      "fail": 0,
+      "expect": 460
+    },
+    "selected_LAN_cases": {
+      "pass": 8,
+      "fail": 0,
+      "filtered": 3
+    },
+    "full_host_suite": "NOT RUN due permitted side-effect boundary"
+  },
+  "physical_iPhone": "NOT RUN / PENDING_USER_ACTION",
+  "accepted": false,
+  "published": false
+}

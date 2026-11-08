@@ -1,0 +1,10 @@
+Workspace: /Users/aiink/Nack/Lead+D-Lab
+Read AGENTS.md, docs/CODING-WORKFLOW.md, docs/implementation/C1-R05-LAN-R02-REVIEW-SUMMARY.md and docs/handoffs/LAN-R02-RESIDUALS.md.
+
+Continue LAN-IPHONE-01 only, one writer, next unused run (expected R03). C1-FU-01 is RESOLVED_TARGETED; do not redo C1 or create C1 R06 without a justified C1 change.
+
+Fix remaining LAN-FU-01 OPEN-side bidirectional backpressure first; then LAN-FU-02 explicit issuer address validation, LAN-FU-03 exact prior-state restoration/committed-frame-and-DB correlation/actual socket cleanup and CLI typecheck, and LAN-FU-04 partial-CA-pair fail-closed recovery. Preserve passing pre-open guards, strict TLS, actual leaf reuse/renewal and CA identity. Test isolated failure/slow-peer paths with bounded resources, not the live listener.
+
+Use TDD and real HTTPS/API/PostgreSQL/WSS evidence; run both modes, builds and relevant typecheck, clearly separating skips/filters from passes. Preserve protected dirty work and immutable reports; no resets, global/network/trust changes, TLS bypass, public tunnel, push or automatic provider switch. Physical iPhone remains pending actual user action.
+
+Deliver immutable LAN task/run results with exact commands/exits, HEAD, group dispositions, URL and pending steps; INDEX last. Checkpoint before budget exhaustion.

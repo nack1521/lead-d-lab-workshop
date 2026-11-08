@@ -1,7 +1,7 @@
 # Lean team — Cycle-based workflow
 
-## Current implementation review — 2026-11-07
-**C1 R02: CHANGES_REQUESTED**, not implementation acceptance. Read the [current consolidated retest](implementation/C1-REVIEW-SUMMARY-R02.md). Original unchanged-join/question-transition paths improved; five named residuals include three runtime reproductions and two static paths, plus a separate open WS lifetime verification gate. Existing regression is 71/0 in each mode, not proof of missing scenarios. [Current fix prompt](handoffs/C1-FIX-R02-EN.txt) is user-operated only. Preserve prior reports, source IDs and single-writer/approval boundaries; preparation observations below are historical.
+## Current implementation review — 2026-11-08
+**C1 R03: PARTIAL / EVIDENCE_GATES_OPEN**, not implementation acceptance. Read the [current consolidated retest](implementation/C1-REVIEW-SUMMARY-R03.md): no new confirmed targeted defect; R02-QA-01..04 resolved in their tested scope, R02-QA-05 structurally fixed, and two controlled evidence gaps remain (C1-EG-01/02). Coordinator reran 84/0 in both modes and verified direct API/browser/DB paths. Local user exploration is available with disclosed limits; use the [verification-only prompt](handoffs/C1-VERIFY-R03-EN.txt) for further evidence, not blanket application rework. Preserve reports/IDs and single-writer gates; preparation observations below are historical.
 
 ## Current coding channel
 ผู้ใช้เลือกและอนุมัติ **DeepSeek Harness เป็นหลัก / Antigravity เป็น fallback เมื่อ budget หมด** วันที่2026-11-07. ผู้ใช้สั่ง primary tool เอง; Operator standby ไม่ auto-dispatch ลุง. Current C1 handoff: [C1 local build](handoffs/C1-LOCAL-BUILD.md); ก่อนสลับอ่าน [coding workflow / checkpoint](CODING-WORKFLOW.md). Historical Antigravity-only/channel blockers ไม่ขวาง primary และไม่อนุญาตให้มี writer สองตัวพร้อมกัน. UI05 accepted/C1 local approval/stack/case matrixเดิมคงเดิม; ยังไม่มีหลักฐานเริ่ม DeepSeek session จากการปรับเอกสารนี้

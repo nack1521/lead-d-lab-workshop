@@ -1,0 +1,10 @@
+Continue C1-LOCAL-BUILD with verification-only follow-up to the R03 review.
+Workspace: /Users/aiink/Nack/Lead+D-Lab
+
+Read AGENTS.md and docs/implementation/C1-REVIEW-SUMMARY-R03.md. Target only C1-EG-01 (controlled real-PostgreSQL mid-read commit/coherent old and new snapshots) and C1-EG-02 (documented WS authorization/send boundary and precise lifetime equality cases). No new confirmed defect was found; preserve the already-resolved paths and avoid blanket refactoring.
+
+Prefer test-boundary barriers and real DB/WS observations over arbitrary sleeps or mocked persistence. Preserve approved access/attempt policy. If a policy decision or tooling limit blocks exact proof, record it honestly; do not invent a leak or silently waive the gate. Change production code only for a reproduced, narrowly scoped defect or a justified minimal test seam.
+
+Run affected tests and current-build regression in both approved modes. Continue the same task under existing local authorization and single-writer/protected-file rules, using the next unused run. Keep old evidence immutable and update C1-REPORT/INDEX last. Report evidence gaps as NOT RUN/PARTIAL, not PASS or fabricated failures.
+
+Use concise English and retain Thai product copy. No push/deploy, destructive reset or automatic tool switch. Checkpoint before budget exhaustion; return task/run, evidence paths and actual remaining gates.

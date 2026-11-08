@@ -1,0 +1,42 @@
+{
+  "task_id": "C1-LOCAL-BUILD",
+  "review_run": "R03",
+  "verdict": "PARTIAL_EVIDENCE_GATES_OPEN",
+  "confirmed_new_defects": [],
+  "targeted_resolved_ids": [
+    "R02-QA-01",
+    "R02-QA-02",
+    "R02-QA-03",
+    "R02-QA-04"
+  ],
+  "structurally_fixed_id": "R02-QA-05",
+  "evidence_gates": [
+    {
+      "id": "C1-EG-01",
+      "source_id": "R02-QA-05",
+      "kind": "EVIDENCE_GAP_NOT_CONFIRMED_DEFECT",
+      "status": "NOT RUN",
+      "criterion": "A controlled commit between component reads proves old and new participant views remain internally coherent under real PostgreSQL repeatable read."
+    },
+    {
+      "id": "C1-EG-02",
+      "source_id": "C1-RV-02",
+      "kind": "EVIDENCE_GAP_NOT_CONFIRMED_DEFECT",
+      "status": "PARTIAL",
+      "criterion": "Controlled revoke/expiry around the documented per-socket authorization/send boundary, plus precise TTL/grace equality cases, prove the stated behavior without inventing a zero-network-race policy."
+    }
+  ],
+  "build": "cce8db1ac194f2ea6d9d23b707c0c05a5841b6d0",
+  "report_commit": "730ca02ff68b6bb6bcc00040c8c0740fcc58c8d9",
+  "coordinator_runtime_review_commit": "1ca479ad38638167ac19e5ed4ca869ad124eea11",
+  "execution": {
+    "mode_a_existing_suite": "84 pass / 0 fail, exit 0",
+    "mode_b_existing_runner": "84 pass / 0 fail, exit 0",
+    "typecheck": "exit 0",
+    "production_build": "exit 0",
+    "runner_normal_cleanup": "VERIFIED"
+  },
+  "local_trial": "AVAILABLE_WITH_DISCLOSED_LIMITS_NOT_ACCEPTANCE",
+  "implementation_acceptance": "NOT GRANTED",
+  "publication": "NOT AUTHORIZED"
+}

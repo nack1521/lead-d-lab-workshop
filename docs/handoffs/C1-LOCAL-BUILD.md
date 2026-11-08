@@ -1,8 +1,8 @@
 # C1 local build — Current tool-neutral handoff
 
-Status: **LOCAL_BUILD_AUTHORIZED / R02_CHANGES_REQUESTED**. UI-05 R02 is accepted; C1 implementation is not accepted. Read the [current consolidated retest](../implementation/C1-REVIEW-SUMMARY-R02.md): original browser paths improved, but residual receipt/authorization/payload/snapshot requirements remain. DeepSeek remains user-operated primary and Antigravity explicit-handover fallback; local authorization is unchanged.
+Status: **LOCAL_BUILD_AUTHORIZED / R03_PARTIAL_EVIDENCE_GATES_OPEN**. No new confirmed defect in the targeted R03 retest; C1 is not accepted. Read the [current consolidated retest](../implementation/C1-REVIEW-SUMMARY-R03.md): targeted fixes are supported, with C1-EG-01/02 verification gaps disclosed. Local user exploration is available, not acceptance or publication. DeepSeek remains user-operated primary and Antigravity explicit-handover fallback.
 
-Current user-operated fix prompt: [C1-FIX-R02-EN.txt](C1-FIX-R02-EN.txt). Prior starters/review prompts are retained as history, not commands to bootstrap again. Prompt preparation is not dispatch. Communication policy lives in `AGENTS.md`.
+Current user-operated verification-only prompt: [C1-VERIFY-R03-EN.txt](C1-VERIFY-R03-EN.txt). Prior fix prompts/starters are historical, not commands to redo resolved work or bootstrap again. Prompt preparation is not dispatch. Communication policy lives in `AGENTS.md`.
 
 ## Entry / precedence
 1. อ่าน `AGENTS.md`, `docs/CODING-WORKFLOW.md`, `docs/TEAM-WORKFLOW.md`, `docs/ANTIGRAVITY-RESULT-PROTOCOL.md`, `docs/results/INDEX.md`.

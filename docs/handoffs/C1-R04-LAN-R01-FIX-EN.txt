@@ -1,0 +1,10 @@
+Workspace: /Users/aiink/Nack/Lead+D-Lab
+Read AGENTS.md, docs/CODING-WORKFLOW.md, docs/implementation/C1-R04-LAN-R01-REVIEW-SUMMARY.md and docs/handoffs/C1-R04-LAN-R01-FOLLOWUP.md.
+
+Continue narrowly; one writer, inspect/checkpoint first. Prioritize LAN-FU-01 bounded WebSocket proxy handling, then LAN-FU-02 fail-closed private-interface/SAN selection, LAN-FU-03 verifier assertions/nonzero failures/fresh-frame evidence, and LAN-FU-04 strict-compatible certificates plus portable reuse. QA-LAN-02 current documentation is already corrected; preserve immutable reports.
+
+For C1-FU-01, verify concurrent per-socket sends before changing behavior. Keep passing C1-EG-01/02 schedules and approved auth/TTL/grace/revoke semantics. Correct unsupported one-frame assurances; no invented leak, zero-race promise or silent policy change. No generic C1 rewrite.
+
+Use TDD/control tests and real API/PostgreSQL/HTTP/WSS evidence. Run both-mode regression, typecheck and builds; record actual exits and limits. Preserve dirty/protected work and CA identity. No public tunnel, DB exposure, reset, global/device trust changes, TLS bypass or automatic provider switch. Physical iPhone remains pending until the user's actual trusted-Safari test.
+
+Use the next unused runs for C1-LOCAL-BUILD and LAN-IPHONE-01, immutable results, INDEX last, owned local commits only. Return task/run, HEAD, result paths, URL and remaining user actions; checkpoint before budget exhaustion.

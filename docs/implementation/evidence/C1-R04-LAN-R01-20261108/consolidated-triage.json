@@ -1,0 +1,103 @@
+{
+  "status": "CHANGES_REQUESTED",
+  "observed_source_head": "d2d09c29ef8a020d06348407a8e8493085394604",
+  "current_docs_baseline": "23aff9ba098e9ad19bd1e9c700b00138d401d4f8",
+  "groups": [
+    {
+      "group": "LAN-FU-01",
+      "source_ids": [
+        "QA-LAN-01"
+      ],
+      "severity": "High",
+      "kind": "static missing resource guards / availability risk",
+      "status": "OPEN",
+      "title": "Bound WS frames/queues/deadlines and proxy lifecycle",
+      "runtime_exploit_or_load_proven": false
+    },
+    {
+      "group": "C1-FU-01",
+      "source_ids": [
+        "QA-R04-01"
+      ],
+      "severity": "Medium",
+      "kind": "static contract/evidence gap",
+      "status": "OPEN",
+      "title": "Controlled concurrent sends and accurate in-flight assurance",
+      "post_revoke_leak_proven": false
+    },
+    {
+      "group": "LAN-FU-02",
+      "source_ids": [
+        "QA-LAN-03"
+      ],
+      "severity": "Medium",
+      "kind": "static exposure/configuration risk",
+      "status": "OPEN",
+      "title": "Fail-closed private-interface/bind/SAN selection",
+      "public_exposure_proven": false
+    },
+    {
+      "group": "LAN-FU-03",
+      "source_ids": [
+        "LAN-COORD-01"
+      ],
+      "severity": "Medium",
+      "kind": "runtime reproduced verification-tooling defect",
+      "status": "OPEN",
+      "title": "Verifier fail-fast exits and strictly fresh push evidence"
+    },
+    {
+      "group": "LAN-FU-04",
+      "source_ids": [
+        "LAN-COORD-02",
+        "LAN-COORD-03"
+      ],
+      "severity": "Medium",
+      "kind": "runtime strict-TLS compatibility / non-mutating command failure",
+      "status": "OPEN",
+      "title": "Certificate extensions and portable exact-SAN reuse",
+      "physical_Safari_failure_proven": false
+    },
+    {
+      "group": "LAN-DOC-01",
+      "source_ids": [
+        "QA-LAN-02"
+      ],
+      "severity": "Medium",
+      "kind": "documentation conflict",
+      "status": "RESOLVED_CURRENT_DOCS",
+      "title": "Out-of-band public-CA transfer; historical bypass instruction superseded",
+      "resolution_commit": "23aff9ba098e9ad19bd1e9c700b00138d401d4f8"
+    }
+  ],
+  "counts": {
+    "source_ids": 7,
+    "groups": 6,
+    "open_groups": 5,
+    "open_source_ids": 6,
+    "resolved_current_doc_source_ids": 1,
+    "open_group_severity": {
+      "High": 1,
+      "Medium": 4
+    }
+  },
+  "independent_regression": {
+    "Mode_A": {
+      "owner": "Senior QA",
+      "pass": 91,
+      "fail": 0,
+      "expect": 455
+    },
+    "Mode_B": {
+      "owner": "Coordinator",
+      "pass": 91,
+      "fail": 0,
+      "expect": 455
+    }
+  },
+  "C1-EG-01": "PASS_CONTROLLED_HTTP_AND_WS",
+  "C1-EG-02": "PASS_SPECIFIED_SINGLE_SEND_AND_EQUALITY_CASES; concurrent upper bound NOT ESTABLISHED (C1-FU-01)",
+  "physical_iPhone": "NOT RUN / PENDING_USER_ACTION",
+  "accepted": false,
+  "published": false
+}

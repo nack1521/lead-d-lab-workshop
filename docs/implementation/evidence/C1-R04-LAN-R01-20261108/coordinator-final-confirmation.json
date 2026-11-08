@@ -1,0 +1,22 @@
+{
+  "commands": [
+    {
+      "command": "bun test tests",
+      "exit_code": 0,
+      "pass": [
+        "91"
+      ],
+      "fail": [
+        "0"
+      ],
+      "expect": [
+        "455"
+      ]
+    },
+    {
+      "command": "bun run typecheck",
+      "exit_code": 0
+    }
+  ],
+  "application_config_changes": false
+}

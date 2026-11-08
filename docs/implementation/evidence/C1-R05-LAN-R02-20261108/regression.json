@@ -1,0 +1,54 @@
+{
+  "commands": [
+    {
+      "command": "bun test tests",
+      "exit_code": 0,
+      "pass": [
+        "103"
+      ],
+      "fail": [
+        "0"
+      ],
+      "skip": [],
+      "expect": [
+        "493"
+      ]
+    },
+    {
+      "command": "bun run typecheck",
+      "exit_code": 0,
+      "pass": [],
+      "fail": [],
+      "skip": [],
+      "expect": []
+    },
+    {
+      "command": "sh tests/run-in-docker.sh c1b_default",
+      "exit_code": 0,
+      "temporary_source_cleaned": true,
+      "pass": [
+        "99"
+      ],
+      "fail": [
+        "0"
+      ],
+      "skip": [
+        "4"
+      ],
+      "expect": [
+        "478"
+      ]
+    },
+    {
+      "build": "production",
+      "exit_code": 0,
+      "served_dist_overwritten": false
+    },
+    {
+      "build": "lan",
+      "exit_code": 0,
+      "served_dist_overwritten": false
+    }
+  ],
+  "native_API_normal_restart": "old verified project PID 47452 stopped; source-current API launched; DB untouched"
+}

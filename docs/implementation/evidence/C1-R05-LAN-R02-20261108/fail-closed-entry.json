@@ -1,0 +1,17 @@
+[
+  {
+    "address": "0.0.0.0",
+    "exit_code": 2,
+    "message": "WILDCARD_ADDRESS: refusing a wildcard LAN bind address"
+  },
+  {
+    "address": "8.8.8.8",
+    "exit_code": 2,
+    "message": "ADDRESS_NOT_ON_INTERFACE: LAN_BIND 8.8.8.8 is not on a local interface"
+  },
+  {
+    "address": "127.0.0.1",
+    "exit_code": 2,
+    "message": "LOOPBACK_ADDRESS: refusing a loopback address as the LAN entry"
+  }
+]

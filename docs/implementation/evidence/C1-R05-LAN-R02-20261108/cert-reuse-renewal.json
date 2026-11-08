@@ -1,0 +1,50 @@
+{
+  "same_address_reuses_leaf_and_key": true,
+  "changed_address_replaces_leaf": true,
+  "isolated_CA_preserved": true,
+  "steps": [
+    {
+      "step": "initial",
+      "exit_code": 0,
+      "SAN": [
+        [
+          "IP Address",
+          "192.168.50.10"
+        ],
+        [
+          "DNS",
+          "coordinator-qa.local"
+        ]
+      ]
+    },
+    {
+      "step": "same-address-reuse",
+      "exit_code": 0,
+      "SAN": [
+        [
+          "IP Address",
+          "192.168.50.10"
+        ],
+        [
+          "DNS",
+          "coordinator-qa.local"
+        ]
+      ]
+    },
+    {
+      "step": "changed-address-renewal",
+      "exit_code": 0,
+      "SAN": [
+        [
+          "IP Address",
+          "192.168.50.11"
+        ],
+        [
+          "DNS",
+          "coordinator-qa.local"
+        ]
+      ]
+    }
+  ],
+  "active_certificates_modified": false
+}

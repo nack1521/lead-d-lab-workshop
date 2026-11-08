@@ -1,0 +1,6 @@
+{
+  "scenario": "Public CA supplied as leaf has no selected-IP SAN",
+  "exit_code": 2,
+  "stderr": "LAN entry: certificate SAN does not include the selected private address 192.168.1.98; run 'bun run lan:certs'",
+  "active_listener_changed": false
+}

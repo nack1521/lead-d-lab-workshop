@@ -1,0 +1,25 @@
+{
+  "source_head": "1eb31f48101dcf34198177e64ae1127778ad60d3",
+  "python": "3.14.9",
+  "TLS_library": "OpenSSL 3.5.9 29 Sep 2026",
+  "strict_enabled": true,
+  "verify_flags": 557088,
+  "probes": [
+    {
+      "path": "/lan-health",
+      "status": 200
+    },
+    {
+      "path": "/ready",
+      "status": 200
+    },
+    {
+      "path": "/join",
+      "status": 200
+    }
+  ],
+  "CA_fingerprint_sha256_DER": "5893933fc7c530e60be2099f6d37a124467848c6edc86700f25ac82cf1a3a167",
+  "same_CA_as_previous_review": true,
+  "system_or_device_trust_changed": false,
+  "phone_execution": "NOT RUN"
+}

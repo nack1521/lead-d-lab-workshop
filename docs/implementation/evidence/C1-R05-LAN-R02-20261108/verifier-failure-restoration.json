@@ -1,0 +1,77 @@
+{
+  "scenario": "Real WSS refusal after HTTP rating/poll mutations; no fake response",
+  "exit_code": 1,
+  "output": {
+    "lan_health": {
+      "status": 200,
+      "body": {
+        "status": "ok",
+        "mode": "lan-https",
+        "upstream": "http://127.0.0.1:3000"
+      }
+    },
+    "web_entry": {
+      "status": 200,
+      "spaRoot": true
+    },
+    "ca_certificate": {
+      "status": 200,
+      "contentType": "application/x-x509-ca-cert"
+    },
+    "join": {
+      "status": 201,
+      "participant_id_present": true,
+      "stored_label": "ผู้ร่วมทดสอบ LAN"
+    },
+    "rating_submission": {
+      "status": 201,
+      "replay_status": 200
+    },
+    "own_view": {
+      "status": 200,
+      "revision": 98
+    },
+    "facilitator_open_poll": {
+      "status": 200
+    },
+    "poll_first_stale_rating": {
+      "status": 409,
+      "code": "QUESTION_CLOSED"
+    },
+    "poll_submission": {
+      "status": 201
+    },
+    "negative": {
+      "evil_origin_status": 403,
+      "participant_facilitator_status": 403,
+      "missing_auth_status": 401
+    },
+    "checks": {
+      "lan_health_200": true,
+      "web_entry_spa": true,
+      "ca_certificate_public": true,
+      "join_201": true,
+      "rating_201": true,
+      "rating_multiline_comment": true,
+      "rating_replay_200_stable": true,
+      "own_view_200": true,
+      "own_view_coherent": true,
+      "facilitator_open_poll_200": true,
+      "stale_probe_join_201": true,
+      "poll_first_stale_rating_409_terminal": true,
+      "poll_201": true,
+      "evil_origin_403": true,
+      "participant_facilitator_403": true,
+      "missing_auth_401": true,
+      "verifier_exception": {
+        "ok": false,
+        "detail": "ws did not open"
+      },
+      "fixture_restored_rating_open": true
+    },
+    "ok": false,
+    "failures": [
+      "verifier_exception"
+    ]
+  }
+}

@@ -1,0 +1,42 @@
+{
+  "Mode_B_WS_source_matches_final_host_source": true,
+  "WS_source_SHA256": "14c5262c553d6aa5b2d966752a79e13ada7e2dfaf1a4320b5434ab0a26a6154a",
+  "probes": [
+    {
+      "path": "/api/me",
+      "origin": "https://192.168.1.98:8443",
+      "status": 401,
+      "private_key_marker_present": false
+    },
+    {
+      "path": "/api/me",
+      "origin": "https://evil.example",
+      "status": 403,
+      "private_key_marker_present": false
+    },
+    {
+      "path": "/.env",
+      "origin": null,
+      "status": 404,
+      "private_key_marker_present": false
+    },
+    {
+      "path": "/.local/lan-certs/server.key",
+      "origin": null,
+      "status": 404,
+      "private_key_marker_present": false
+    },
+    {
+      "path": "/.local/lan-certs/ca.key",
+      "origin": null,
+      "status": 404,
+      "private_key_marker_present": false
+    }
+  ],
+  "active_private_key_permissions": {
+    "server.key": "0o600",
+    "ca.key": "0o600"
+  },
+  "Mode_A_current_listener": "COMMAND   PID  USER   FD   TYPE             DEVICE SIZE/OFF NODE NAME\nbun     55010 aiink    4u  IPv4 0xe4da6f8f52e1dd06      0t0  TCP 127.0.0.1:3000 (LISTEN)",
+  "physical_iPhone": "NOT RUN"
+}

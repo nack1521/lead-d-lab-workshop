@@ -1,0 +1,29 @@
+{
+  "source_head": "1eb31f48101dcf34198177e64ae1127778ad60d3",
+  "final_code": "df4b52352786784cd71a62d4b5a3d92fac571d35",
+  "verdict": "TARGETED_RUNTIME_RETESTED / PEER_REVIEW_PENDING",
+  "groups": {
+    "LAN-FU-04": "RESOLVED_TARGETED_STRICT_TLS_AND_REAL_REUSE_RENEWAL",
+    "LAN-FU-02": "TARGETED_STARTUP_REJECTION_PASS_PENDING_STATIC_REVIEW",
+    "C1-FU-01": "CONTROLLED_CONCURRENCY_AND_CORRECTED_WORDING_PASS_PENDING_STATIC_REVIEW",
+    "LAN-FU-01": "PRE_UPSTREAM_LIMIT_TESTS_PASS; OPEN_SIDE_BACKPRESSURE_REVIEW_PENDING",
+    "LAN-FU-03": "REPRODUCED_FALSE_GREEN_AND_FAILURE_RESTORATION_PASS; CLEANUP_CORRELATION_REVIEW_PENDING",
+    "LAN-DOC-01": "RESOLVED_CURRENT_DOCS_RETAINED"
+  },
+  "physical_iPhone": "NOT RUN / PENDING_USER_ACTION",
+  "accepted": false,
+  "published": false,
+  "regression": {
+    "Mode_A": {
+      "pass": 103,
+      "fail": 0,
+      "expect": 493
+    },
+    "Mode_B": {
+      "pass": 99,
+      "fail": 0,
+      "skip": 4,
+      "expect": 478
+    }
+  }
+}

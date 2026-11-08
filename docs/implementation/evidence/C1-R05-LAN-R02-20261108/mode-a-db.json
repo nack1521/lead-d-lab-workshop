@@ -1,0 +1,16 @@
+[
+  {
+    "rating_value": 4,
+    "option_id": null,
+    "comment": "R05 บรรทัดหนึ่ง\nบรรทัดสอง 🎯",
+    "question_id": "c9ebe455-9397-42b7-a2de-c5abfa76d1a4",
+    "logical_rows": 1
+  },
+  {
+    "rating_value": null,
+    "option_id": "time",
+    "comment": null,
+    "question_id": "19024183-6e5d-416f-b02b-6137fab13c5d",
+    "logical_rows": 1
+  }
+]

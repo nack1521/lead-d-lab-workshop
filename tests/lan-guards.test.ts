@@ -1,6 +1,6 @@
 import { afterAll, describe, expect, test } from 'bun:test';
 import { createServer } from 'node:net';
-import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { existsSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { LanSelectionError, selectLanAddress } from '../lan/address.ts';
@@ -16,6 +16,9 @@ import { hasExactSanIp, isStrictCompatibleLeaf, planLeafRenewal } from '../lan/c
  */
 
 const root = join(import.meta.dir, '..');
+const hasOpenssl = Bun.which('openssl') !== null;
+const hasActiveCertificate = existsSync(join(root, '.local/lan-certs/server.crt'));
+const hasFixtureFile = existsSync(join(root, '.local/fixtures.json'));
 const tempDirs: string[] = [];
 afterAll(() => {
   for (const dir of tempDirs) rmSync(dir, { recursive: true, force: true });
@@ -70,7 +73,7 @@ describe('LAN-FU-02 fail-closed private interface/address and SAN agreement', ()
     expect(explicit.address).toBe('192.168.1.50');
   });
 
-  test('the listener entry refuses to start when the retained certificate SAN does not exactly match the selection', async () => {
+  test.skipIf(!hasActiveCertificate)('the listener entry refuses to start when the retained certificate SAN does not exactly match the selection', async () => {
     // Reuse the active project cert on a loopback test entry; the selection guard
     // itself is covered above and in the certificate tests below.
     expect(hasExactSanIp(join(root, '.local/lan-certs/server.crt'), '192.168.1.98')).toBe(true);
@@ -95,7 +98,7 @@ describe('LAN-FU-04 strict-compatible certificates and exact-SAN reuse/renewal',
     if (result.exitCode !== 0) throw new Error(`cert generation failed: ${result.stderr.toString()}`);
   }
 
-  test('leaf is strict-compatible, has the exact SAN and is reused for the same address with the same CA', () => {
+  test.skipIf(!hasOpenssl)('leaf is strict-compatible, has the exact SAN and is reused for the same address with the same CA', () => {
     const dir = tempDir();
     generate(dir, '192.168.1.50');
     const certPath = join(dir, 'server.crt');
@@ -111,7 +114,7 @@ describe('LAN-FU-04 strict-compatible certificates and exact-SAN reuse/renewal',
     expect(readFileSync(caPath, 'utf8')).toBe(caBefore);
   });
 
-  test('changed address and short-validity leaf renew instead of being reused', () => {
+  test.skipIf(!hasOpenssl)('changed address and short-validity leaf renew instead of being reused', () => {
     const dir = tempDir();
     generate(dir, '192.168.1.50');
     const changed = planLeafRenewal({
@@ -314,7 +317,7 @@ describe('LAN-FU-01 bounded WebSocket proxy', () => {
 });
 
 describe('LAN-FU-03 verifier fails closed', () => {
-  test('an unavailable LAN target produces a nonzero verifier exit', async () => {
+  test.skipIf(!hasFixtureFile)('an unavailable LAN target produces a nonzero verifier exit', async () => {
     const result = Bun.spawnSync(['bun', 'lan/verify.ts'], {
       cwd: root,
       env: { ...process.env, LAN_ORIGIN: 'https://127.0.0.1:1', LAN_WS: 'wss://127.0.0.1:1/ws' },

@@ -87,7 +87,7 @@ NODE_EXTRA_CA_CERTS=.local/lan-certs/ca.crt bun lan/verify.ts   # real API/DB/WS
 The selected backing authority is the existing native **Mode A** API (`127.0.0.1:3000`), so participant and facilitator share one authority and one PostgreSQL database. The LAN entry binds only to the private LAN address; API/DB keep listening on loopback. If the LAN IP changes, rerun `bun run lan:certs` and update `ALLOWED_ORIGINS` for the exact `https://<new-ip>:8443` origin (the existing `.env` currently allows `https://192.168.1.98:8443`).
 
 **iPhone certificate trust (user-assisted, required — the phone test stays BLOCKED until done):**
-1. Transfer only the public CA certificate `.local/lan-certs/ca.crt` to the iPhone (AirDrop or email; or download `https://<lan-ip>:8443/lan-ca.crt` after proceeding past the initial warning). Never transfer `ca.key`/`server.key`.
+1. Transfer only the public CA certificate `.local/lan-certs/ca.crt` to your own test iPhone using AirDrop or another trusted out-of-band transfer. Do not bypass the initial HTTPS warning to bootstrap certificate trust. Never transfer `ca.key`/`server.key`; no certificate/profile is installed automatically.
 2. On the iPhone install the downloaded profile: Settings > General > VPN & Device Management > install the profile.
 3. Enable trust separately: Settings > General > About > Certificate Trust Settings > enable full trust for "Lead+D Lab LAN Development CA" ([Apple guidance](https://support.apple.com/en-us/102390)).
 4. Open `https://<lan-ip>:8443/join` in Safari with code `ROOM-01`. If macOS prompts to allow incoming connections for `bun`, that firewall decision is yours; no firewall or router setting is changed by the project.

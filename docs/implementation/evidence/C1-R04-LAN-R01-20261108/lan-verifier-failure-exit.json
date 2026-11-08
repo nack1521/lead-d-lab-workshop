@@ -1,0 +1,10 @@
+{
+  "scenario": "Actual refused connection to held non-listening loopback port, no fake API",
+  "exit_code": 0,
+  "actual_output": {
+    "ok": false,
+    "error": "ETIMEDOUT: Unable to connect. Is the computer able to access the url?"
+  },
+  "failure_signalled_by_process": false,
+  "global_or_service_config_changed": false
+}

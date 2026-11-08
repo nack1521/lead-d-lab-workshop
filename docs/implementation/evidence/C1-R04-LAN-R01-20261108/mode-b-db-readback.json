@@ -1,0 +1,11 @@
+{
+  "exit_code": 0,
+  "synthetic_rows": [
+    {
+      "nickname": "QA R04 Mode B",
+      "rating": 3,
+      "comment": "Mode B R04 ทดสอบจริง",
+      "response_rows": 1
+    }
+  ]
+}

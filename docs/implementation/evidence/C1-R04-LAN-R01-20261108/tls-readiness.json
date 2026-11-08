@@ -1,0 +1,84 @@
+{
+  "normal_curl_TLS": "explicit CA verification with hostname checks, no -k or global trust changes",
+  "probes": [
+    {
+      "path": "/lan-health",
+      "origin": null,
+      "status": 200,
+      "private_key_marker_present": false
+    },
+    {
+      "path": "/ready",
+      "origin": null,
+      "status": 200,
+      "private_key_marker_present": false
+    },
+    {
+      "path": "/join",
+      "origin": null,
+      "status": 200,
+      "private_key_marker_present": false
+    },
+    {
+      "path": "/api/me",
+      "origin": "https://192.168.1.98:8443",
+      "status": 401,
+      "private_key_marker_present": false
+    },
+    {
+      "path": "/api/me",
+      "origin": "https://evil.example",
+      "status": 403,
+      "private_key_marker_present": false
+    },
+    {
+      "path": "/.env",
+      "origin": null,
+      "status": 404,
+      "private_key_marker_present": false
+    },
+    {
+      "path": "/.local/lan-certs/server.key",
+      "origin": null,
+      "status": 404,
+      "private_key_marker_present": false
+    },
+    {
+      "path": "/.local/lan-certs/ca.key",
+      "origin": null,
+      "status": 404,
+      "private_key_marker_present": false
+    },
+    {
+      "path": "/%2e%2e%2f.env",
+      "origin": null,
+      "status": 404,
+      "private_key_marker_present": false
+    },
+    {
+      "path": "/lan-ca.crt",
+      "origin": null,
+      "status": 200,
+      "private_key_marker_present": false,
+      "matches_local_public_ca": true
+    }
+  ],
+  "strict_Python_TLS": {
+    "verified": false,
+    "error_type": "SSLCertVerificationError",
+    "reason": "[SSL: CERTIFICATE_VERIFY_FAILED] certificate verify failed: Missing Authority Key Identifier (_ssl.c:1082)",
+    "verify_flags": 557088
+  },
+  "server_SAN": [
+    [
+      "IP Address",
+      "192.168.1.98"
+    ],
+    [
+      "DNS",
+      "MacBook-Air-khxngAraya.local"
+    ]
+  ],
+  "CA_fingerprint_sha256_DER": "5893933fc7c530e60be2099f6d37a124467848c6edc86700f25ac82cf1a3a167",
+  "physical_iPhone": "NOT RUN"
+}

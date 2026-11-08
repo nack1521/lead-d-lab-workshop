@@ -1,0 +1,6 @@
+{
+  "non_mutating_SAN_probe_exit": 1,
+  "actual_first_error": "unknown option -ext",
+  "consequence": "Generator existing-SAN detection cannot succeed with this host command; reissue behavior inferred from the inspected branch. No regeneration performed by Coordinator.",
+  "physical_iPhone_failure_proven": false
+}

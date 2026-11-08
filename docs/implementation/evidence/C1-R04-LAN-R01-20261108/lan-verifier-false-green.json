@@ -1,0 +1,80 @@
+{
+  "scenario": "Real fixture poll opened before invoking rating-first verifier; no mock API or source/fixture-file replacement",
+  "precondition_control_status": 200,
+  "exit_code": 0,
+  "actual_output": {
+    "lan_health": {
+      "status": 200,
+      "body": {
+        "status": "ok",
+        "mode": "lan-https",
+        "upstream": "http://127.0.0.1:3000"
+      }
+    },
+    "web_entry": {
+      "status": 200,
+      "spaRoot": true
+    },
+    "ca_certificate": {
+      "status": 200,
+      "contentType": "application/x-x509-ca-cert",
+      "bytes": 1245
+    },
+    "join": {
+      "status": 201,
+      "participant_id_present": true,
+      "stored_label": "ผู้ร่วมทดสอบ LAN",
+      "revision": 56
+    },
+    "rating_submission": {
+      "status": 409,
+      "accepted_rating": null,
+      "multiline_comment_preserved": false,
+      "replay_status": 409,
+      "replay_stable": true
+    },
+    "own_view": {
+      "status": 200,
+      "revision": 56,
+      "own_question_matches": false
+    },
+    "facilitator_open_poll": {
+      "status": 200
+    },
+    "poll_submission": {
+      "status": 201,
+      "option_id": "time"
+    },
+    "negative": {
+      "evil_origin_status": 403,
+      "participant_facilitator_status": 403,
+      "missing_auth_status": 401
+    },
+    "facilitator_ws": {
+      "received_snapshot": true,
+      "snapshot_has_counts": true,
+      "snapshot_contains_nickname_or_comment": false
+    },
+    "participant_ws": {
+      "received_own_state": true,
+      "state_has_own_answer": true
+    },
+    "facilitator_ws_live_push": {
+      "received_pushed_snapshot": true
+    },
+    "facilitator_ws_reconnect": {
+      "received_authoritative_snapshot": true,
+      "revision": 59
+    },
+    "db_readback": {
+      "output": [
+        "23",
+        "33"
+      ],
+      "exit_code": 0
+    },
+    "restored_rating_open": true,
+    "ok": true
+  },
+  "restored_by_existing_verifier": true
+}

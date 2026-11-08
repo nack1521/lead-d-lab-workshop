@@ -1,0 +1,79 @@
+{
+  "command": "NODE_EXTRA_CA_CERTS=.local/lan-certs/ca.crt bun lan/verify.ts",
+  "exit_code": 0,
+  "actual_output": {
+    "lan_health": {
+      "status": 200,
+      "body": {
+        "status": "ok",
+        "mode": "lan-https",
+        "upstream": "http://127.0.0.1:3000"
+      }
+    },
+    "web_entry": {
+      "status": 200,
+      "spaRoot": true
+    },
+    "ca_certificate": {
+      "status": 200,
+      "contentType": "application/x-x509-ca-cert",
+      "bytes": 1245
+    },
+    "join": {
+      "status": 201,
+      "participant_id_present": true,
+      "stored_label": "ผู้ร่วมทดสอบ LAN",
+      "revision": 44
+    },
+    "rating_submission": {
+      "status": 201,
+      "accepted_rating": 4,
+      "multiline_comment_preserved": true,
+      "replay_status": 200,
+      "replay_stable": true
+    },
+    "own_view": {
+      "status": 200,
+      "revision": 45,
+      "own_question_matches": true
+    },
+    "facilitator_open_poll": {
+      "status": 200
+    },
+    "poll_submission": {
+      "status": 201,
+      "option_id": "time"
+    },
+    "negative": {
+      "evil_origin_status": 403,
+      "participant_facilitator_status": 403,
+      "missing_auth_status": 401
+    },
+    "facilitator_ws": {
+      "received_snapshot": true,
+      "snapshot_has_counts": true,
+      "snapshot_contains_nickname_or_comment": false
+    },
+    "participant_ws": {
+      "received_own_state": true,
+      "state_has_own_answer": true
+    },
+    "facilitator_ws_live_push": {
+      "received_pushed_snapshot": true
+    },
+    "facilitator_ws_reconnect": {
+      "received_authoritative_snapshot": true,
+      "revision": 48
+    },
+    "db_readback": {
+      "output": [
+        "20",
+        "29"
+      ],
+      "exit_code": 0
+    },
+    "restored_rating_open": true,
+    "ok": true
+  },
+  "interpretation": "Diagnostic self-report is not accepted solely from ok=true; verify statuses and fresh-frame evidence separately."
+}

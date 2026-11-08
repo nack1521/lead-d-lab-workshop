@@ -1,0 +1,21 @@
+{
+  "event": "fresh_LAN_facilitator_push_and_DB",
+  "control_status": 200,
+  "control_revision": 54,
+  "initial_revision": 53,
+  "fresh_frame_revision": 54,
+  "stale_initial_cannot_satisfy_predicate": true,
+  "no_private_participant_label_in_snapshot": true,
+  "browser_synthetic_answer_rows": [
+    {
+      "rating": 4,
+      "comment": "R04 บรรทัดหนึ่ง\nบรรทัดสอง 🎯",
+      "question_id": "c9ebe455-9397-42b7-a2de-c5abfa76d1a4"
+    },
+    {
+      "rating": null,
+      "comment": null,
+      "question_id": "19024183-6e5d-416f-b02b-6137fab13c5d"
+    }
+  ]
+}

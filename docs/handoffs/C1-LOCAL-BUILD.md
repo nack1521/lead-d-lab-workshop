@@ -1,8 +1,8 @@
 # C1 local build — Current tool-neutral handoff
 
-Status: **LOCAL_BUILD_AUTHORIZED / R03_PARTIAL_EVIDENCE_GATES_OPEN**. No new confirmed defect in the targeted R03 retest; C1 is not accepted. Read the [current consolidated retest](../implementation/C1-REVIEW-SUMMARY-R03.md): targeted fixes are supported, with C1-EG-01/02 verification gaps disclosed. Local user exploration is available, not acceptance or publication. DeepSeek remains user-operated primary and Antigravity explicit-handover fallback.
+Status: **LOCAL_BUILD_AUTHORIZED / R04_RUNTIME_RETESTED / PEER_REVIEW_PENDING**. C1 R04 and LAN R01 are delivered; read the [current Coordinator runtime review](../implementation/C1-R04-LAN-R01-COORDINATOR-REVIEW.md). Controlled C1 evidence tests pass independently in Mode B and targeted participant browsers pass in A/B; canonical Senior QA is pending. LAN has open tooling/certificate findings and physical iPhone is pending user action. No human acceptance or publication. The [R03 consolidation](../implementation/C1-REVIEW-SUMMARY-R03.md) is history, not the current command to repeat. DeepSeek remains user-operated primary and Antigravity explicit-handover fallback.
 
-Current user-operated verification-only prompt: [C1-VERIFY-R03-EN.txt](C1-VERIFY-R03-EN.txt). Prior fix prompts/starters are historical, not commands to redo resolved work or bootstrap again. Prompt preparation is not dispatch. Communication policy lives in `AGENTS.md`.
+The [R03 verification-only prompt](C1-VERIFY-R03-EN.txt) has produced R04 and is now historical, like the earlier fix prompts/starters. Do not redo resolved work or bootstrap again. Await current independent review before a narrow follow-up; prompt preparation is not dispatch. Communication policy lives in `AGENTS.md`.
 
 ## Entry / precedence
 1. อ่าน `AGENTS.md`, `docs/CODING-WORKFLOW.md`, `docs/TEAM-WORKFLOW.md`, `docs/ANTIGRAVITY-RESULT-PROTOCOL.md`, `docs/results/INDEX.md`.

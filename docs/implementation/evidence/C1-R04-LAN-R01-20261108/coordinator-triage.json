@@ -1,0 +1,55 @@
+{
+  "task_refs": [
+    "C1-LOCAL-BUILD/R04",
+    "LAN-IPHONE-01/R01"
+  ],
+  "observed_head": "d2d09c29ef8a020d06348407a8e8493085394604",
+  "application_head": "f7b2006db0e9e161278c5080129f8409d6c8d1bf",
+  "c1_controlled_suite": "PASS in independent Mode B run; canonical peer review pending; no human acceptance",
+  "LAN": "IMPLEMENTED_WITH_OPEN_TOOLING_COMPATIBILITY_FINDINGS_AND_PHYSICAL_DEVICE_PENDING",
+  "open_findings": [
+    {
+      "id": "LAN-COORD-01",
+      "severity": "Medium",
+      "category": "Functional / verification tooling",
+      "status": "OPEN",
+      "title": "Verifier false-green exit/outcome and stale-frame predicate",
+      "runtime_reproduced": true,
+      "evidence": [
+        "lan-verifier-false-green.json",
+        "lan-verifier-failure-exit.json"
+      ],
+      "scope": "Evidence runner, not a demonstrated voting/persistence failure"
+    },
+    {
+      "id": "LAN-COORD-02",
+      "severity": "Medium",
+      "category": "TLS compatibility",
+      "status": "OPEN",
+      "title": "Generated server certificate fails strict Python/OpenSSL validation: missing AKI",
+      "runtime_reproduced": true,
+      "evidence": [
+        "tls-readiness.json"
+      ],
+      "scope": "Observed default strict-client failure; normal explicit-CA curl/Bun pass; physical Safari impact unknown"
+    },
+    {
+      "id": "LAN-COORD-03",
+      "severity": "Low",
+      "category": "Setup portability",
+      "status": "OPEN",
+      "title": "SAN reuse check uses unsupported LibreSSL x509 -ext option",
+      "runtime_reproduced": "Non-mutating command failure; generator branch consequence inspected, no cert regeneration performed",
+      "evidence": [
+        "certificate-generator-compatibility.json"
+      ],
+      "scope": "Repeated unnecessary certificate reissue inferred from code, not performed by Coordinator"
+    }
+  ],
+  "counts": {
+    "Medium": 2,
+    "Low": 1
+  },
+  "physical_iPhone": "NOT RUN / PENDING_USER_ACTION",
+  "publication": false
+}

@@ -1,0 +1,33 @@
+# LAN-IPHONE-01 actual commands (run on 2026-11-08, Asia/Bangkok)
+# Secrets (DB password, grants, keys) are never printed; paths only.
+
+# 0. Preconditions inspected
+ifconfig / route -n get default / ipconfig getifaddr en0      # en0 192.168.1.98, gateway 192.168.1.1
+lsof -nP -iTCP -sTCP:LISTEN                                   # API 127.0.0.1:3000, web 127.0.0.1:5173, Mode B 3001/5174, DB loopback
+bun --version                                                 # 1.4.4
+
+# 1. Project-local development CA + server certificate (SAN current IPv4 + <host>.local)
+sh lan/generate-certs.sh                                      # exit 0; keys under ignored .local/lan-certs
+# public CA only: .local/lan-certs/ca.crt  (keys ca.key/server.key are mode 600, ignored)
+
+# 2. Same-origin LAN web build (empty VITE_* from tracked .env.lan)
+bun run build:web:lan                                         # exit 0; dist has no configured LAN/loopback API base
+
+# 3. Backing authority: existing Mode A API (native Bun) with the exact LAN origin allowed
+#    (ALLOWED_ORIGINS in untracked .env: http://127.0.0.1:5173,https://192.168.1.98:8443)
+bun run apps/api/src/index.ts                                 # exit 0; ready HTTP 200 on 127.0.0.1:3000
+
+# 4. TLS entry: web + /api + /ws -> 127.0.0.1:3000, bound only to the LAN address
+bun run lan/lan-entry.ts                                      # listener 192.168.1.98:8443 only
+
+# 5. Verification through the real HTTPS entry (trusted with the project CA)
+NODE_EXTRA_CA_CERTS=.local/lan-certs/ca.crt bun lan/verify.ts # exit 0; see lan-verify.log
+
+# 6. Regression on the same source (both approved modes)
+bun test tests                                                # 91 pass / 0 fail (Mode A)
+bun x tsc --noEmit -p tsconfig.json                           # exit 0
+cd .worktrees/c1-mode-b && tests/run-in-docker.sh c1b_default # 91 pass / 0 fail (Mode B, Docker-only)
+
+# 7. Safe stop / return to loopback-only
+#    Ctrl-C the lan/lan-entry.ts process; bun run api continues on loopback.
+#    Do NOT run docker compose down -v / prune; no volume was deleted in this task.

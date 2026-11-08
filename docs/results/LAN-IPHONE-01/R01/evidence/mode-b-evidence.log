@@ -1,0 +1,17 @@
+== Mode B Docker-only runner on LAN-IPHONE-01 build ==
+RUNNER_EXIT=0
+ 91 pass
+ 0 fail
+ 455 expect() calls
+Ran 91 tests across 11 files. [11.54s]
+== Mode B restart check ==
+ Container c1b-api-1 Restarting 
+ Container c1b-db-1 Restarting 
+ Container c1b-api-1 Started 
+ Container c1b-db-1 Started 
+RESTART_EXIT=0
+ready HTTP 200 {"status":"ready","db":"ok"}
+NAME        STATUS
+c1b-api-1   Up 3 seconds (healthy)
+c1b-db-1    Up 3 seconds (healthy)
+c1b-web-1   Up 40 seconds

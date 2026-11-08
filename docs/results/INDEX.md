@@ -7,6 +7,7 @@ Paths ในตารางเริ่มจาก repository root. Latest run 
 | Task | Latest run | Producer / provenance | Status | Summary JSON | Detail | Next gate |
 |---|---|---|---|---|---|---|
 | C1-LOCAL-BUILD | R04 | DeepSeek Harness (model: deepseek-v4.1-flash-1017, runtime-reported/unverified) | READY_FOR_REVIEW | docs/results/C1-LOCAL-BUILD/R04/result.json | docs/results/C1-LOCAL-BUILD/R04/result.md | Independent QA/browser retest ของ 62bfa8d (real-browser C1-15) → ผู้ใช้ทดลอง/รับ implementation |
+| LAN-IPHONE-01 | R01 | DeepSeek Harness (single writer; model: deepseek-v4.1-flash-1017, runtime-reported/unverified) | BLOCKED_PENDING_USER_ACTION | docs/results/LAN-IPHONE-01/R01/result.json | docs/results/LAN-IPHONE-01/R01/result.md | ผู้ใช้ติดตั้ง/trust CA บน iPhone แล้วทดสอบ Safari ที่ https://192.168.1.98:8443/join → เก็บหลักฐานอุปกรณ์จริง |
 | C1-PREFLIGHT-FOLLOWUP | R03 | Antigravity IDE (model: gemini-3.8-flash-high) | READY_FOR_REVIEW | docs/results/C1-PREFLIGHT-FOLLOWUP/R03/result.json | docs/results/C1-PREFLIGHT-FOLLOWUP/R03/result.md | ผู้ใช้พิจารณาและอนุมัติ technical choices / local build |
 
 สถานะการตั้งกติกา: Antigravity ใน IDE อ่าน AGENTS.md, protocol และ SKILL-AUDIT-01 แล้ว; บันทึกรอบ R03 พร้อม skill_usage (ponytail applied) ลงดิสก์จริงโดยตรง; Runtime C1-01–C1-16 ยังคง NOT RUN ทั้งหมดในรอบ R03 (historical)
@@ -18,3 +19,5 @@ Coordinator review ของ **R03**: **READY_FOR_HUMAN_BUILD_APPROVAL** — ด
 Coordinator review ของ **R02** (historical): **CHANGES_REQUESTED** — ดู [ผลตรวจแยกจาก producer](../implementation/C1-PREFLIGHT-R02-COORDINATOR-REVIEW.md). Findings เดิมคงไว้เป็นประวัติ ไม่ rewrite เป็น PASS; runtime ทุกเคสยัง NOT RUN
 
 Legacy Operator evidence OP-00/OP-00B/OP-01 อยู่ docs/implementation/ ตามเดิม; ไม่ใช่ C1 runtime results และไม่ rewrite history
+
+**LAN-IPHONE-01 / R01 (current):** private-Wi-Fi HTTPS LAN mode สำหรับ iPhone testing (ไม่ใช่ public deploy) — Bun TLS entry เดียวบน `https://192.168.1.98:8443` proxy web/API/WSS ไป Mode A API เดิม (`127.0.0.1:3000`, PostgreSQL เดียวกัน), exact origins, same-origin LAN build (ไม่มี loopback ใน traffic มือถือ), dev CA + server cert ใต้ `.local/lan-certs` (ignored, keys 600). ตรวจ LAN-01/03/04/05/06/07 ด้วย HTTPS จริง + API/DB/WS + Mode A 91/0, Mode B runner 91/0. **LAN-02 BLOCKED_PENDING_USER_ACTION**: ยังไม่ได้ติดตั้ง/trust CA และยังไม่ได้รัน Safari บน iPhone จริง (NOT RUN). C1 ยัง PARTIAL และ **C1-EG-01/02 ยังเปิด** — LAN success ไม่ใช่ C1 acceptance. อ่าน [result.json](LAN-IPHONE-01/R01/result.json) / [detail](LAN-IPHONE-01/R01/result.md) / [evidence](LAN-IPHONE-01/R01/evidence/README.md).

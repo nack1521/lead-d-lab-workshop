@@ -1,0 +1,95 @@
+{
+  "schema_version": 1,
+  "task_id": "LAN-IPHONE-01",
+  "run_id": "R01",
+  "reported_at": "2026-11-08T15:41:00+07:00",
+  "producer": "DeepSeek Harness (single active coding writer)",
+  "authoring_tool": "DeepSeek Harness",
+  "model": "deepseek-v4.1-flash-1017",
+  "model_verification": "runtime-reported identifier; not independently verified",
+  "source_kind": "direct",
+  "baseline_commit": "d35d372",
+  "observed_head": "f7b2006",
+  "branch": "main",
+  "work_kind": "lan_device_test_mode",
+  "status": "BLOCKED_PENDING_USER_ACTION",
+  "summary": "Private-Wi-Fi HTTPS LAN mode implemented with one project-local Bun TLS entry bound only to 192.168.1.98:8443, serving the same-origin LAN web build and proxying /api, /health, /ready and WebSocket upgrades to the existing native Mode A API authority on 127.0.0.1:3000 (same PostgreSQL). LAN-01/03/04/05/06/07 verified with real HTTPS API/DB/native-WS evidence and both-mode regression (Mode A 91/0, Mode B Docker runner 91/0). LAN-02 (physical iPhone Safari with user-installed trusted CA) is NOT RUN and BLOCKED_PENDING_USER_ACTION: certificate profile installation/trust on the iPhone is an explicit user action. No public tunnel, DB exposure, global install, firewall/router/system trust change, TLS bypass or HTTP downgrade; keys stay ignored and private. C1 remains PARTIAL with C1-EG-01/02 unchanged.",
+  "detail_path": "docs/results/LAN-IPHONE-01/R01/result.md",
+  "lan_url": "https://192.168.1.98:8443",
+  "topology": "Bun TLS entry on private LAN IP -> static LAN web build + same-origin proxy for /api,/health,/ready,/ws -> existing native Mode A API 127.0.0.1:3000 -> PostgreSQL 127.0.0.1:5433",
+  "backing_authority": "Mode A native Bun API (127.0.0.1:3000)",
+  "allowed_origins": ["http://127.0.0.1:5173", "https://192.168.1.98:8443"],
+  "iphone": {
+    "model": null,
+    "ios_version": null,
+    "safari_version": null,
+    "same_private_network_confirmed": false,
+    "certificate_trust_completed": false,
+    "physical_safari_run": false
+  },
+  "pending_user_actions": [
+    "Confirm the iPhone is on the same private Wi-Fi as 192.168.1.98 (not guest/isolated; no VPN conflict)",
+    "Transfer only the public CA certificate .local/lan-certs/ca.crt to the iPhone (never ca.key/server.key)",
+    "Install the certificate profile on the iPhone (Settings > General > VPN & Device Management)",
+    "Enable SSL trust for the development CA (Settings > General > About > Certificate Trust Settings)",
+    "Allow the Bun listener if macOS prompts for incoming connections (user firewall decision)",
+    "Open https://192.168.1.98:8443/join in Safari with ROOM-01 and record the actual iPhone model/iOS/Safari results",
+    "Remove the development CA profile after testing"
+  ],
+  "changed_paths": [
+    ".env.lan",
+    ".gitignore",
+    "README.md",
+    "apps/web/src/api.ts",
+    "lan/generate-certs.sh",
+    "lan/lan-entry.ts",
+    "lan/verify.ts",
+    "package.json"
+  ],
+  "commands": [
+    { "command": "sh lan/generate-certs.sh", "exit_code": 0, "outcome": "project-local dev CA + server cert (SAN IP 192.168.1.98, DNS <host>.local); keys mode 600 under ignored .local/lan-certs" },
+    { "command": "bun run build:web:lan", "exit_code": 0, "outcome": "same-origin LAN bundle (empty VITE_*; no loopback/IP API base configured)" },
+    { "command": "bun run apps/api/src/index.ts (ALLOWED_ORIGINS includes LAN origin)", "exit_code": 0, "outcome": "Mode A API ready 200 on 127.0.0.1:3000" },
+    { "command": "bun run lan/lan-entry.ts", "exit_code": 0, "outcome": "TLS listener only on 192.168.1.98:8443; proxy to 127.0.0.1:3000" },
+    { "command": "NODE_EXTRA_CA_CERTS=.local/lan-certs/ca.crt bun lan/verify.ts", "exit_code": 0, "outcome": "HTTPS join/rating/poll/replay/negatives/facilitator+participant WS/live push/reconnect + DB readback; ok=true" },
+    { "command": "bun test tests (Mode A)", "exit_code": 0, "outcome": "91 pass / 0 fail" },
+    { "command": "bun x tsc --noEmit -p tsconfig.json", "exit_code": 0, "outcome": "no type errors" },
+    { "command": "tests/run-in-docker.sh c1b_default (Mode B, rebuilt from f7b2006)", "exit_code": 0, "outcome": "91 pass / 0 fail" },
+    { "command": "Mode B docker compose restart api db", "exit_code": 0, "outcome": "ready 200, containers healthy" },
+    { "command": "private-path TLS probes on the LAN entry", "exit_code": 0, "outcome": "/.env, /../.env, /.local/.../server.key -> 404; /lan-ca.crt -> 200 public CA only" }
+  ],
+  "cases": [
+    { "case_id": "LAN-01", "status": "PARTIAL", "evidence_paths": ["docs/results/LAN-IPHONE-01/R01/evidence/commands.txt", "docs/results/LAN-IPHONE-01/R01/evidence/lan-05-06-07-evidence.log"], "limitations": "Mac-side topology/URL/commands verified; iPhone same-network membership is unconfirmed (PENDING_USER_ACTION)." },
+    { "case_id": "LAN-02", "status": "BLOCKED_PENDING_USER_ACTION", "evidence_paths": ["docs/results/LAN-IPHONE-01/R01/result.md"], "limitations": "Physical iPhone Safari NOT RUN; certificate profile install/trust is a user action; iPhone model/iOS/Safari unknown." },
+    { "case_id": "LAN-03", "status": "PASS", "evidence_paths": ["docs/results/LAN-IPHONE-01/R01/evidence/lan-verify.log"], "limitations": "Executed through the real HTTPS entry to the real API/PostgreSQL with synthetic data; phone UI part NOT RUN." },
+    { "case_id": "LAN-04", "status": "PASS", "evidence_paths": ["docs/results/LAN-IPHONE-01/R01/evidence/lan-verify.log"], "limitations": "Automated facilitator WS/HTTP over HTTPS; facilitator browser UI NOT RUN." },
+    { "case_id": "LAN-05", "status": "PASS", "evidence_paths": ["docs/results/LAN-IPHONE-01/R01/evidence/lan-05-06-07-evidence.log", "docs/results/LAN-IPHONE-01/R01/evidence/lan-verify.log"], "limitations": "Same-origin resolution and negatives verified in automation; real Safari network panel NOT RUN." },
+    { "case_id": "LAN-06", "status": "PASS", "evidence_paths": ["docs/results/LAN-IPHONE-01/R01/evidence/mode-a-regression.log", "docs/results/LAN-IPHONE-01/R01/evidence/mode-b-regression.log", "docs/results/LAN-IPHONE-01/R01/evidence/build-lan-web.log"], "limitations": "Safe stop/return to loopback documented; no volume deleted." },
+    { "case_id": "LAN-07", "status": "PASS", "evidence_paths": ["docs/results/LAN-IPHONE-01/R01/evidence/lan-05-06-07-evidence.log"], "limitations": "Pattern/path probes only; device certificate removal is a user action." }
+  ],
+  "c1_gates": {
+    "status": "UNCHANGED_PARTIAL",
+    "note": "C1-EG-01/C1-EG-02 remain as recorded in C1-LOCAL-BUILD R04; this LAN run does not change C1 verdicts or acceptance."
+  },
+  "blockers": ["Physical iPhone Safari and CA trust: PENDING_USER_ACTION"],
+  "environment_limitations": [
+    "No physical iPhone access in this coding session; certificate trust cannot be installed remotely.",
+    "macOS inbound firewall prompt status not verified; user may need to allow the Bun listener once.",
+    "Guest-network/AP isolation and VPN state on the phone network are unknown and were not changed.",
+    "IP-based certificate SAN means a DHCP address change requires regenerating certs and updating ALLOWED_ORIGINS."
+  ],
+  "not_verified": [
+    "physical iPhone Safari HTTPS without bypass and secure-context/UUID behavior",
+    "iPhone model/iOS/Safari and exact user steps",
+    "mobile/accessibility/load/security certification",
+    "C1 acceptance (C1-EG-01/02 remain open)"
+  ],
+  "next_gate": "User completes the certificate trust actions and runs the iPhone Safari test; then independent review/QA of the device evidence. No push/deploy/tunnel/publication.",
+  "services_left_running": {
+    "lan_entry": "bun on 192.168.1.98:8443 (stop with Ctrl-C to return to loopback-only)",
+    "mode_a": ["c1a-db-1 (127.0.0.1:5433)", "API 127.0.0.1:3000", "static web 127.0.0.1:5173"],
+    "mode_b": ["c1b-db-1 (127.0.0.1:5434)", "c1b-api-1 (127.0.0.1:3001)", "c1b-web-1 (127.0.0.1:5174)"],
+    "volumes": ["c1a_c1_pgdata", "c1b_c1_pgdata"]
+  },
+  "published": false
+}

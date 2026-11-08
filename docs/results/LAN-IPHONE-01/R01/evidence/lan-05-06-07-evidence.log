@@ -1,0 +1,39 @@
+== LAN-01 network/topology ==
+interface=en0 gateway=192.168.1.1 ip=192.168.1.98
+lan_url=https://192.168.1.98:8443
+no public tunnel processes:
+none
+
+== LAN-05 same-origin runtime check (LAN build env is empty) ==
+dotenv-lan:
+  VITE_API_BASE_URL=
+  VITE_WS_URL=
+LAN https page -> {"api":"","ws":"wss://192.168.1.98:8443/ws"}
+bundle loopback strings (non-secure fallback only):
+   2 127.0.0.1
+served index asset references:
+src="/assets/index-x-7hUrEP.js"
+href="/assets/index-DlTPi2gx.css"
+asset /assets/index-x-7hUrEP.js HTTP 200 type=text/javascript;charset=utf-8
+
+== LAN-05 exact origin + negative via HTTPS entry ==
+allowed origin join HTTP 201
+evil origin join HTTP 403
+
+== LAN-06 loopback mode still usable (dist is the LAN build) ==
+loopback /join HTTP 200
+loopback API health (origin 5173) HTTP 200
+
+== LAN-07 private files ignored and not served ==
+.gitignore:20:.local/	.local/lan-certs/ca.key
+.gitignore:20:.local/	.local/lan-certs/server.key
+.gitignore:20:.local/	.local/fixtures.json
+.gitignore:5:!.env.lan	.env.lan
+GET /.env -> HTTP 404
+GET /../.env -> HTTP 404
+GET /.local/lan-certs/server.key -> HTTP 404
+GET /lan-ca.crt -> HTTP 200
+listeners on LAN interface (expect only 8443):
+bun 192.168.1.98:8443
+db port binding (expect loopback only):
+com.docke 127.0.0.1:5433

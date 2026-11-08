@@ -2,6 +2,7 @@
 .env
 .env.*
 !.env.example
+!.env.lan
 !.env.*.example
 .dev.vars
 .dev.vars.*

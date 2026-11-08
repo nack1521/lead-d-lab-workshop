@@ -71,3 +71,27 @@ process arguments) and removes its temporary source copy on exit. Live server ou
 belongs in `.local/logs/` (untracked); result evidence files are immutable snapshots.
 
 ห้าม push/deploy/public tunnel/paid service/global config/destructive reset จาก workflow นี้. ผลลัพธ์จริงพร้อมคำสั่ง/exit code อยู่ `docs/results/C1-LOCAL-BUILD/R01/`.
+
+## Private LAN iPhone test mode (LAN-IPHONE-01)
+
+Development-device testing on your own trusted private Wi-Fi only. This is not a public deployment, tunnel or workshop onboarding path. Details and limits: [LAN handoff](docs/handoffs/LAN-IPHONE-01.md) and [results](docs/results/LAN-IPHONE-01/R01/result.md).
+
+```bash
+bun run lan:certs        # project-local dev CA + server cert (SAN = current en0 IPv4 + <host>.local)
+                         # written to ignored .local/lan-certs (keys mode 600; never commit/serve them)
+bun run build:web:lan    # same-origin bundle: empty VITE_* so no loopback/observed IP is baked in
+bun run lan:entry        # TLS entry on https://<lan-ip>:8443 -> web + /api + /ws to 127.0.0.1:3000
+NODE_EXTRA_CA_CERTS=.local/lan-certs/ca.crt bun lan/verify.ts   # real API/DB/WS verification
+```
+
+The selected backing authority is the existing native **Mode A** API (`127.0.0.1:3000`), so participant and facilitator share one authority and one PostgreSQL database. The LAN entry binds only to the private LAN address; API/DB keep listening on loopback. If the LAN IP changes, rerun `bun run lan:certs` and update `ALLOWED_ORIGINS` for the exact `https://<new-ip>:8443` origin (the existing `.env` currently allows `https://192.168.1.98:8443`).
+
+**iPhone certificate trust (user-assisted, required — the phone test stays BLOCKED until done):**
+1. Transfer only the public CA certificate `.local/lan-certs/ca.crt` to the iPhone (AirDrop or email; or download `https://<lan-ip>:8443/lan-ca.crt` after proceeding past the initial warning). Never transfer `ca.key`/`server.key`.
+2. On the iPhone install the downloaded profile: Settings > General > VPN & Device Management > install the profile.
+3. Enable trust separately: Settings > General > About > Certificate Trust Settings > enable full trust for "Lead+D Lab LAN Development CA" ([Apple guidance](https://support.apple.com/en-us/102390)).
+4. Open `https://<lan-ip>:8443/join` in Safari with code `ROOM-01`. If macOS prompts to allow incoming connections for `bun`, that firewall decision is yours; no firewall or router setting is changed by the project.
+
+**Remove afterwards:** delete the profile in Settings > General > VPN & Device Management (this removes the CA and trust); stopping `bun run lan:entry` returns to loopback-only mode. Generated keys and certs stay in ignored `.local/lan-certs`; they are development-only and must never be used for production.
+
+Limitations: one private network and one phone; guest-network/AP isolation, VPN, or firewall prompts can block it and are not changed by this setup; the LAN URL is not a stable hostname (IP-based SAN), and real-device Safari results are recorded by the user/QA, not fabricated here.

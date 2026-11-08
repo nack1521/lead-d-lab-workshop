@@ -1,5 +1,18 @@
-export const API_BASE = (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? 'http://127.0.0.1:3000';
-export const WS_URL = (import.meta.env.VITE_WS_URL as string | undefined) ?? 'ws://127.0.0.1:3000/ws';
+const configuredApiBase = import.meta.env.VITE_API_BASE_URL as string | undefined;
+const configuredWsUrl = import.meta.env.VITE_WS_URL as string | undefined;
+const securePage = typeof window !== 'undefined' && window.location.protocol === 'https:';
+// A LAN build leaves VITE_* empty so a trusted HTTPS entry can serve web, API
+// and WSS same-origin without baking a loopback or observed IP into the bundle.
+export const API_BASE = configuredApiBase
+  ? configuredApiBase
+  : securePage
+    ? ''
+    : 'http://127.0.0.1:3000';
+export const WS_URL = configuredWsUrl
+  ? configuredWsUrl
+  : securePage
+    ? `wss://${window.location.host}/ws`
+    : 'ws://127.0.0.1:3000/ws';
 
 export interface Question {
   id: string;

@@ -1,8 +1,8 @@
 # C1 local build — Current tool-neutral handoff
 
-Status: **LOCAL_BUILD_AUTHORIZED / C1-FU-01_RESOLVED_TARGETED / LAN_R03_PEER_REVIEW_PENDING**. Read the [current LAN R03 runtime retest](../implementation/LAN-R03-COORDINATOR-RETEST.md). Four prior LAN residual paths pass targeted Coordinator execution; canonical static review is pending. C1 evidence remains unchanged, not full human/mobile acceptance. DeepSeek remains user-operated primary and Antigravity explicit-handover fallback.
+Status: **LOCAL_BUILD_AUTHORIZED / C1-FU-01_RESOLVED_TARGETED / LAN_R03_CHANGES_REQUESTED**. Read the [current consolidation](../implementation/LAN-R03-REVIEW-SUMMARY.md). LAN-FU-04 is now resolved targeted with Coordinator runtime proof and QA static review. Three narrower LAN branches remain; no C1 rewrite, mobile PASS, human acceptance or publication. DeepSeek remains user-operated primary; fallback requires explicit handover.
 
-The [LAN residual prompt](LAN-R02-RESIDUAL-EN.txt) produced R03 and is now historical; its [contract](LAN-R02-RESIDUALS.md) remains the retest input. Await canonical review, not another automatic coding run. Do not create another C1 fix run without a justified C1 change, bootstrap/reset, dispatch or switch provider automatically. Communication policy lives in `AGENTS.md`.
+Current [three-branch LAN contract](LAN-R03-RESIDUALS.md) and [English prompt](LAN-R03-RESIDUAL-EN.txt) replace prior starters. Keep C1 and certificate resolutions; do not auto-dispatch or create another C1 run. Communication policy lives in AGENTS.md.
 
 ## Entry / precedence
 1. อ่าน `AGENTS.md`, `docs/CODING-WORKFLOW.md`, `docs/TEAM-WORKFLOW.md`, `docs/ANTIGRAVITY-RESULT-PROTOCOL.md`, `docs/results/INDEX.md`.

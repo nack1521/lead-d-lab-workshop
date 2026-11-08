@@ -1,0 +1,97 @@
+{
+  "status": "LAN_CHANGES_REQUESTED",
+  "source": "fdba66a8a0e3c849c8fc645bab59774d2b6c0e99",
+  "report_head": "a3b3ed241c963116a58c5c7d83368e10629f0854",
+  "groups": [
+    {
+      "group": "LAN-FU-01",
+      "source_ids": [
+        "QA-LAN-01",
+        "R02-QA-LAN-01",
+        "R03-QA-01"
+      ],
+      "status": "PARTIAL_OPEN",
+      "priority": "High",
+      "scope": "Apply OPEN upstream budget on pending-queue flush; handle server send outcomes",
+      "evidence_class": "static contract gap; finite pending queue retained; no default-unbounded-memory/exploit claim"
+    },
+    {
+      "group": "LAN-FU-02",
+      "source_ids": [
+        "QA-LAN-03",
+        "R03-QA-02"
+      ],
+      "status": "PARTIAL_OPEN",
+      "priority": "Medium",
+      "scope": "Isolate test issuer override from active/default certificate storage",
+      "evidence_class": "static local configuration guard gap; no unsafe listener/public exposure observed"
+    },
+    {
+      "group": "LAN-FU-03",
+      "source_ids": [
+        "LAN-COORD-01",
+        "R02-QA-LAN-02",
+        "R03-QA-03"
+      ],
+      "status": "PARTIAL_OPEN",
+      "priority": "Medium",
+      "scope": "Side-effect-free unsupported-state preflight, no-op early-failure lifecycle and all connecting/opened socket cleanup",
+      "evidence_class": "static diagnostic-harness residual; successful exact restore/correlation/failure signals retained"
+    },
+    {
+      "group": "LAN-FU-04",
+      "source_ids": [
+        "LAN-COORD-02",
+        "LAN-COORD-03",
+        "R02-QA-LAN-03"
+      ],
+      "status": "RESOLVED_TARGETED",
+      "priority": "Medium",
+      "evidence_class": "QA static resolution plus Coordinator actual both partial-pair refusals, default strict TLS and real reuse/renewal"
+    },
+    {
+      "group": "C1-FU-01",
+      "source_ids": [
+        "QA-R04-01"
+      ],
+      "status": "RESOLVED_TARGETED_RETAINED",
+      "priority": "Medium"
+    },
+    {
+      "group": "LAN-DOC-01",
+      "source_ids": [
+        "QA-LAN-02"
+      ],
+      "status": "RESOLVED_CURRENT_DOCS_RETAINED",
+      "priority": "Medium"
+    }
+  ],
+  "open_groups": 3,
+  "priority_counts": {
+    "High": 1,
+    "Medium": 2
+  },
+  "note": "Queue flush is client-to-upstream; do not repeat the QA narrative direction typo as downstream flush. Downstream send-result handling is a separate branch. Preserve immutable QA report.",
+  "Coordinator_full": {
+    "Mode_A": {
+      "pass": 107,
+      "fail": 0,
+      "expect": 509
+    },
+    "Mode_B": {
+      "pass": 100,
+      "fail": 0,
+      "skip": 7,
+      "expect": 478
+    }
+  },
+  "Senior_QA_selected": {
+    "pass": 10,
+    "fail": 0,
+    "filtered": 5,
+    "expect": 22
+  },
+  "physical_iPhone": "NOT RUN / PENDING_USER_ACTION",
+  "accepted": false,
+  "published": false
+}

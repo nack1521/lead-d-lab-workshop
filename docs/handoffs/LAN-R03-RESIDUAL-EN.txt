@@ -1,0 +1,10 @@
+Workspace: /Users/aiink/Nack/Lead+D-Lab
+Read AGENTS.md, docs/CODING-WORKFLOW.md, docs/implementation/LAN-R03-REVIEW-SUMMARY.md and docs/handoffs/LAN-R03-RESIDUALS.md.
+
+Continue LAN-IPHONE-01 only, next unused run (expected R04), one writer. C1-FU-01, LAN-FU-04 and documentation fixes stay resolved; no C1 rerun or generic rewrite.
+
+Close three branches together: LAN-FU-01 shared bounded forwarding for queued flush/direct sends and explicit supported send outcomes; LAN-FU-02 prevent issuer test override from active/default storage; LAN-FU-03 side-effect-free unsupported preflight, no-op early failure and all CONNECTING/OPEN socket cleanup. Preserve successful post-mutation restoration, exact revision/DB correlation, TLS and CA identity. Audit each paired branch before finalizing; use low-resource isolated tests, never the live listener for pressure tests.
+
+Run TDD/controlled cases, both-mode regression, CLI-covered typecheck, builds and real HTTPS/API/PostgreSQL/WSS checks. Declare skips/filters. Preserve dirty/protected work and immutable evidence. No resets, public tunnel/push, global/network/device trust changes, TLS bypass or provider switch. Physical Safari remains pending user action.
+
+Deliver immutable LAN results with HEAD, actual commands/exits, dispositions, URL/pending steps; INDEX last. Checkpoint before budget exhaustion.

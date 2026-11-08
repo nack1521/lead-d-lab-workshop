@@ -1,6 +1,6 @@
 # C1-LOCAL-BUILD / R05 — C1-FU-01 concurrent-send verification and wording correction
 
-- **Task/run:** C1-LOCAL-BUILD / R05 (`main`, build `42e7bb8`, not pushed)
+- **Task/run:** C1-LOCAL-BUILD / R05 (`main`, build `df4b523`, not pushed)
 - **Producer:** DeepSeek Harness (single active coding writer); baseline `3ab71c4`
 - **Reported:** 2026-11-08T17:24:40+07:00 (Asia/Bangkok)
 - **Status:** **READY_FOR_REVIEW** (verification + documentation correction; no policy change)
@@ -10,6 +10,8 @@
 - Therefore the earlier "at most one in-flight frame" statement is **not supported under concurrent sends**. Code comments and `docs/implementation/C1-WS-AUTHORIZATION-BOUNDARY.md` now state: a revoke/expiry after the revalidation point can interleave with **any already-admitted concurrent send** (one per in-flight send); no later send passes revalidation, explicit revocation closes the socket, and no zero-network-race guarantee is claimed.
 - The test hook is awaited **only when present**, removing an unconditional scheduling yield from production sends.
 - Approved auth decision point, TTL/grace/revoke semantics, C1-EG-01/02 schedules and all resolved receipt/join/UI contracts are unchanged.
+
+Regression was rerun on the final HEAD `df4b523` (the ws.ts conditional-hook commit landed after `42e7bb8`; both runs pass).
 
 ## Regression (current build)
 - Mode A `bun test tests`: **103 pass / 0 fail**, 491 expect, 12 files; `bun x tsc --noEmit` exit 0.

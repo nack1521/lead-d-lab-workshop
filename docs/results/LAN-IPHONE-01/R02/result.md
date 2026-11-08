@@ -1,6 +1,6 @@
 # LAN-IPHONE-01 / R02 — Follow-up guards for the private-HTTPS LAN mode
 
-- **Task/run:** LAN-IPHONE-01 / R02 (`main`, build `42e7bb8`, not pushed)
+- **Task/run:** LAN-IPHONE-01 / R02 (`main`, build `df4b523`, not pushed)
 - **Producer:** DeepSeek Harness (single active coding writer); baseline `3ab71c4`
 - **Reported:** 2026-11-08T17:24:40+07:00 (Asia/Bangkok)
 - **LAN URL:** `https://192.168.1.98:8443` (entry `/join`, code `ROOM-01`)
@@ -14,6 +14,8 @@
 | LAN-FU-03 | LAN-COORD-01 | **PASS** | Verifier asserts required outcomes, requires a **strictly newer** fresh push revision (85→86), exercises the real poll-first stale rating **409 QUESTION_CLOSED**, restores the fixture and closes sockets in `finally`, and exits nonzero on failure (unavailable target test: exit 1, `ok:false`). Successful HTTPS run: exit 0, `failures: []`. |
 | LAN-FU-04 | LAN-COORD-02/03 | **PASS (structural) / exact strict-Python retest NOT RUN** | Leaf renewed with strict-compatible extensions (AKI/SKI, critical `CA:FALSE`) while **retaining the CA identity** (CA hash unchanged). Exact-SAN parsing replaces substring matching; reuse requires exact IP+DNS SAN, retained-CA signature, strict extensions and non-expiring leaf; changed-address and short-validity renewal tested with isolated material. `openssl verify -x509_strict` OK, curl + Bun fetch 200. Host has no OpenSSL-3.5 strict Python, so the Coordinator's 3.14/3.5 strict-verification retest is NOT RUN here (limitation, not a claim). |
 | LAN-DOC-01 | QA-LAN-02 | RESOLVED_CURRENT_DOCS preserved | README keeps trusted out-of-band public-CA transfer; no warning-bypass instruction reintroduced. Historical producer R01 immutable. |
+
+Both-mode regression was rerun on the final HEAD `df4b523` (the ws.ts conditional-hook commit landed after `42e7bb8`; both runs pass).
 
 ## Re-verified LAN criteria
 - LAN-01 PARTIAL (Mac topology/URL/commands verified; iPhone same-network membership still unconfirmed).

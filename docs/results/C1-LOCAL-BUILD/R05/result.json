@@ -8,24 +8,61 @@
   "model": "deepseek-v4.1-flash-1017",
   "source_kind": "direct",
   "baseline_commit": "3ab71c4",
-  "observed_head": "42e7bb8",
+  "observed_head": "df4b523",
   "branch": "main",
   "work_kind": "verification_and_documentation_correction",
   "status": "READY_FOR_REVIEW",
   "summary": "C1-FU-01 verification: a controlled test at the real per-socket auth/send seam shows up to three concurrent already-admitted frames can be delivered after a post-revalidation expiry (observed 3), then resync is denied and the socket closes 4401. Corrected the unsupported one-in-flight-frame wording in code comments and the boundary document; no policy/zero-race claim. Removed an unconditional test-hook await from production sends. C1-EG-01/02 and all case dispositions preserved. Regression: Mode A 103 pass/0 fail, typecheck 0, Mode B runner 0 fail with 4 host-tooling skips, builds 0.",
   "detail_path": "docs/results/C1-LOCAL-BUILD/R05/result.md",
   "findings": [
-    {"finding_id": "C1-FU-01", "source_id": "QA-R04-01", "status": "ADDRESSED", "evidence_paths": ["tests/evidence-gates.test.ts", "docs/results/C1-LOCAL-BUILD/R05/evidence/mode-a-regression.log", "docs/implementation/C1-WS-AUTHORIZATION-BOUNDARY.md"], "notes": "Concurrent admitted sends verified (3 frames); one-frame assurance corrected; no policy change; later sends denied and socket closed 4401."}
+    {
+      "finding_id": "C1-FU-01",
+      "source_id": "QA-R04-01",
+      "status": "ADDRESSED",
+      "evidence_paths": [
+        "tests/evidence-gates.test.ts",
+        "docs/results/C1-LOCAL-BUILD/R05/evidence/mode-a-regression.log",
+        "docs/implementation/C1-WS-AUTHORIZATION-BOUNDARY.md"
+      ],
+      "notes": "Concurrent admitted sends verified (3 frames); one-frame assurance corrected; no policy change; later sends denied and socket closed 4401."
+    }
   ],
-  "preserved": {"C1-EG-01": "PASS (schedules unchanged)", "C1-EG-02": "PASS (single-send/equality cases unchanged)", "R02-QA-01..05": "unchanged", "C1-RV-01..05": "unchanged", "C1-15": "PARTIAL (real browser NOT RUN)"},
+  "preserved": {
+    "C1-EG-01": "PASS (schedules unchanged)",
+    "C1-EG-02": "PASS (single-send/equality cases unchanged)",
+    "R02-QA-01..05": "unchanged",
+    "C1-RV-01..05": "unchanged",
+    "C1-15": "PARTIAL (real browser NOT RUN)"
+  },
   "commands": [
-    {"command": "bun test tests", "exit_code": 0, "outcome": "103 pass / 0 fail"},
-    {"command": "bun x tsc --noEmit -p tsconfig.json", "exit_code": 0, "outcome": "no type errors"},
-    {"command": "tests/run-in-docker.sh c1b_default", "exit_code": 0, "outcome": "0 fail; 4 host-tooling tests skipped"},
-    {"command": "bun run build:web / build:web:lan", "exit_code": 0, "outcome": "both builds succeed"}
+    {
+      "command": "bun test tests",
+      "exit_code": 0,
+      "outcome": "103 pass / 0 fail"
+    },
+    {
+      "command": "bun x tsc --noEmit -p tsconfig.json",
+      "exit_code": 0,
+      "outcome": "no type errors"
+    },
+    {
+      "command": "tests/run-in-docker.sh c1b_default",
+      "exit_code": 0,
+      "outcome": "0 fail; 4 host-tooling tests skipped"
+    },
+    {
+      "command": "bun run build:web / build:web:lan",
+      "exit_code": 0,
+      "outcome": "both builds succeed"
+    }
   ],
   "blockers": [],
-  "not_verified": ["real-browser C1-15 flows", "mobile/load/reboot", "independent QA acceptance"],
+  "not_verified": [
+    "real-browser C1-15 flows",
+    "mobile/load/reboot",
+    "independent QA acceptance"
+  ],
   "next_gate": "Independent review of C1-R05 + LAN-R02, then user device test/acceptance",
-  "published": false
+  "published": false,
+  "regression_note": "Both-mode regression rerun on final HEAD df4b523 after the ws.ts conditional-hook commit; Mode A and Mode B runs pass."
 }

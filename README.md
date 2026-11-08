@@ -28,6 +28,9 @@ Source skills อยู่ใน .hermes/skills และ .agents/skills; proven
 ## Future deliverables
 Working URL, public GitHub repository with full commit history, unlisted one-take 5–8 minute video with face and screen. ยังไม่มีแอปออนไลน์หรือวิดีโอ; repository เริ่มเก็บ foundation/design history ก่อน implementation
 
+## iPhone on private Wi-Fi — preparation only
+The current loopback URLs are not iPhone URLs. [LAN-IPHONE-01 handoff](docs/handoffs/LAN-IPHONE-01.md) and its [English START prompt](docs/handoffs/LAN-IPHONE-01-START-EN.txt) define a dev-only trusted-HTTPS LAN mode; this preparation has not implemented or started that mode. Any iPhone CA/profile trust is a separate explicit user action. No public tunnel or system trust change is authorized automatically; physical-phone verification remains NOT RUN.
+
 ## C1 local tracer bullet — commands ที่รันจริง
 
 ต้องมี Bun 1.4.4 และ Docker engine ที่ทำงานอยู่. ค่า secret อยู่ใน `.env` (untracked) — คัดลอกจาก `.env.example` แล้วตั้ง `POSTGRES_PASSWORD` เอง.

@@ -1,0 +1,10 @@
+Task: LAN-IPHONE-01 - private-Wi-Fi iPhone testing, not public deployment.
+Workspace: /Users/aiink/Nack/Lead+D-Lab
+
+Read AGENTS.md, docs/CODING-WORKFLOW.md and docs/handoffs/LAN-IPHONE-01.md. Inspect current code, network and ports. Start only when the previous coding writer is stopped/checkpointed; do not run two writers or bootstrap over existing data.
+
+Implement the smallest project-scoped, trusted-HTTPS LAN mode for the existing prototype. Prefer one HTTPS entry routing web/API/WSS to one existing backend authority, with exact origins and no loopback URLs in phone traffic. Preserve existing Mode A/B and all auth/idempotency/privacy behavior. Keep keys private and ignored.
+
+Do not open a public tunnel, expose the DB, install global tools, change router/firewall/system trust, or bypass TLS. Any iPhone certificate installation/trust is an explicit user-assisted action: provide safe public-certificate instructions and report BLOCKED/PENDING_USER_ACTION until completed. No silent HTTP downgrade or fabricated phone success.
+
+Verify LAN-01..07 with real API/DB evidence; physical Safari steps not performed remain NOT RUN. Record immutable results under LAN-IPHONE-01 with a free run ID and update INDEX last. Keep C1-EG-01/02 open; LAN success is not C1 acceptance. Use concise English, preserve Thai copy, and checkpoint before budget exhaustion. Reply with task/run, actual LAN URL, result paths and remaining user actions.

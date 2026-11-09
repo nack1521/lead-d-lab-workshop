@@ -1,0 +1,29 @@
+bun test v1.4.4 (38afee6c8)
+
+tests/lan-guards.test.ts:
+(pass) LAN-FU-02 fail-closed private interface/address and SAN agreement > missing, ambiguous, public, wildcard, loopback and VPN selections are rejected [0.66ms]
+(pass) LAN-FU-02 fail-closed private interface/address and SAN agreement > a single private candidate or an explicit valid private address is selected [0.07ms]
+(pass) LAN-FU-02 fail-closed private interface/address and SAN agreement > the listener entry refuses to start when the retained certificate SAN does not exactly match the selection [13.05ms]
+(pass) LAN-FU-04 strict-compatible certificates and exact-SAN reuse/renewal > leaf is strict-compatible, has the exact SAN and is reused for the same address with the same CA [334.05ms]
+(pass) LAN-FU-04 strict-compatible certificates and exact-SAN reuse/renewal > issuer refuses an explicit unsafe address and incomplete CA pairs fail closed [230.52ms]
+(pass) LAN-FU-04 strict-compatible certificates and exact-SAN reuse/renewal > a healthy non-forced rerun actually reuses the leaf and key [374.70ms]
+(pass) LAN-FU-04 strict-compatible certificates and exact-SAN reuse/renewal > the issuer test override cannot target active/default storage [25.34ms]
+(pass) LAN-FU-04 strict-compatible certificates and exact-SAN reuse/renewal > a real CLI start with a mismatched retained SAN is refused [294.03ms]
+(pass) LAN-FU-04 strict-compatible certificates and exact-SAN reuse/renewal > changed address and short-validity leaf renew instead of being reused [560.52ms]
+(pass) LAN-FU-01 bounded WebSocket proxy > healthy upstream forwards frames, preserves Origin and supports reconnect [47.26ms]
+(pass) LAN-FU-01 bounded WebSocket proxy > unavailable upstream closes the client with 1011 and releases both sides [0.91ms]
+(pass) LAN-FU-01 bounded WebSocket proxy > delayed upstream handshake hits the deadline and closes with 1013 [307.13ms]
+(pass) LAN-FU-01 bounded WebSocket proxy > oversize client frame is denied before forwarding and closes 1009 [3.44ms]
+(pass) LAN-FU-01 bounded WebSocket proxy > queue caps bound frames waiting for an unopened upstream and close 1013 [2.53ms]
+(pass) pending queue flush obeys the smaller OPEN-side upstream budget [7.35ms]
+(pass) slow downstream client is closed within a finite budget and the upstream is released [25.94ms]
+(pass) slow upstream builds bounded client-side buffer and the client is closed 1013 [4.55ms]
+(pass) LAN-FU-03 verifier fails closed > an unavailable LAN target produces a nonzero verifier exit [57.14ms]
+(pass) LAN-FU-03 preflight and connection-attempt cleanup > unsupported fixture states are refused before any mutation [0.14ms]
+(pass) LAN-FU-03 preflight and connection-attempt cleanup > every attempt including CONNECTING is settled and late auth is blocked [12.23ms]
+(pass) LAN-FU-03 preflight and connection-attempt cleanup > an unsettled attempt is reported as incomplete cleanup, not success [82.21ms]
+
+ 21 pass
+ 0 fail
+ 71 expect() calls
+Ran 21 tests across 1 file. [2.40s]

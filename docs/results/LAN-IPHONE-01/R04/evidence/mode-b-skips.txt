@@ -1,0 +1,18 @@
+SKIP: (skip) LAN-FU-02 fail-closed private interface/address and SAN agreement > the listener entry refuses to start when the retained certificate SAN does not exactly match the selection
+SKIP: (skip) LAN-FU-04 strict-compatible certificates and exact-SAN reuse/renewal > leaf is strict-compatible, has the exact SAN and is reused for the same address with the same CA
+SKIP: (skip) LAN-FU-04 strict-compatible certificates and exact-SAN reuse/renewal > issuer refuses an explicit unsafe address and incomplete CA pairs fail closed
+SKIP: (skip) LAN-FU-04 strict-compatible certificates and exact-SAN reuse/renewal > a healthy non-forced rerun actually reuses the leaf and key
+SKIP: (skip) LAN-FU-04 strict-compatible certificates and exact-SAN reuse/renewal > the issuer test override cannot target active/default storage
+SKIP: (skip) LAN-FU-04 strict-compatible certificates and exact-SAN reuse/renewal > a real CLI start with a mismatched retained SAN is refused
+SKIP: (skip) LAN-FU-04 strict-compatible certificates and exact-SAN reuse/renewal > changed address and short-validity leaf renew instead of being reused
+SKIP: (skip) slow downstream client is closed within a finite budget and the upstream is released
+SKIP: (skip) LAN-FU-03 verifier fails closed > an unavailable LAN target produces a nonzero verifier exit
+SKIP: (skip) LAN-FU-02 fail-closed private interface/address and SAN agreement > the listener entry refuses to start when the retained certificate SAN does not exactly match the selection
+SKIP: (skip) LAN-FU-04 strict-compatible certificates and exact-SAN reuse/renewal > leaf is strict-compatible, has the exact SAN and is reused for the same address with the same CA
+SKIP: (skip) LAN-FU-04 strict-compatible certificates and exact-SAN reuse/renewal > issuer refuses an explicit unsafe address and incomplete CA pairs fail closed
+SKIP: (skip) LAN-FU-04 strict-compatible certificates and exact-SAN reuse/renewal > a healthy non-forced rerun actually reuses the leaf and key
+SKIP: (skip) LAN-FU-04 strict-compatible certificates and exact-SAN reuse/renewal > the issuer test override cannot target active/default storage
+SKIP: (skip) LAN-FU-04 strict-compatible certificates and exact-SAN reuse/renewal > a real CLI start with a mismatched retained SAN is refused
+SKIP: (skip) LAN-FU-04 strict-compatible certificates and exact-SAN reuse/renewal > changed address and short-validity leaf renew instead of being reused
+SKIP: (skip) slow downstream client is closed within a finite budget and the upstream is released
+SKIP: (skip) LAN-FU-03 verifier fails closed > an unavailable LAN target produces a nonzero verifier exit

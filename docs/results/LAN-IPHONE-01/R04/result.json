@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "task_id": "LAN-IPHONE-01",
+  "run_id": "R04",
+  "reported_at": "2026-11-09T07:52:18+07:00",
+  "producer": "DeepSeek Harness (single active coding writer)",
+  "authoring_tool": "DeepSeek Harness",
+  "model": "deepseek-v4.1-flash-1017",
+  "source_kind": "direct",
+  "baseline_commit": "347398d",
+  "observed_head": "68e8670",
+  "branch": "main",
+  "work_kind": "lan_residual_branches",
+  "status": "BLOCKED_PENDING_USER_ACTION",
+  "lan_url": "https://192.168.4.97:8443",
+  "network_note": "Private LAN address changed to 192.168.4.97; stale-SAN startup was refused, leaf renewed for exact new SAN with CA identity preserved, API allowlist updated. Historical evidence keeps its original URLs.",
+  "summary": "Closed three LAN branches together: shared guarded client->upstream forwarding (queued flush + direct) with explicit send outcomes and bounded close; issuer test override confined to isolated storage plus real mismatched-SAN CLI refusal; side-effect-free verifier preflight before grant/mutation, no-op early failure, exact post-mutation restoration and all CONNECTING/OPEN attempt settlement with incomplete cleanup reported as failure. Mode A 113/0; Mode B 104 pass/0 fail/9 declared skips; typecheck/builds 0; trusted HTTPS verifier exit 0 with exact restore and control/DB correlation. Physical iPhone remains NOT RUN.",
+  "detail_path": "docs/results/LAN-IPHONE-01/R04/result.md",
+  "findings": [
+    {"finding_id": "LAN-FU-01", "source_id": "R03-QA-01", "status": "FIXED", "evidence_paths": ["lan/lan-entry.ts", "tests/lan-guards.test.ts", "docs/results/LAN-IPHONE-01/R04/evidence/lan-guards.log"]},
+    {"finding_id": "LAN-FU-02", "source_id": "R03-QA-02", "status": "FIXED", "evidence_paths": ["lan/generate-certs.sh", "tests/lan-guards.test.ts", "docs/results/LAN-IPHONE-01/R04/evidence/entry-san-mismatch-refusal.log"]},
+    {"finding_id": "LAN-FU-03", "source_id": "R03-QA-03", "status": "FIXED", "evidence_paths": ["lan/verify.ts", "lan/verify-support.ts", "docs/results/LAN-IPHONE-01/R04/evidence/lan-verify.log"]},
+    {"finding_id": "LAN-FU-04", "source_id": "previous", "status": "RESOLVED_PRESERVED", "evidence_paths": ["docs/results/LAN-IPHONE-01/R04/evidence/cert-renewal.log"]},
+    {"finding_id": "C1-FU-01", "source_id": "QA-R04-01", "status": "RESOLVED_PRESERVED", "evidence_paths": ["docs/results/C1-LOCAL-BUILD/R05/result.md"]},
+    {"finding_id": "LAN-DOC-01", "source_id": "QA-LAN-02", "status": "RESOLVED_CURRENT_DOCS_PRESERVED", "evidence_paths": ["README.md"]}
+  ],
+  "cases": [
+    {"case_id": "LAN-01", "status": "PARTIAL", "limitations": "iPhone same-network membership unconfirmed; address changed to 192.168.4.97."},
+    {"case_id": "LAN-02", "status": "BLOCKED_PENDING_USER_ACTION", "limitations": "Physical iPhone Safari/cert trust NOT RUN."},
+    {"case_id": "LAN-03", "status": "PASS", "limitations": "HTTPS/API/DB automated; phone UI NOT RUN."},
+    {"case_id": "LAN-04", "status": "PASS", "limitations": "WSS automated; browser UI NOT RUN."},
+    {"case_id": "LAN-05", "status": "PASS", "limitations": "Automated same-origin/negatives."},
+    {"case_id": "LAN-06", "status": "PASS", "limitations": "Mode B 9 declared skips."},
+    {"case_id": "LAN-07", "status": "PASS", "limitations": "Device certificate removal is a user action."}
+  ],
+  "commands": [
+    {"command": "bun test tests", "exit_code": 0, "outcome": "113 pass / 0 fail"},
+    {"command": "tests/run-in-docker.sh c1b_default", "exit_code": 0, "outcome": "104 pass / 0 fail / 9 skip"},
+    {"command": "bun x tsc --noEmit -p tsconfig.json", "exit_code": 0, "outcome": "includes lan/**/*.ts"},
+    {"command": "bun run build:web / build:web:lan", "exit_code": 0, "outcome": "both builds succeed"},
+    {"command": "NODE_EXTRA_CA_CERTS=… LAN_ORIGIN=https://192.168.4.97:8443 bun lan/verify.ts", "exit_code": 0, "outcome": "failures []; exact restore; control revision 146 = pushed; DB total matches; 3/3 attempts settled"},
+    {"command": "bun lan/lan-entry.ts with stale SAN", "exit_code": 2, "outcome": "refused before bind; leaf renewed with CA identity preserved"},
+    {"command": "LAN_ALLOW_TEST_ADDRESS=1 with active LAN_CERT_DIR", "exit_code": 2, "outcome": "issuer override refused; active cert/key bytes unchanged"}
+  ],
+  "environment_limitations": [
+    "Physical iPhone and certificate trust remain user actions (NOT RUN).",
+    "Mode B archive-only runner skips 9 host-tooling/raw-socket/fixture cases (declared).",
+    "Private LAN address changed to 192.168.4.97; certificate/allowlist regenerated for the exact address.",
+    "No memory-exhaustion/load test on the live listener."
+  ],
+  "blockers": ["Physical iPhone certificate trust + Safari test: PENDING_USER_ACTION"],
+  "next_gate": "User completes CA trust and iPhone Safari test; then independent review. No public deploy/tunnel.",
+  "published": false
+}

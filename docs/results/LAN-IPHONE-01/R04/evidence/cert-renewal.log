@@ -1,0 +1,8 @@
+$ sh lan/generate-certs.sh
+retaining existing development CA identity: /Users/aiink/Nack/Lead+D-Lab/.local/lan-certs/ca.crt
+created server certificate for 192.168.4.97 and MacBook-Air-khxngAraya.local: /Users/aiink/Nack/Lead+D-Lab/.local/lan-certs/server.crt
+LAN IP: 192.168.4.97 (mDNS: MacBook-Air-khxngAraya.local)
+leaf SAN: IP Address:192.168.4.97, DNS:MacBook-Air-khxngAraya.local
+public CA certificate (safe to transfer to the test iPhone): /Users/aiink/Nack/Lead+D-Lab/.local/lan-certs/ca.crt
+server certificate: /Users/aiink/Nack/Lead+D-Lab/.local/lan-certs/server.crt
+private keys stay in /Users/aiink/Nack/Lead+D-Lab/.local/lan-certs (ignored, mode 600); never transfer or commit them

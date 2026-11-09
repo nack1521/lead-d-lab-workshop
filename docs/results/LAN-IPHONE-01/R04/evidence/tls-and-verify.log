@@ -1,0 +1,33 @@
+== current LAN URL ==
+https://192.168.4.97:8443 (entry /join, ROOM-01)
+== strict TLS ==
+curl HTTP 200
+bun_fetch 200
+.local/lan-certs/server.crt: OK
+strict_openssl_exit=0
+ca_fingerprint_prefix=e2a52e8d7939d0c3
+== verifier ==
+VERIFY_EXIT=0
+{
+  "ok": true,
+  "failures": [],
+  "restorable": true,
+  "restored_exact": true,
+  "fresh": {
+    "initial_revision": 145,
+    "control_revision": 146,
+    "pushed_revision": 146,
+    "question_matches": true,
+    "db_total_matches": true
+  },
+  "cleanup": {
+    "closedCodes": [
+      1005,
+      1005,
+      1005
+    ],
+    "incomplete": false,
+    "attempts": 3,
+    "opened": 3
+  }
+}

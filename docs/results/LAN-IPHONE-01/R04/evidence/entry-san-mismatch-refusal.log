@@ -1,0 +1,1 @@
+LAN entry: certificate SAN does not include the selected private address 192.168.4.97; run 'bun run lan:certs'

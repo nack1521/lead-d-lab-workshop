@@ -7,6 +7,7 @@ import { join } from 'node:path';
 import { LanSelectionError, selectLanAddress } from '../lan/address.ts';
 import { createLanEntry, DEFAULT_LAN_WS_LIMITS } from '../lan/lan-entry.ts';
 import { hasExactSanIp, isStrictCompatibleLeaf, planLeafRenewal } from '../lan/certs.ts';
+import { createSocketTracker, evaluateFixtureState } from '../lan/verify-support.ts';
 
 /**
  * Follow-up guards for the LAN mode:
@@ -156,6 +157,41 @@ describe('LAN-FU-04 strict-compatible certificates and exact-SAN reuse/renewal',
     expect(rerun.stdout.toString()).toContain('reusing existing leaf');
     expect(createHash('sha256').update(readFileSync(join(dir, 'server.crt'))).digest('hex')).toBe(certHash);
     expect(createHash('sha256').update(readFileSync(join(dir, 'server.key'))).digest('hex')).toBe(keyHash);
+  });
+
+  test.skipIf(!hasOpenssl)('the issuer test override cannot target active/default storage', () => {
+    const activeDir = join(root, '.local/lan-certs');
+    const activeCert = readFileSync(join(activeDir, 'server.crt'));
+    const activeKey = readFileSync(join(activeDir, 'server.key'));
+
+    const noDir = Bun.spawnSync(['sh', join(root, 'lan/generate-certs.sh')], {
+      cwd: root,
+      env: { ...process.env, LAN_ALLOW_TEST_ADDRESS: '1', LAN_CERT_DIR: '', LAN_IP: '192.168.1.50' },
+    });
+    expect(noDir.exitCode).not.toBe(0);
+
+    const activeTarget = Bun.spawnSync(['sh', join(root, 'lan/generate-certs.sh')], {
+      cwd: root,
+      env: { ...process.env, LAN_ALLOW_TEST_ADDRESS: '1', LAN_CERT_DIR: activeDir, LAN_IP: '192.168.1.50' },
+    });
+    expect(activeTarget.exitCode).toBe(2);
+    expect(activeTarget.stderr.toString()).toContain('must not target active/default certificate storage');
+    expect(readFileSync(join(activeDir, 'server.crt'))).toEqual(activeCert);
+    expect(readFileSync(join(activeDir, 'server.key'))).toEqual(activeKey);
+  });
+
+  test.skipIf(!hasOpenssl || !hasActiveCertificate)('a real CLI start with a mismatched retained SAN is refused', () => {
+    const isolated = tempDir();
+    generate(isolated, '192.168.1.50');
+    const activeAddress = (Bun.spawnSync(['bun', 'lan/config-cli.ts', 'address'], { cwd: root }).stdout.toString() || '').trim();
+    expect(activeAddress).toMatch(/^\d+\.\d+\.\d+\.\d+$/);
+    const refused = Bun.spawnSync(['bun', 'lan/lan-entry.ts'], {
+      cwd: root,
+      env: { ...process.env, LAN_BIND: activeAddress, LAN_CERT_DIR: isolated },
+      timeout: 15_000,
+    });
+    expect(refused.exitCode).toBe(2);
+    expect(refused.stderr.toString()).toContain('does not include the selected private address');
   });
 
   test.skipIf(!hasOpenssl)('changed address and short-validity leaf renew instead of being reused', () => {
@@ -312,6 +348,46 @@ async function slowWebSocketUpstream(): Promise<{ port: number; close: () => voi
   };
 }
 
+async function delayedHandshakeUpstream(delayMs: number): Promise<{ port: number; close: () => void; connections: number }> {
+  const sockets = new Set<NetSocket>();
+  const state = { connections: 0 };
+  const server = createServer((socket) => {
+    state.connections += 1;
+    sockets.add(socket);
+    socket.on('error', () => {});
+    socket.on('close', () => sockets.delete(socket));
+    let buffer = Buffer.alloc(0);
+    const onData = (chunk: Buffer) => {
+      buffer = Buffer.concat([buffer, chunk]);
+      const end = buffer.indexOf('\r\n\r\n');
+      if (end === -1) return;
+      socket.off('data', onData);
+      const request = buffer.subarray(0, end).toString('utf8');
+      const key = /Sec-WebSocket-Key:\s*(.+)/i.exec(request)?.[1]?.trim() ?? '';
+      const accept = createHash('sha1').update(`${key}258EAFA5-E914-47DA-95CA-C5AB0DC85B11`).digest('base64');
+      setTimeout(() => {
+        if (socket.destroyed) return;
+        socket.write(
+          'HTTP/1.1 101 Switching Protocols\r\nUpgrade: websocket\r\nConnection: Upgrade\r\n' +
+            `Sec-WebSocket-Accept: ${accept}\r\n\r\n`,
+        );
+        socket.pause(); // stop reading so the entry's upstream buffer grows
+      }, delayMs);
+    };
+    socket.on('data', onData);
+  });
+  await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
+  const port = (server.address() as { port: number }).port;
+  return {
+    port,
+    get connections() { throw new Error('unused'); },
+    close: () => {
+      for (const socket of sockets) socket.destroy();
+      server.close();
+    },
+  } as never;
+}
+
 describe('LAN-FU-01 bounded WebSocket proxy', () => {
   test('healthy upstream forwards frames, preserves Origin and supports reconnect', async () => {
     const upstream = await startEchoUpstream();
@@ -395,6 +471,27 @@ describe('LAN-FU-01 bounded WebSocket proxy', () => {
   });
 });
 
+  test('pending queue flush obeys the smaller OPEN-side upstream budget', async () => {
+    const delayed = await delayedHandshakeUpstream(400);
+    const entry = await startEntry(delayed.port, {
+      maxQueuedBytes: 1_000_000,
+      maxQueuedFrames: 300,
+      maxUpstreamBufferedBytes: 1024,
+      upstreamDeadlineMs: 5000,
+    });
+    try {
+      const client = await connect(`ws://127.0.0.1:${entry.port}/ws`);
+      // Queued while the upstream handshake is still pending; the flush after OPEN
+      // must hit the smaller OPEN-side budget even though the queue itself allows it.
+      for (let index = 0; index < 250; index += 1) client.ws.send('q'.repeat(4096));
+      const closed = await client.closed;
+      expect(closed.code).toBe(1013);
+    } finally {
+      entry.stop();
+      delayed.close();
+    }
+  });
+
   // The raw TCP slow-client flood depends on host socket buffering; in the
   // archive-only Docker runner it is timing-dependent, so it is reported as a
   // host-only skip there rather than a pass.
@@ -462,3 +559,61 @@ describe('LAN-FU-03 verifier fails closed', () => {
   });
 });
 
+
+
+describe('LAN-FU-03 preflight and connection-attempt cleanup', () => {
+  test('unsupported fixture states are refused before any mutation', () => {
+    const base = { status: 'active', activeQuestionId: 'q1', questions: [{ id: 'q1', receiving: true, closedAt: null }] };
+    expect(evaluateFixtureState(base).supported).toBe(true);
+    expect(evaluateFixtureState(null).supported).toBe(false);
+    expect(evaluateFixtureState({ ...base, status: 'ended' }).reason).toContain('ended');
+    expect(
+      evaluateFixtureState({ ...base, questions: [{ id: 'q1', receiving: false, closedAt: null }] }).reason,
+    ).toContain('no receiving');
+    expect(
+      evaluateFixtureState({
+        ...base,
+        questions: [
+          { id: 'q1', receiving: true, closedAt: null },
+          { id: 'q2', receiving: true, closedAt: null },
+        ],
+      }).reason,
+    ).toContain('multiple receiving');
+    expect(evaluateFixtureState({ ...base, activeQuestionId: 'q2' }).reason).toContain('does not match');
+    expect(
+      evaluateFixtureState({
+        ...base,
+        questions: [
+          { id: 'q1', receiving: true, closedAt: null },
+          { id: 'q2', receiving: false, closedAt: '2026-01-01T00:00:00.000Z' },
+        ],
+      }).reason,
+    ).toContain('closed_at');
+  });
+
+  test('every attempt including CONNECTING is settled and late auth is blocked', async () => {
+    const tracker = createSocketTracker(200);
+    const connecting = { readyState: 0, close: () => { connecting.readyState = 3; } , closedResolve: null as null | ((code: number) => void) };
+    const connectingClosed = new Promise<number>((resolve) => { connecting.closedResolve = resolve; });
+    const connectingAttempt = tracker.track(connecting, connectingClosed);
+    const open = { readyState: 1, close: () => { open.readyState = 3; } };
+    const openClosed = new Promise<number>((resolve) => { open.close = () => { open.readyState = 3; resolve(1000); }; open.close(); });
+    const openAttempt = tracker.track(open, openClosed);
+    tracker.markOpened(openAttempt);
+    setTimeout(() => connecting.closedResolve?.(1006), 10);
+    const cleanup = await tracker.dispose();
+    expect(cleanup.attempts).toBe(2);
+    expect(cleanup.opened).toBe(1);
+    expect(cleanup.incomplete).toBe(false);
+    expect(tracker.isDisposed(connectingAttempt)).toBe(true);
+    expect(tracker.isDisposed(openAttempt)).toBe(true);
+  });
+
+  test('an unsettled attempt is reported as incomplete cleanup, not success', async () => {
+    const tracker = createSocketTracker(80);
+    const stuck = { readyState: 0, close: () => {} };
+    tracker.track(stuck, new Promise<number>(() => {}));
+    const cleanup = await tracker.dispose();
+    expect(cleanup.incomplete).toBe(true);
+  });
+});

@@ -4,13 +4,16 @@
  * authority and native WS proxy with synthetic data only.
  *
  * Fail-closed verifier: required outcomes are asserted; any failed check or
- * exception makes the process exit nonzero. Sockets are closed and the fixture's
- * rating question is restored in finally even on failure. Grants, keys and
- * connection strings are never printed.
+ * exception makes the process exit nonzero. Supported-state/ownership preflight
+ * runs before any grant or lifecycle mutation; an unsupported state is refused
+ * without changes. Only an actual lifecycle mutation is reconciled/restored in
+ * finally, and every connection attempt (CONNECTING included) is settled.
+ * Grants, keys and connection strings are never printed.
  */
 import { readFileSync } from 'node:fs';
 import { createSql } from '../apps/api/src/db.ts';
 import { issueGrant } from '../apps/api/src/grants.ts';
+import { createSocketTracker, evaluateFixtureState, type FixtureSnapshot } from './verify-support.ts';
 
 const LAN_ORIGIN = process.env.LAN_ORIGIN ?? 'https://192.168.1.98:8443';
 const LAN_WS = process.env.LAN_WS ?? 'wss://192.168.1.98:8443/ws';
@@ -22,7 +25,7 @@ const room = fixtures.fixtures[0];
 const databaseUrl = process.env.DATABASE_URL;
 if (!databaseUrl) throw new Error('DATABASE_URL is required for the LAN verification database readback');
 const sql = createSql(databaseUrl, 4);
-const facilitatorGrant = await issueGrant(sql, { sessionId: room.session_id, role: 'facilitator', ttlSeconds: 8 * 60 * 60 });
+let facilitatorGrant = '';
 
 interface JsonRecord {
   [key: string]: unknown;
@@ -30,8 +33,8 @@ interface JsonRecord {
 const results: JsonRecord = {};
 const checks: Record<string, unknown> = {};
 const failures: string[] = [];
-const sockets: WebSocket[] = [];
-const openedSockets: { ws: WebSocket; closed: Promise<number> }[] = [];
+const tracker = createSocketTracker(1500);
+let lifecycleMutationPerformed = false;
 
 function check(name: string, condition: boolean, detail?: unknown): void {
   if (!condition) failures.push(name);
@@ -56,21 +59,34 @@ async function call(path: string, init: RequestInit & { token?: string; origin?:
 
 function openSocket(origin: string, token: string): Promise<{ ws: WebSocket; messages: JsonRecord[]; closed: Promise<number> }> {
   return new Promise((resolve, reject) => {
-    const ws = new WebSocket(LAN_WS, { headers: { origin } } as never);
-    sockets.push(ws);
     const messages: JsonRecord[] = [];
-    const timer = setTimeout(() => reject(new Error('ws did not open')), 4000);
+    const ws = new WebSocket(LAN_WS, { headers: { origin } } as never);
+    let timer: ReturnType<typeof setTimeout> | null = setTimeout(() => reject(new Error('ws did not open')), 4000);
     const closed = new Promise<number>((done) => ws.addEventListener('close', (event) => done((event as CloseEvent).code)));
+    const attempt = tracker.track(ws, closed, () => {
+      if (timer) clearTimeout(timer);
+      timer = null;
+    });
     ws.addEventListener('open', () => {
-      clearTimeout(timer);
+      if (timer) clearTimeout(timer);
+      timer = null;
+      tracker.markOpened(attempt);
+      if (tracker.isDisposed(attempt)) {
+        // Cleanup already ran; never send auth or resolve a late open.
+        try {
+          ws.close();
+        } catch {
+          // already closed
+        }
+        return;
+      }
       ws.send(JSON.stringify({ type: 'auth', token }));
-      const handle = { ws, messages, closed };
-      openedSockets.push(handle);
-      resolve(handle);
+      resolve({ ws, messages, closed });
     });
     ws.addEventListener('message', (event) => messages.push(JSON.parse(String(event.data)) as JsonRecord));
     ws.addEventListener('error', () => {
-      clearTimeout(timer);
+      if (timer) clearTimeout(timer);
+      timer = null;
       reject(new Error('ws error'));
     });
   });
@@ -88,13 +104,6 @@ async function waitFor(messages: JsonRecord[], predicate: (m: JsonRecord) => boo
 
 const snapshotRevision = (message: JsonRecord): number => Number((message.snapshot as { revision?: number } | undefined)?.revision ?? -1);
 
-let facilitySockets: WebSocket[] = [];
-interface FixtureSnapshot {
-  status: string;
-  activeQuestionId: string | null;
-  questions: { id: string; receiving: boolean; closedAt: string | null }[];
-}
-
 let prior: FixtureSnapshot | null = null;
 let priorRestorable = false;
 try {
@@ -107,20 +116,17 @@ try {
     activeQuestionId: sessionRow?.active_question_id ?? null,
     questions: questionRows.map((q) => ({ id: q.id, receiving: q.receiving, closedAt: q.closed_at ? q.closed_at.toISOString() : null })),
   };
-  const receiving = prior.questions.filter((q) => q.receiving);
-  // Only states that can be restored exactly through the existing approved API
-  // are exercised; end/unend and closed_at resurrection are not invented.
-  priorRestorable =
-    prior.status === 'active' &&
-    receiving.length === 1 &&
-    prior.activeQuestionId === receiving[0].id &&
-    prior.questions.every((q) => q.closedAt === null);
-  check('fixture_state_supported_for_exact_restore', priorRestorable, prior);
+  // Pure preflight decision: unsupported/ambiguous/ended states are refused
+  // before any grant creation, control call or data mutation.
+  const evaluation = evaluateFixtureState(prior);
+  priorRestorable = evaluation.supported;
+  check('fixture_state_supported_for_exact_restore', priorRestorable, { evaluation, prior });
   results.prior_state = prior;
   results.prior_state_restorable = priorRestorable;
+  results.prior_state_reason = evaluation.reason;
   if (!priorRestorable) {
     failures.push('fixture_state_unsupported');
-    throw new Error('fixture lifecycle state is not supported for exact restoration; no mutation performed');
+    throw new Error(`fixture lifecycle state is not supported for exact restoration (${evaluation.reason}); no mutation performed`);
   }
 
   let health: Response | null = null;
@@ -133,6 +139,12 @@ try {
     check('lan_health_200', health.status === 200);
     results.lan_health = { status: health.status, body: (await health.json()) as JsonRecord };
   }
+  if (!checks.lan_health_200 || checks.lan_health_200 !== true) {
+    throw new Error('LAN health check failed before any grant or lifecycle mutation');
+  }
+  // Side-effecting grant creation happens only after the non-mutating preflight
+  // and health checks have passed.
+  facilitatorGrant = await issueGrant(sql, { sessionId: room.session_id, role: 'facilitator', ttlSeconds: 8 * 60 * 60 });
 
   const index = await fetch(`${LAN_ORIGIN}/join`);
   const indexHtml = await index.text();
@@ -182,6 +194,7 @@ try {
     token: facilitatorGrant,
   });
   check('facilitator_open_poll_200', openPoll.status === 200);
+  if (openPoll.status === 200) lifecycleMutationPerformed = true;
   results.facilitator_open_poll = { status: openPoll.status };
 
   // Retained real poll-first stale-rating scenario with a participant who has no
@@ -216,7 +229,6 @@ try {
   results.negative = { evil_origin_status: evil.status, participant_facilitator_status: roleDenied.status, missing_auth_status: missingAuth.status };
 
   const facilitatorSocket = await openSocket(LAN_ORIGIN, facilitatorGrant);
-  facilitySockets.push(facilitatorSocket.ws);
   const initialSnapshot = await waitFor(facilitatorSocket.messages, (m) => m.type === 'snapshot');
   const initialRevision = snapshotRevision(initialSnapshot);
   check('facilitator_snapshot_received', initialSnapshot.type === 'snapshot' && initialRevision >= 0);
@@ -224,18 +236,19 @@ try {
   results.facilitator_ws = { initial_revision: initialRevision, snapshot_has_counts: JSON.stringify(initialSnapshot).includes('counts') };
 
   const participantSocket = await openSocket(LAN_ORIGIN, participantGrant);
-  facilitySockets.push(participantSocket.ws);
   const participantState = await waitFor(participantSocket.messages, (m) => m.type === 'state');
   check('participant_state_received', participantState.type === 'state');
   check('participant_state_own_answer', (participantState.own_response as unknown) !== null);
 
-  // Commit a new accepted answer and require a *fresh* pushed snapshot: its
-  // revision must advance beyond the cached initial frame, not merely match it.
+  // Question control: reopen the rating question. This is a control action, not a
+  // new participant answer; the fresh pushed snapshot must match the control's
+  // exact returned revision, not merely exceed the cached initial frame.
   const openRating = await call(`/api/facilitator/sessions/${room.session_id}/questions/${room.rating_question_id}/open`, {
     method: 'POST',
     token: facilitatorGrant,
   });
   check('facilitator_reopen_rating_200', openRating.status === 200);
+  if (openRating.status === 200) lifecycleMutationPerformed = true;
   const controlRevision = Number((openRating.body as { revision?: number }).revision ?? -1);
   const pushed = await waitFor(
     facilitatorSocket.messages,
@@ -273,7 +286,6 @@ try {
 
   facilitatorSocket.ws.close();
   const reconnect = await openSocket(LAN_ORIGIN, facilitatorGrant);
-  facilitySockets.push(reconnect.ws);
   const resynced = await waitFor(reconnect.messages, (m) => m.type === 'snapshot');
   check('facilitator_reconnect_snapshot', resynced.type === 'snapshot');
   check('facilitator_reconnect_revision_not_older', snapshotRevision(resynced) >= pushedRevision);
@@ -299,23 +311,14 @@ try {
 } catch (error) {
   check('verifier_exception', false, error instanceof Error ? error.message : String(error));
 } finally {
-  const closeResults = await Promise.all(
-    openedSockets.map(async ({ ws, closed }) => {
-      try {
-        ws.close();
-      } catch {
-        // already closed
-      }
-      return Promise.race([closed, new Promise<number>((resolve) => setTimeout(() => resolve(-1), 2000))]);
-    }),
-  );
-  check('all_opened_sockets_closed', closeResults.every((code) => code !== -1), closeResults);
-  results.socket_close_codes = closeResults;
+  const cleanup = await tracker.dispose();
+  check('all_socket_attempts_settled', cleanup.attempts > 0 ? !cleanup.incomplete : true, cleanup);
+  results.socket_cleanup = cleanup;
 
   let restored = false;
   let restoredExact = false;
   const snapshot = prior;
-  if (snapshot && priorRestorable) {
+  if (snapshot && priorRestorable && lifecycleMutationPerformed) {
     try {
       const restore = await call(`/api/facilitator/sessions/${room.session_id}/questions/${snapshot.activeQuestionId}/open`, {
         method: 'POST',
@@ -341,6 +344,11 @@ try {
     } catch {
       restored = false;
     }
+  } else if (snapshot && priorRestorable) {
+    // No lifecycle mutation happened; restoring would itself reopen an unchanged
+    // question and advance the revision, so the no-op lifecycle is reported as-is.
+    check('fixture_restore_not_needed_no_lifecycle_mutation', true);
+    results.fixture_restore_skipped_no_lifecycle_mutation = true;
   }
   check('fixture_restored_prior_active_question', restored);
   check('fixture_restored_exactly', restoredExact);

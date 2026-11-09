@@ -53,6 +53,8 @@ interface LanSocketData {
   closed: boolean;
 }
 
+export type SendOutcome = 'sent' | 'backpressure' | 'closed';
+
 export const DEFAULT_LAN_WS_LIMITS: LanWsLimits = {
   // Same frame budget as the API's own WebSocket check.
   maxFrameBytes: Number(process.env.LAN_WS_MAX_FRAME_BYTES ?? 4096),
@@ -76,6 +78,49 @@ function byteLength(data: string | Buffer): number {
 
 function mapCloseCode(code: number): number {
   return [1000, 1001, 1008, 1009, 1011, 1013, 4401, 4408].includes(code) ? code : 1011;
+}
+
+/**
+ * One guarded client -> upstream forwarding path shared by queued flush and
+ * direct sends. Bun's client WebSocket `send()` returns undefined and reports
+ * buffering through `bufferedAmount`; a thrown send or a non-OPEN socket is a
+ * closed outcome, a budget exceedance is backpressure. These are distinct.
+ */
+export function forwardToUpstream(
+  upstream: WebSocket,
+  frame: string | Buffer,
+  maxBufferedBytes: number,
+): SendOutcome {
+  if (upstream.readyState !== WebSocket.OPEN) return 'closed';
+  if (upstream.bufferedAmount > maxBufferedBytes) return 'backpressure';
+  try {
+    upstream.send(frame as never);
+  } catch {
+    return 'closed';
+  }
+  if (upstream.bufferedAmount > maxBufferedBytes) return 'backpressure';
+  return 'sent';
+}
+
+/**
+ * Server -> client send outcome using supported Bun semantics: `send()` returns
+ * a byte count (negative indicates a dropped/failed send) and the server-side
+ * buffer is inspected with `getBufferedAmount()`.
+ */
+export function sendToClient(
+  ws: { send: (data: string | Buffer) => number; getBufferedAmount: () => number },
+  data: string | Buffer,
+  maxBufferedBytes: number,
+): SendOutcome {
+  let sent: number;
+  try {
+    sent = ws.send(data);
+  } catch {
+    return 'closed';
+  }
+  if (typeof sent === 'number' && sent < 0) return 'closed';
+  if (ws.getBufferedAmount() > maxBufferedBytes) return 'backpressure';
+  return 'sent';
 }
 
 export function createLanEntry(config: LanEntryConfig) {
@@ -187,10 +232,13 @@ export function createLanEntry(config: LanEntryConfig) {
           if (ws.data.closed) return;
           if (ws.data.deadline) clearTimeout(ws.data.deadline);
           for (const frame of ws.data.queue.splice(0)) {
-            try {
-              upstreamSocket.send(frame.data);
-            } catch {
-              deny(ws, 1011, 'upstream send failed');
+            const outcome = forwardToUpstream(upstreamSocket, frame.data, config.limits.maxUpstreamBufferedBytes);
+            if (outcome === 'backpressure') {
+              deny(ws, 1013, 'upstream backpressure limit exceeded while flushing queue');
+              return;
+            }
+            if (outcome === 'closed') {
+              deny(ws, 1011, 'upstream closed while flushing queue');
               return;
             }
           }
@@ -203,16 +251,11 @@ export function createLanEntry(config: LanEntryConfig) {
             deny(ws, 1011, 'upstream frame too large');
             return;
           }
-          try {
-            ws.send(data);
-          } catch {
-            releaseSocket(ws);
-            return;
-          }
-          // Bounded downstream (upstream -> slow client) backpressure: close and
-          // release both sides once the server-side buffer exceeds the budget.
-          if (ws.getBufferedAmount() > config.limits.maxClientBufferedBytes) {
+          const outcome = sendToClient(ws, data, config.limits.maxClientBufferedBytes);
+          if (outcome === 'backpressure') {
             deny(ws, 1013, 'client backpressure limit exceeded');
+          } else if (outcome === 'closed') {
+            deny(ws, 1011, 'client send failed');
           }
         });
         upstreamSocket.addEventListener('close', (event) => {
@@ -233,16 +276,13 @@ export function createLanEntry(config: LanEntryConfig) {
         }
         const upstreamSocket = ws.data.upstream;
         if (upstreamSocket && upstreamSocket.readyState === WebSocket.OPEN) {
-          try {
-            upstreamSocket.send(message as string | Buffer);
-          } catch {
-            deny(ws, 1011, 'upstream send failed');
-            return;
-          }
-          // Bounded upstream (client -> slow upstream) backpressure.
-          if (upstreamSocket.bufferedAmount > config.limits.maxUpstreamBufferedBytes) {
-            deny(ws, 1013, 'upstream backpressure limit exceeded');
-          }
+          const outcome = forwardToUpstream(
+            upstreamSocket,
+            message as string | Buffer,
+            config.limits.maxUpstreamBufferedBytes,
+          );
+          if (outcome === 'backpressure') deny(ws, 1013, 'upstream backpressure limit exceeded');
+          else if (outcome === 'closed') deny(ws, 1011, 'upstream send failed');
           return;
         }
         ws.data.queue.push({ data: message as string | Buffer, bytes });

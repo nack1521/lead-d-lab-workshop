@@ -8,6 +8,7 @@
 set -eu
 
 ROOT=$(cd "$(dirname "$0")/.." && pwd)
+EXPLICIT_CERT_DIR="${LAN_CERT_DIR:-}"
 CERT_DIR="${LAN_CERT_DIR:-$ROOT/.local/lan-certs}"
 EXPLICIT_IP="${LAN_IP:-}"
 LAN_IP="${LAN_IP:-$(cd "$ROOT" && bun run lan/config-cli.ts address)}"
@@ -23,6 +24,26 @@ if [ -n "$EXPLICIT_IP" ] && [ "${LAN_ALLOW_TEST_ADDRESS:-0}" != "1" ]; then
     echo "error: LAN_IP=$LAN_IP is not an intended private LAN address on this host" >&2
     exit 2
   }
+fi
+
+# The test-only address override must never write to active/default certificate
+# storage (or an alias/nested path of it); isolated destinations only.
+if [ "${LAN_ALLOW_TEST_ADDRESS:-0}" = "1" ]; then
+  if [ -z "$EXPLICIT_CERT_DIR" ]; then
+    echo "error: LAN_ALLOW_TEST_ADDRESS requires an explicit isolated LAN_CERT_DIR" >&2
+    exit 2
+  fi
+  mkdir -p "$CERT_DIR"
+  REAL_CERT_DIR=$(cd "$CERT_DIR" && pwd -P)
+  ACTIVE_DIR="$ROOT/.local/lan-certs"
+  mkdir -p "$ACTIVE_DIR"
+  REAL_ACTIVE_DIR=$(cd "$ACTIVE_DIR" && pwd -P)
+  case "$REAL_CERT_DIR" in
+    "$REAL_ACTIVE_DIR"|"$REAL_ACTIVE_DIR"/*)
+      echo "error: LAN_ALLOW_TEST_ADDRESS must not target active/default certificate storage" >&2
+      exit 2
+      ;;
+  esac
 fi
 
 mkdir -p "$CERT_DIR"

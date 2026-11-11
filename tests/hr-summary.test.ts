@@ -278,6 +278,11 @@ describe('HR-03 authorization matrix and read-only privacy', () => {
     await ctx.sql`update grants set revoked_at = now() where role = 'hr' and session_id = ${session.sessionId}`;
     expect((await summary(ctx, session.sessionId, hr)).status).toBe(401);
 
+    // Expired HR grant is denied (hard TTL, no silent extension).
+    const expiredHr = await hrToken(ctx, session.sessionId);
+    await ctx.sql`update grants set expires_at = now() - interval '1 second' where role = 'hr' and session_id = ${session.sessionId}`;
+    expect((await summary(ctx, session.sessionId, expiredHr)).status).toBe(401);
+
     // A fresh HR grant cannot be issued for an unknown session.
     await expect(hrToken(ctx, '00000000-0000-0000-0000-000000000000')).rejects.toThrow();
   });

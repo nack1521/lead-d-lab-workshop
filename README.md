@@ -106,6 +106,7 @@ Private local trial (loopback; grants never go in URLs or the bundle):
 bun run apps/api/src/hr-demo-fixture.ts          # fresh owned session/code, no ROOM fixture reuse
 # drive synthetic participants through the real API (this smoke also ends the session):
 bun scripts/hr-smoke.ts .local/hr-demo/<CODE>.json 30
+bun scripts/hr-smoke-overlap.ts 30 30 27   # bounded overlapping real HTTP/DB/WS verification (fresh fixture, paced concurrency)
 bun run apps/api/src/issue-hr-grant.ts <session-id-or-code>   # writes ignored .local/hr-grants/<id>.json
 # open http://127.0.0.1:5173/hr and paste the grant into the page field
 ```

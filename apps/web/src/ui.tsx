@@ -327,7 +327,15 @@ export function AggregateChart(props: { question: QuestionAggregate }) {
 export type HrViewState = 'loading' | 'unauthorized' | 'not_ended' | 'error' | 'ready';
 
 function coverageText(question: HrQuestionSummary): string {
-  if (question.joined_base <= 0) return `ตอบ ${question.n} คน (ยังไม่ทราบจำนวนผู้เข้าร่วม)`;
+  // A known zero joined base is NOT an unknown denominator: show zero people,
+  // no responses and explicitly state that coverage/mean are not computable.
+  if (question.joined_base === 0) {
+    return `ผู้เข้าร่วม 0 คน · ยังไม่มีคำตอบ · ไม่สามารถคำนวณความครอบคลุมหรือค่าเฉลี่ย`;
+  }
+  // Defensive: an actually unavailable denominator is labelled separately.
+  if (question.coverage_ratio === null) {
+    return `ตอบ ${question.n} คน · ไม่ทราบจำนวนผู้เข้าร่วม · ไม่แสดงร้อยละความครอบคลุม`;
+  }
   const percent =
     question.coverage_ratio === null ? null : Math.round(question.coverage_ratio * 1000) / 10;
   return `ตอบ ${question.n} จาก ${question.joined_base} คน · ไม่ตอบ ${question.unanswered} คน${
@@ -408,7 +416,9 @@ export function HrSummaryView(props: {
             ) : null}
             {allEmpty ? (
               <p className="notice" role="status">
-                ยังไม่มีคำตอบในกิจกรรมนี้ — แสดงจำนวนผู้เข้าร่วมโดยไม่สร้างค่าเฉลี่ยหรือข้อมูลสมมติ
+                {summary.session.joined_base === 0
+                  ? 'ยังไม่มีผู้เข้าร่วมหรือคำตอบในกิจกรรมนี้ — ไม่สร้างค่าเฉลี่ยหรือข้อมูลสมมติ'
+                  : 'ยังไม่มีคำตอบในกิจกรรมนี้ — แสดงจำนวนผู้เข้าร่วมโดยไม่สร้างค่าเฉลี่ยหรือข้อมูลสมมติ'}
               </p>
             ) : null}
           </section>

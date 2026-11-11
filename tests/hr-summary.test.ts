@@ -108,7 +108,7 @@ describe('HR-02 empty / partial aggregates with explicit denominators', () => {
     expect(summaryValue.caveats.length).toBeGreaterThan(0);
   });
 
-  test('n=1 and partial answers keep per-question n/base/coverage distinct', async () => {
+  test('partial answers keep per-question n/base/coverage distinct (rating n=2, poll n=2 of 3 joined)', async () => {
     const session = await seedSession(ctx.sql, ctx.config, 'HR-PARTIAL-1');
     const open = await ctx.http(
       `/api/facilitator/sessions/${session.sessionId}/questions/${session.pollQuestionId}/open`,
@@ -170,6 +170,56 @@ describe('HR-02 empty / partial aggregates with explicit denominators', () => {
     expect(serialized).not.toContain('nick-a');
     expect(serialized).not.toContain('อยากมีเวลา');
     expect(serialized).not.toContain(a.participant_id);
+  });
+});
+
+describe('HR-QA-02 actual singleton n=1 accepted-response case', () => {
+  test('one accepted rating response yields exact n=1/base/counts/mean and an unanswered poll', async () => {
+    const session = await seedSession(ctx.sql, ctx.config, `HR-SINGLE-${Math.random().toString(36).slice(2, 7)}`);
+    const participant = await joinTo(ctx, session.joinCode);
+    const rating = await submitRating(ctx, participant.grant, session.ratingQuestionId, 4, '   ');
+    expect(rating.status).toBe(201);
+    const end = await ctx.http(`/api/facilitator/sessions/${session.sessionId}/end`, {
+      method: 'POST',
+      token: session.facilitatorToken,
+    });
+    expect(end.status).toBe(200);
+    const response = await summary(ctx, session.sessionId, await hrToken(ctx, session.sessionId));
+    expect(response.status).toBe(200);
+    const body = (await response.json()) as { summary: HrSummary };
+    const [ratingSummary, pollSummary] = body.summary.questions;
+    expect(ratingSummary.seq).toBe(1);
+    expect(ratingSummary.n).toBe(1);
+    expect(ratingSummary.joined_base).toBe(1);
+    expect(ratingSummary.unanswered).toBe(0);
+    expect(ratingSummary.coverage_ratio).toBe(1);
+    expect(ratingSummary.counts).toEqual({ '4': 1 });
+    expect(ratingSummary.mean).toBe(4);
+    expect(ratingSummary.comment_count).toBe(0); // whitespace-only comment is absent
+
+    expect(pollSummary.n).toBe(0);
+    expect(pollSummary.joined_base).toBe(1);
+    expect(pollSummary.unanswered).toBe(1);
+    expect(pollSummary.coverage_ratio).toBe(0);
+    expect(pollSummary.counts).toEqual({});
+    expect(pollSummary.mean).toBeNull();
+    expect(pollSummary.comment_count).toBe(0);
+
+    // Positive n is visible with a small-sample caveat and no suppression gate.
+    expect(body.summary.insights.feedback_confidence).toContain('n=1');
+    expect(body.summary.insights.reported_blockers).toHaveLength(0);
+    expect(body.summary.caveats.join(' ')).toContain('n < 5');
+
+    const [dbRating] = await ctx.sql<{ count: number; mean: string | null; comments: number }[]>`
+      select count(*)::int as count, avg(rating_value)::text as mean,
+             count(comment)::int as comments
+      from responses where question_id = ${session.ratingQuestionId}`;
+    expect(dbRating.count).toBe(1);
+    expect(Number(dbRating.mean)).toBe(4);
+    expect(dbRating.comments).toBe(0);
+    const [dbPoll] = await ctx.sql<{ count: number }[]>`
+      select count(*)::int as count from responses where question_id = ${session.pollQuestionId}`;
+    expect(dbPoll.count).toBe(0);
   });
 });
 

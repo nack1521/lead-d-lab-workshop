@@ -132,7 +132,7 @@ describe('HR-02/HR-05 HR view states, denominators and caveats', () => {
       caveats: ['ข้อมูลนี้เป็น self-report จากผู้เข้าร่วม ไม่ใช่การวินิจฉัยพนักงานหรือการประเมินผลการทำงาน'],
     };
     const html = render({ hasToken: true, state: 'ready', summary: empty });
-    expect(html).toContain('ยังไม่มีคำตอบในกิจกรรมนี้');
+    expect(html).toContain('ยังไม่มีผู้เข้าร่วมหรือคำตอบในกิจกรรมนี้');
     expect(html).toContain('ยังไม่มีคำตอบสำหรับข้อนี้');
     expect(html).not.toContain('ค่าเฉลี่ยคำตอบ');
     expect(html).toContain('ยังไม่มีคำตอบเพียงพอสำหรับข้อสรุปด้านความมั่นใจ');
@@ -146,5 +146,65 @@ describe('HR-02/HR-05 HR view states, denominators and caveats', () => {
     const form = render({ hasToken: false, state: 'loading' });
     expect(form).toContain('โทเค็น HR (เฉพาะเครื่องนี้)');
     expect(form).toContain('ไม่ต้องใส่ใน URL');
+  });
+});
+
+
+describe('HR-QA-01/02 known-zero copy and actual n=1 view', () => {
+  const baseSummary: HrSummary = {
+    session: { id: 's1', status: 'ended', ended_at: null, revision: 1, joined_base: 0, question_count: 1 },
+    questions: [
+      {
+        id: 'q1',
+        seq: 1,
+        type: 'rating',
+        label: 'คุณมั่นใจในการให้ feedback ที่ช่วยให้ทีมพัฒนาได้เพียงใด?',
+        help_text: null,
+        options: null,
+        rating_min: 1,
+        rating_max: 5,
+        n: 0,
+        joined_base: 0,
+        unanswered: 0,
+        coverage_ratio: null,
+        counts: {},
+        mean: null,
+        comment_count: 0,
+      },
+    ],
+    insights: { feedback_confidence: null, reported_blockers: [] },
+    caveats: ['ข้อมูลนี้เป็น self-report จากผู้เข้าร่วม ไม่ใช่การวินิจฉัยพนักงานหรือการประเมินผลการทำงาน'],
+    generated_at: '2026-11-11T07:01:00.000Z',
+  };
+
+  test('a known zero joined base is shown as zero participants, not as an unknown denominator', () => {
+    const html = render({ hasToken: true, state: 'ready', summary: baseSummary });
+    expect(html).toContain('ผู้เข้าร่วม 0 คน');
+    expect(html).toContain('ไม่สามารถคำนวณความครอบคลุม');
+    expect(html).not.toContain('ยังไม่ทราบจำนวนผู้เข้าร่วม');
+  });
+
+  test('n=1 renders the mean and 100% share with explicit n and caveat', () => {
+    const singleton: HrSummary = {
+      ...baseSummary,
+      session: { ...baseSummary.session, joined_base: 1 },
+      questions: [
+        {
+          ...baseSummary.questions[0],
+          n: 1,
+          joined_base: 1,
+          unanswered: 0,
+          coverage_ratio: 1,
+          counts: { '4': 1 },
+          mean: 4,
+        },
+      ],
+    };
+    const html = render({ hasToken: true, state: 'ready', summary: singleton });
+    expect(html).toContain('ตอบ 1 จาก 1 คน');
+    expect(html).toContain('100%');
+    expect(html).toContain('n=1');
+    expect(html).toContain('ค่าเฉลี่ยคำตอบ');
+    expect(html).toContain('4');
   });
 });

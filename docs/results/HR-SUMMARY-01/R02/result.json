@@ -1,0 +1,53 @@
+{
+  "schema_version": 1,
+  "task_id": "HR-SUMMARY-01",
+  "run_id": "R02",
+  "reported_at": "2026-11-11T15:10:05+07:00",
+  "producer": "DeepSeek Harness (single active coding writer)",
+  "authoring_tool": "DeepSeek Harness",
+  "model": "deepseek-v4.1-flash-1017",
+  "source_kind": "direct",
+  "baseline_commit": "e092cc7",
+  "observed_head": "96a1365",
+  "branch": "main",
+  "work_kind": "hr_qa_followup",
+  "status": "READY_FOR_REVIEW",
+  "summary": "Closed the three HR R01 QA branches together: known-zero joined base copy (0 participants, no computable coverage/mean, separate unavailable-denominator label), a real singleton n=1 API/DB/view case with exact n/base/coverage/buckets/mean/blank-comment/poll-empty evidence and an accurate renamed partial test, and a fresh-owner overlapping 30-participant real HTTP/PostgreSQL/WS verification with a bounded 10-request pool (not await-in-loop), explicit attempted/admitted/succeeded/failed/unique counts, observed max in-flight 10, per-bucket DB equality, exact per-question summary values and a fresh aggregate frame tied to committed revision 89 (baseline revision 0 accepted only as baseline). Native 124/0; Mode B 124 tests/0 fail/9 declared skips; typecheck and builds 0. Authenticated browser/physical Safari remain NOT RUN.",
+  "detail_path": "docs/results/HR-SUMMARY-01/R02/result.md",
+  "findings": [
+    {"finding_id": "HR-QA-01", "source_id": "HR R01 QA Low", "status": "FIXED", "evidence_paths": ["apps/web/src/ui.tsx", "tests/hr-views.test.tsx", "docs/results/HR-SUMMARY-01/R02/evidence/hr-red.log", "docs/results/HR-SUMMARY-01/R02/evidence/hr-green.log"]},
+    {"finding_id": "HR-QA-02", "source_id": "HR R01 QA Medium", "status": "FIXED", "evidence_paths": ["tests/hr-summary.test.ts", "tests/hr-views.test.tsx", "docs/results/HR-SUMMARY-01/R02/evidence/hr-green.log"]},
+    {"finding_id": "HR-QA-03", "source_id": "HR R01 QA Medium", "status": "FIXED", "evidence_paths": ["scripts/hr-smoke-overlap.ts", "docs/results/HR-SUMMARY-01/R02/evidence/hr-overlap-30.log"]}
+  ],
+  "cases": [
+    {"case_id": "HR-01", "status": "PASS", "evidence_paths": ["docs/results/HR-SUMMARY-01/R02/evidence/hr-overlap-30.log"]},
+    {"case_id": "HR-02", "status": "PASS", "evidence_paths": ["tests/hr-summary.test.ts", "tests/hr-views.test.tsx", "docs/results/HR-SUMMARY-01/R02/evidence/hr-overlap-30.log"]},
+    {"case_id": "HR-03", "status": "PASS", "evidence_paths": ["tests/hr-summary.test.ts"]},
+    {"case_id": "HR-04", "status": "PASS", "evidence_paths": ["tests/hr-summary.test.ts", "tests/hr-views.test.tsx"]},
+    {"case_id": "HR-05", "status": "PARTIAL", "limitations": "Authenticated browser/mobile/keyboard/physical Safari NOT RUN; SSR only."},
+    {"case_id": "HR-06", "status": "PASS", "evidence_paths": ["docs/results/HR-SUMMARY-01/R02/evidence/mode-a-regression.log", "docs/results/HR-SUMMARY-01/R02/evidence/mode-b-regression.log", "docs/results/HR-SUMMARY-01/R02/evidence/typecheck.log", "docs/results/HR-SUMMARY-01/R02/evidence/build-web.log", "docs/results/HR-SUMMARY-01/R02/evidence/build-web-lan.log"], "limitations": "Mode B 9 declared skips."},
+    {"case_id": "HR-07", "status": "PASS", "evidence_paths": ["docs/results/HR-SUMMARY-01/R02/evidence/hr-overlap-30.log"], "limitations": "Single-machine bounded overlapping synthetic run; not 30 phones or an SLA."}
+  ],
+  "commands": [
+    {"command": "bun test tests/hr-summary.test.ts tests/hr-views.test.tsx (pre-fix)", "exit_code": 1, "outcome": "RED: known-zero copy assertion failed"},
+    {"command": "bun test tests/hr-summary.test.ts tests/hr-views.test.tsx (post-fix)", "exit_code": 0, "outcome": "11 pass / 0 fail"},
+    {"command": "bun test tests", "exit_code": 0, "outcome": "124 pass / 0 fail"},
+    {"command": "tests/run-in-docker.sh c1b_default", "exit_code": 0, "outcome": "0 fail, 9 declared skips"},
+    {"command": "bun x tsc --noEmit -p tsconfig.json", "exit_code": 0, "outcome": "no type errors"},
+    {"command": "bun run build:web / build:web:lan", "exit_code": 0, "outcome": "both builds succeed"},
+    {"command": "bun scripts/hr-smoke-overlap.ts 30 30 27", "exit_code": 0, "outcome": "ok:true; 30/30 joins, 30/30 ratings, 27/27 polls; max in-flight 10; committed revision 89; per-bucket DB equal; sockets settled"}
+  ],
+  "environment_limitations": [
+    "No browser automation in this session; authenticated browser/physical Safari NOT RUN.",
+    "Mode B 9 declared skips (host tooling/raw sockets/LAN fixtures).",
+    "Overlap smoke is single-machine synthetic with 10-request waves and 60 ms pacing; not an SLA or 30-device proof."
+  ],
+  "blockers": [],
+  "not_verified": [
+    "authenticated browser HR login, mobile/keyboard/accessibility and physical Safari",
+    "30 real devices / production load / SLA",
+    "independent QA and human acceptance"
+  ],
+  "next_gate": "User-assisted authenticated browser/phone trial with synthetic data and independent review; no deployment/push.",
+  "published": false
+}

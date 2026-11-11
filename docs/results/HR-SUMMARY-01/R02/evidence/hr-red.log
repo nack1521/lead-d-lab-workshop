@@ -1,0 +1,34 @@
+bun test v1.4.4 (38afee6c8)
+
+tests/hr-summary.test.ts:
+(pass) HR-02 empty / partial aggregates with explicit denominators > an ended session with zero responses is an honest empty summary (no zero mean) [24.95ms]
+(pass) HR-02 empty / partial aggregates with explicit denominators > partial answers keep per-question n/base/coverage distinct (rating n=2, poll n=2 of 3 joined) [49.32ms]
+(pass) HR-QA-02 actual singleton n=1 accepted-response case > one accepted rating response yields exact n=1/base/counts/mean and an unanswered poll [12.81ms]
+(pass) HR-01 persisted summary after facilitator control, answers and end > HR summary equals independent DB counts and survives reload [46.74ms]
+(pass) HR-03 authorization matrix and read-only privacy > only an unexpired, unrevoked session-scoped HR grant can read; HR cannot mutate [26.78ms]
+(pass) HR-03 authorization matrix and read-only privacy > not-ended and unauthorized states are distinct from empty [3.77ms]
+
+tests/hr-views.test.tsx:
+(pass) HR-02/HR-05 HR view states, denominators and caveats > ready view shows per-question n, denominator, coverage, distributions, mean and caveats [8.96ms]
+(pass) HR-02/HR-05 HR view states, denominators and caveats > zero-response session shows an honest empty state, not a zero mean [0.66ms]
+(pass) HR-02/HR-05 HR view states, denominators and caveats > not-ended, unauthorized, loading and error states stay distinct [0.53ms]
+177 |     generated_at: '2026-11-11T07:01:00.000Z',
+178 |   };
+179 | 
+180 |   test('a known zero joined base is shown as zero participants, not as an unknown denominator', () => {
+181 |     const html = render({ hasToken: true, state: 'ready', summary: baseSummary });
+182 |     expect(html).toContain('ผู้เข้าร่วม 0 คน');
+                       ^
+error: expect(received).toContain(expected)
+
+Expected to contain: "ผู้เข้าร่วม 0 คน"
+Received: "<main class=\"screen hr-screen\"><header class=\"hr-header\"><h1>สรุปผลหลังจบกิจกรรม (HR)</h1><p class=\"hint\">อ่านได้เฉพาะผู้มีสิทธิ์ HR ของกิจกรรมนี้ · ข้อมูลรวมเท่านั้น</p></header><section class=\"card hr-meta\" aria-label=\"ข้อมูลกิจกรรม\"><p>ผู้เข้าร่วมที่เข้าร่วมทั้งหมด <strong>0</strong> คน · คำถาม <strong>1</strong> ข้อ</p><p class=\"notice\" role=\"status\">ยังไม่มีคำตอบในกิจกรรมนี้ — แสดงจำนวนผู้เข้าร่วมโดยไม่สร้างค่าเฉลี่ยหรือข้อมูลสมมติ</p></section><section class=\"card hr-question\" aria-label=\"คำถามข้อ 1\"><p class=\"eyebrow\">ข้อ 01</p><h2>คุณมั่นใจในการให้ feedback ที่ช่วยให้ทีมพัฒนาได้เพียงใด?</h2><p class=\"hr-coverage\">ตอบ 0 คน (ยังไม่ทราบจำนวนผู้เข้าร่วม)</p><p class=\"notice\" role=\"status\">ยังไม่มีคำตอบสำหรับข้อนี้ — ไม่แสดงค่าเฉลี่ยหรือร้อยละ</p><p class=\"hint\">ความคิดเห็นที่ให้: 0 ข้อความ (ไม่แสดงเนื้อหาและไม่นับเป็นคำตอบที่ขาด)</p></section><section class=\"card hr-insights\" aria-label=\"ข้อสรุปจากผลรวม\"><h2>ข้อสรุปจากผลรวม</h2><p class=\"hint\">ยังไม่มีคำตอบเพียงพอสำหรับข้อสรุปด้านความมั่นใจ</p><p class=\"hint\">ยังไม่มีคำตอบเพียงพอสำหรับข้อสรุปด้านอุปสรรค</p></section><section class=\"card hr-caveats\" aria-label=\"ข้อควรระวังในการตีความ\"><h2>ข้อควรระวังในการตีความ</h2><ul><li>ข้อมูลนี้เป็น self-report จากผู้เข้าร่วม ไม่ใช่การวินิจฉัยพนักงานหรือการประเมินผลการทำงาน</li></ul><p class=\"hint\">ตัวเลขทั้งหมดอ้างอิงคำตอบที่บันทึกจริงในฐานข้อมูล ไม่ได้ปรับให้ครบตามเป้าหมายจำนวนผู้เข้าร่วม</p></section></main>"
+
+      at <anonymous> (/Users/aiink/Nack/Lead+D-Lab/tests/hr-views.test.tsx:182:18)
+(fail) HR-QA-01/02 known-zero copy and actual n=1 view > a known zero joined base is shown as zero participants, not as an unknown denominator [2.86ms]
+(pass) HR-QA-01/02 known-zero copy and actual n=1 view > n=1 renders the mean and 100% share with explicit n and caveat [0.39ms]
+
+ 10 pass
+ 1 fail
+ 144 expect() calls
+Ran 11 tests across 2 files. [481.00ms]

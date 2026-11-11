@@ -1,0 +1,21 @@
+bun test v1.4.4 (38afee6c8)
+
+tests/hr-summary.test.ts:
+(pass) HR-02 empty / partial aggregates with explicit denominators > an ended session with zero responses is an honest empty summary (no zero mean) [15.49ms]
+(pass) HR-02 empty / partial aggregates with explicit denominators > partial answers keep per-question n/base/coverage distinct (rating n=2, poll n=2 of 3 joined) [43.15ms]
+(pass) HR-QA-02 actual singleton n=1 accepted-response case > one accepted rating response yields exact n=1/base/counts/mean and an unanswered poll [20.10ms]
+(pass) HR-01 persisted summary after facilitator control, answers and end > HR summary equals independent DB counts and survives reload [43.46ms]
+(pass) HR-03 authorization matrix and read-only privacy > only an unexpired, unrevoked session-scoped HR grant can read; HR cannot mutate [15.45ms]
+(pass) HR-03 authorization matrix and read-only privacy > not-ended and unauthorized states are distinct from empty [3.09ms]
+
+tests/hr-views.test.tsx:
+(pass) HR-02/HR-05 HR view states, denominators and caveats > ready view shows per-question n, denominator, coverage, distributions, mean and caveats [6.96ms]
+(pass) HR-02/HR-05 HR view states, denominators and caveats > zero-response session shows an honest empty state, not a zero mean [0.27ms]
+(pass) HR-02/HR-05 HR view states, denominators and caveats > not-ended, unauthorized, loading and error states stay distinct [0.40ms]
+(pass) HR-QA-01/02 known-zero copy and actual n=1 view > a known zero joined base is shown as zero participants, not as an unknown denominator [0.15ms]
+(pass) HR-QA-01/02 known-zero copy and actual n=1 view > n=1 renders the mean and 100% share with explicit n and caveat [0.28ms]
+
+ 11 pass
+ 0 fail
+ 146 expect() calls
+Ran 11 tests across 2 files. [379.00ms]

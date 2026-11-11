@@ -1,0 +1,13 @@
+bun test v1.4.4 (38afee6c8)
+
+tests/hr-summary.test.ts:
+(pass) HR-02 empty / partial aggregates with explicit denominators > an ended session with zero responses is an honest empty summary (no zero mean) [15.03ms]
+(pass) HR-02 empty / partial aggregates with explicit denominators > n=1 and partial answers keep per-question n/base/coverage distinct [43.40ms]
+(pass) HR-01 persisted summary after facilitator control, answers and end > HR summary equals independent DB counts and survives reload [45.64ms]
+(pass) HR-03 authorization matrix and read-only privacy > only an unexpired, unrevoked session-scoped HR grant can read; HR cannot mutate [19.19ms]
+(pass) HR-03 authorization matrix and read-only privacy > not-ended and unauthorized states are distinct from empty [3.91ms]
+
+ 5 pass
+ 0 fail
+ 84 expect() calls
+Ran 5 tests across 1 file. [314.00ms]

@@ -1,0 +1,44 @@
+SUMMARY_HTTP_EXIT=0
+{
+  "status": "ok",
+  "session": "ended",
+  "joined": 30,
+  "q": [
+    {
+      "seq": 1,
+      "n": 30,
+      "joined_base": 30,
+      "unanswered": 0,
+      "coverage_ratio": 1,
+      "mean": 3,
+      "comment_count": 10
+    },
+    {
+      "seq": 2,
+      "n": 27,
+      "joined_base": 30,
+      "unanswered": 3,
+      "coverage_ratio": 0.9,
+      "mean": null,
+      "comment_count": 6
+    }
+  ],
+  "insights": {
+    "feedback_confidence": "มั่นใจปานกลางในการให้ feedback (ค่าเฉลี่ย 3 จากผู้ตอบ n=30)",
+    "reported_blockers": [
+      {
+        "option_id": "time",
+        "label": "เวลาสำหรับดูแลทีมไม่พอ",
+        "count": 7,
+        "share": 0.2593
+      },
+      {
+        "option_id": "skill",
+        "label": "ขาดทักษะการให้ feedback",
+        "count": 7,
+        "share": 0.2593
+      },
+      {
+reload_persisted=true
+== no raw names/comments in HR response ==
+no raw participant data

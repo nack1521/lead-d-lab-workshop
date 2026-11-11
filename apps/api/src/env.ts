@@ -5,6 +5,7 @@ export interface Config {
   allowedOrigins: string[];
   participantGrantTtlSeconds: number;
   facilitatorGrantTtlSeconds: number;
+  hrGrantTtlSeconds: number;
   wsAuthTimeoutMs: number;
   httpBodyLimitBytes: number;
   wsFrameLimitBytes: number;
@@ -43,6 +44,9 @@ export function loadConfig(env: Record<string, string | undefined> = process.env
     allowedOrigins,
     participantGrantTtlSeconds: num(env, 'GRANT_TTL_PARTICIPANT_SECONDS', 14400),
     facilitatorGrantTtlSeconds: num(env, 'GRANT_TTL_FACILITATOR_SECONDS', 28800),
+    // Prototype default: HR read-only grant uses the configured facilitator TTL
+    // without extending existing credentials.
+    hrGrantTtlSeconds: num(env, 'GRANT_TTL_HR_SECONDS', num(env, 'GRANT_TTL_FACILITATOR_SECONDS', 28800)),
     wsAuthTimeoutMs: num(env, 'WS_AUTH_TIMEOUT_MS', 3000),
     httpBodyLimitBytes: num(env, 'HTTP_BODY_LIMIT_BYTES', 16384),
     wsFrameLimitBytes: num(env, 'WS_FRAME_LIMIT_BYTES', 4096),

@@ -1,5 +1,5 @@
 import type { Outcome } from './state.ts';
-import type { Question, QuestionAggregate, OwnResponse, Snapshot } from './api.ts';
+import type { Question, QuestionAggregate, OwnResponse, Snapshot, HrQuestionSummary, HrSummary } from './api.ts';
 
 const RATING_LABELS: Record<number, string> = {
   1: '1 ยังไม่มั่นใจ',
@@ -321,5 +321,205 @@ export function AggregateChart(props: { question: QuestionAggregate }) {
         </li>
       ))}
     </ul>
+  );
+}
+
+export type HrViewState = 'loading' | 'unauthorized' | 'not_ended' | 'error' | 'ready';
+
+function coverageText(question: HrQuestionSummary): string {
+  if (question.joined_base <= 0) return `ตอบ ${question.n} คน (ยังไม่ทราบจำนวนผู้เข้าร่วม)`;
+  const percent =
+    question.coverage_ratio === null ? null : Math.round(question.coverage_ratio * 1000) / 10;
+  return `ตอบ ${question.n} จาก ${question.joined_base} คน · ไม่ตอบ ${question.unanswered} คน${
+    percent === null ? '' : ` · ความครอบคลุม ${percent}%`
+  }`;
+}
+
+export function HrSummaryView(props: {
+  hasToken: boolean;
+  token: string;
+  state: HrViewState;
+  summary: HrSummary | null;
+  errorMessage: string | null;
+  pending: boolean;
+  onToken: (value: string) => void;
+  onOpen: () => void;
+}) {
+  const summary = props.summary;
+  const allEmpty = summary !== null && summary.questions.every((question) => question.n === 0);
+  return (
+    <main className="screen hr-screen">
+      <header className="hr-header">
+        <h1>สรุปผลหลังจบกิจกรรม (HR)</h1>
+        <p className="hint">อ่านได้เฉพาะผู้มีสิทธิ์ HR ของกิจกรรมนี้ · ข้อมูลรวมเท่านั้น</p>
+      </header>
+
+      {!props.hasToken ? (
+        <section className="card" aria-label="เข้าถึงสรุปผล HR">
+          <label htmlFor="hr-token">โทเค็น HR (เฉพาะเครื่องนี้)</label>
+          <input
+            id="hr-token"
+            type="password"
+            value={props.token}
+            autoComplete="off"
+            onChange={(event) => props.onToken(event.target.value)}
+          />
+          <button type="button" onClick={props.onOpen} disabled={props.pending || props.token.trim().length === 0}>
+            {props.pending ? 'กำลังเปิด…' : 'เปิดสรุปผล'}
+          </button>
+          <p className="hint">
+            วางโทเค็นที่สร้างจากเครื่องนี้ในช่องนี้เท่านั้น ไม่ต้องใส่ใน URL และไม่ควรแสดงบนหน้าจอขณะบันทึกวิดีโอ
+          </p>
+        </section>
+      ) : null}
+
+      {props.hasToken && props.state === 'loading' ? (
+        <section className="card" aria-live="polite">
+          <p>กำลังโหลดสรุปผล…</p>
+        </section>
+      ) : null}
+      {props.state === 'unauthorized' ? (
+        <section className="card" role="alert">
+          <p className="error">โทเค็นไม่ถูกต้อง หมดอายุ หรือถูกเพิกถอน</p>
+          <p className="hint">ตรวจสิทธิ์ HR ของกิจกรรมนี้กับผู้ดูแลระบบในเครื่อง</p>
+        </section>
+      ) : null}
+      {props.state === 'not_ended' ? (
+        <section className="card" role="status">
+          <p className="notice">กิจกรรมนี้ยังไม่จบ — สรุปผลจะแสดงหลังจบกิจกรรม</p>
+        </section>
+      ) : null}
+      {props.state === 'error' ? (
+        <section className="card" role="alert">
+          <p className="error">โหลดสรุปผลไม่สำเร็จ{props.errorMessage ? `: ${props.errorMessage}` : ''}</p>
+          <p className="hint">การเชื่อมต่อขัดข้องไม่ใช่ข้อมูลศูนย์ กรุณาลองใหม่</p>
+        </section>
+      ) : null}
+
+      {props.state === 'ready' && summary ? (
+        <>
+          <section className="card hr-meta" aria-label="ข้อมูลกิจกรรม">
+            <p>
+              ผู้เข้าร่วมที่เข้าร่วมทั้งหมด <strong>{summary.session.joined_base}</strong> คน · คำถาม{' '}
+              <strong>{summary.session.question_count}</strong> ข้อ
+            </p>
+            {summary.session.ended_at ? (
+              <p className="hint">จบกิจกรรมเมื่อ {new Date(summary.session.ended_at).toLocaleString('th-TH')}</p>
+            ) : null}
+            {allEmpty ? (
+              <p className="notice" role="status">
+                ยังไม่มีคำตอบในกิจกรรมนี้ — แสดงจำนวนผู้เข้าร่วมโดยไม่สร้างค่าเฉลี่ยหรือข้อมูลสมมติ
+              </p>
+            ) : null}
+          </section>
+
+          {summary.questions.map((question) => {
+            const isRating = question.type === 'rating';
+            const ratingValues = isRating
+              ? Array.from(
+                  { length: (question.rating_max ?? 5) - (question.rating_min ?? 1) + 1 },
+                  (_, index) => String((question.rating_min ?? 1) + index),
+                )
+              : (question.options ?? []).map((option) => option.id);
+            return (
+              <section className="card hr-question" key={question.id} aria-label={`คำถามข้อ ${question.seq}`}>
+                <p className="eyebrow">ข้อ {String(question.seq).padStart(2, '0')}</p>
+                <h2>{question.label}</h2>
+                {question.help_text ? <p className="hint">{question.help_text}</p> : null}
+                <p className="hr-coverage">{coverageText(question)}</p>
+                {question.n === 0 ? (
+                  <p className="notice" role="status">
+                    ยังไม่มีคำตอบสำหรับข้อนี้ — ไม่แสดงค่าเฉลี่ยหรือร้อยละ
+                  </p>
+                ) : (
+                  <>
+                    <table className="hr-table">
+                      <caption>{isRating ? 'จำนวนผู้เลือกแต่ละระดับ' : 'จำนวนผู้เลือกแต่ละตัวเลือก'}</caption>
+                      <thead>
+                        <tr>
+                          <th scope="col">{isRating ? 'ระดับ' : 'ตัวเลือก'}</th>
+                          <th scope="col">จำนวน</th>
+                          <th scope="col">ร้อยละของผู้ตอบข้อนี้</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {ratingValues.map((value) => {
+                          const count = question.counts[value] ?? 0;
+                          const label = isRating
+                            ? value === String(question.rating_min)
+                              ? `${value} ยังไม่มั่นใจ`
+                              : value === String(question.rating_max)
+                                ? `${value} มั่นใจมาก`
+                                : value
+                            : (question.options ?? []).find((option) => option.id === value)?.label ?? value;
+                          const percent = Math.round((count / question.n) * 1000) / 10;
+                          return (
+                            <tr key={value}>
+                              <th scope="row">{label}</th>
+                              <td>{count}</td>
+                              <td>
+                                {percent}% <span className="hint">(n={question.n})</span>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                    {isRating && question.mean !== null ? (
+                      <p>
+                        ค่าเฉลี่ยคำตอบ: <strong>{question.mean}</strong> <span className="hint">จากผู้ตอบ n={question.n}</span>
+                      </p>
+                    ) : null}
+                  </>
+                )}
+                <p className="hint">
+                  ความคิดเห็นที่ให้: {question.comment_count} ข้อความ (ไม่แสดงเนื้อหาและไม่นับเป็นคำตอบที่ขาด)
+                </p>
+              </section>
+            );
+          })}
+
+          <section className="card hr-insights" aria-label="ข้อสรุปจากผลรวม">
+            <h2>ข้อสรุปจากผลรวม</h2>
+            {summary.insights.feedback_confidence ? (
+              <p>
+                <strong>ความมั่นใจในการให้ feedback:</strong> {summary.insights.feedback_confidence}
+              </p>
+            ) : (
+              <p className="hint">ยังไม่มีคำตอบเพียงพอสำหรับข้อสรุปด้านความมั่นใจ</p>
+            )}
+            {summary.insights.reported_blockers.length > 0 ? (
+              <div>
+                <p>
+                  <strong>อุปสรรคที่ถูกรายงาน:</strong>
+                </p>
+                <ul>
+                  {summary.insights.reported_blockers.map((blocker) => (
+                    <li key={blocker.option_id}>
+                      {blocker.label} — {blocker.count} คน
+                      {blocker.share === null ? '' : ` (${Math.round(blocker.share * 1000) / 10}% ของผู้ตอบ n=${summary.questions.find((q) => q.type === 'poll')?.n ?? 0})`}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : (
+              <p className="hint">ยังไม่มีคำตอบเพียงพอสำหรับข้อสรุปด้านอุปสรรค</p>
+            )}
+          </section>
+
+          <section className="card hr-caveats" aria-label="ข้อควรระวังในการตีความ">
+            <h2>ข้อควรระวังในการตีความ</h2>
+            <ul>
+              {summary.caveats.map((caveat) => (
+                <li key={caveat}>{caveat}</li>
+              ))}
+            </ul>
+            <p className="hint">
+              ตัวเลขทั้งหมดอ้างอิงคำตอบที่บันทึกจริงในฐานข้อมูล ไม่ได้ปรับให้ครบตามเป้าหมายจำนวนผู้เข้าร่วม
+            </p>
+          </section>
+        </>
+      ) : null}
+    </main>
   );
 }

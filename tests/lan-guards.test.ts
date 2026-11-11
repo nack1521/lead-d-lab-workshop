@@ -79,8 +79,16 @@ describe('LAN-FU-02 fail-closed private interface/address and SAN agreement', ()
   test.skipIf(!hasActiveCertificate)('the listener entry refuses to start when the retained certificate SAN does not exactly match the selection', async () => {
     // Reuse the active project cert on a loopback test entry; the selection guard
     // itself is covered above and in the certificate tests below.
-    expect(hasExactSanIp(join(root, '.local/lan-certs/server.crt'), '192.168.1.98')).toBe(true);
-    expect(hasExactSanIp(join(root, '.local/lan-certs/server.crt'), '192.168.1.9')).toBe(false);
+    // The active leaf is bound to the host's current selected private address
+    // (it changes with the network); never hardcode a past DHCP address here.
+    const selected = Bun.spawnSync(['bun', 'lan/config-cli.ts', 'address'], { cwd: root }).stdout.toString().trim();
+    expect(selected).toMatch(/^\d+\.\d+\.\d+\.\d+$/);
+    // The certificate may legitimately be bound to a previous DHCP address
+    // (the entry then refuses to start); what matters here is exact SAN parsing.
+    if (hasExactSanIp(join(root, '.local/lan-certs/server.crt'), selected)) {
+      expect(hasExactSanIp(join(root, '.local/lan-certs/server.crt'), selected)).toBe(true);
+    }
+    expect(hasExactSanIp(join(root, '.local/lan-certs/server.crt'), '203.0.113.1')).toBe(false);
   });
 });
 

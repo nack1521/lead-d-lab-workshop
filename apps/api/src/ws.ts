@@ -181,6 +181,12 @@ export function createHub(sql: Sql, config: Config, hooks?: HubTestHooks): Hub {
           ws.close(4401, 'unauthorized');
           return;
         }
+        if (result.auth.grant.role === 'hr') {
+          // HR is a read-only HTTP summary authority only; no realtime channel.
+          send(ws, { type: 'error', code: 'FORBIDDEN' });
+          ws.close(4403, 'forbidden');
+          return;
+        }
         if (ws.data.timer) {
           clearTimeout(ws.data.timer);
           ws.data.timer = null;

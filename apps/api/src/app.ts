@@ -9,6 +9,7 @@ import {
 } from './grants.ts';
 import { createRateLimiter, type RateLimiter } from './ratelimit.ts';
 import { buildParticipantView, buildSnapshot, type ParticipantSnapshot, type Snapshot } from './snapshot.ts';
+import { buildHrSummary } from './hr-summary.ts';
 import { fingerprint, graphemeCount, hashToken, isBlank, normalizeOptionalText } from './text.ts';
 
 export interface HubLike {
@@ -563,6 +564,34 @@ export function createApp(deps: AppDeps) {
       const [response] = await sql<ResponseRow[]>`
         select id, question_id, rating_value, option_id, comment, accepted_at from responses where id = ${receipt.response_id}`;
       return json({ status: 'accepted', replay: true, response: serializeResponse(response) });
+    })
+    .get('/api/hr/sessions/:sessionId/summary', async ({ request, params }) => {
+      const authResult = await currentAuth(request);
+      if (!authResult.ok) return authResult.response;
+      const { auth } = authResult;
+      if (auth.grant.role !== 'hr') return rejected('FORBIDDEN', 'เส้นทางนี้สำหรับ HR เท่านั้น', 403);
+      if (!params.sessionId) return rejected('VALIDATION_FAILED', 'ต้องระบุห้อง', 422);
+      if (auth.grant.session_id !== params.sessionId) {
+        return rejected('FORBIDDEN', 'ไม่สามารถเข้าถึงห้องอื่นได้', 403);
+      }
+      const summary = await buildHrSummary(sql, params.sessionId);
+      if (!summary) return rejected('SESSION_NOT_FOUND', 'ไม่พบห้องนี้', 404);
+      if (summary.session.status !== 'ended') {
+        return rejected('SESSION_NOT_ENDED', 'กิจกรรมนี้ยังไม่จบ สรุปผลจะแสดงหลังจบกิจกรรม', 409, false);
+      }
+      return json({ status: 'ok', summary });
+    })
+    .get('/api/hr/summary', async ({ request }) => {
+      const authResult = await currentAuth(request);
+      if (!authResult.ok) return authResult.response;
+      const { auth } = authResult;
+      if (auth.grant.role !== 'hr') return rejected('FORBIDDEN', 'เส้นทางนี้สำหรับ HR เท่านั้น', 403);
+      const summary = await buildHrSummary(sql, auth.grant.session_id);
+      if (!summary) return rejected('SESSION_NOT_FOUND', 'ไม่พบห้องนี้', 404);
+      if (summary.session.status !== 'ended') {
+        return rejected('SESSION_NOT_ENDED', 'กิจกรรมนี้ยังไม่จบ สรุปผลจะแสดงหลังจบกิจกรรม', 409, false);
+      }
+      return json({ status: 'ok', summary });
     })
     .get('/api/facilitator/sessions/:sessionId/snapshot', async ({ request, params }) => {
       const authResult = await currentAuth(request);

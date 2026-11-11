@@ -153,3 +153,40 @@ export function connectSocket(
     resync: () => socket?.send(JSON.stringify({ type: 'resync' })),
   };
 }
+
+
+export interface HrQuestionSummary {
+  id: string;
+  seq: number;
+  type: 'rating' | 'poll';
+  label: string;
+  help_text: string | null;
+  options: { id: string; label: string }[] | null;
+  rating_min: number | null;
+  rating_max: number | null;
+  n: number;
+  joined_base: number;
+  unanswered: number;
+  coverage_ratio: number | null;
+  counts: Record<string, number>;
+  mean: number | null;
+  comment_count: number;
+}
+
+export interface HrSummary {
+  session: {
+    id: string;
+    status: 'active' | 'ended';
+    ended_at: string | null;
+    revision: number;
+    joined_base: number;
+    question_count: number;
+  };
+  questions: HrQuestionSummary[];
+  insights: {
+    feedback_confidence: string | null;
+    reported_blockers: { option_id: string; label: string; count: number; share: number | null }[];
+  };
+  caveats: string[];
+  generated_at: string;
+}

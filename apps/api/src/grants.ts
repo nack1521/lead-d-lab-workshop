@@ -1,7 +1,7 @@
 import type { Sql } from './db.ts';
 import { hashToken, newToken } from './text.ts';
 
-export type Role = 'participant' | 'facilitator';
+export type Role = 'participant' | 'facilitator' | 'hr';
 
 export interface SessionRow {
   id: string;
@@ -88,7 +88,8 @@ export async function authenticate(
 }
 
 export function authTtlSeconds(role: Role, participantTtl: number, facilitatorTtl: number): number {
-  return role === 'facilitator' ? facilitatorTtl : participantTtl;
+  if (role === 'facilitator' || role === 'hr') return facilitatorTtl;
+  return participantTtl;
 }
 
 export const DAY_MS = MS_DAY;

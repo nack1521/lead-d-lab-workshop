@@ -95,3 +95,19 @@ The selected backing authority is the existing native **Mode A** API (`127.0.0.1
 **Remove afterwards:** delete the profile in Settings > General > VPN & Device Management (this removes the CA and trust); stopping `bun run lan:entry` returns to loopback-only mode. Generated keys and certs stay in ignored `.local/lan-certs`; they are development-only and must never be used for production.
 
 Limitations: one private network and one phone; guest-network/AP isolation, VPN, or firewall prompts can block it and are not changed by this setup; the LAN URL is not a stable hostname (IP-based SAN), and real-device Safari results are recorded by the user/QA, not fabricated here.
+
+## HR summary after session end (HR-SUMMARY-01)
+
+Local, read-only, session-scoped HR summary backed by the real PostgreSQL data of an **ended** session. No minimum-sample gate: any positive n is shown together with its per-question joined denominator; n=0 is an honest empty state with no mean. The page never shows names, comments, participant identifiers or individual rankings. Synthetic demo data only.
+
+Private local trial (loopback; grants never go in URLs or the bundle):
+
+```bash
+bun run apps/api/src/hr-demo-fixture.ts          # fresh owned session/code, no ROOM fixture reuse
+# drive synthetic participants through the real API (this smoke also ends the session):
+bun scripts/hr-smoke.ts .local/hr-demo/<CODE>.json 30
+bun run apps/api/src/issue-hr-grant.ts <session-id-or-code>   # writes ignored .local/hr-grants/<id>.json
+# open http://127.0.0.1:5173/hr and paste the grant into the page field
+```
+
+HR grants are session-scoped and use the configured HR TTL (prototype default follows the facilitator TTL, `GRANT_TTL_HR_SECONDS`). HR can only read the summary; it cannot join, submit, use facilitator controls or open a WebSocket. Expired/revoked/other-session/participant/facilitator access is denied. Keep grant files and screenshots out of recordings; delete `.local/hr-grants/*.json` after the demo.

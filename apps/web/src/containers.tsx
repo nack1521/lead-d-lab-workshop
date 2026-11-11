@@ -7,6 +7,7 @@ import {
   type ParticipantViewData,
   type Question,
   type Snapshot,
+  type HrSummary,
 } from './api.ts';
 import {
   canStartFreshAttempt,
@@ -21,7 +22,7 @@ import {
   type Attempt,
   type Outcome,
 } from './state.ts';
-import { FacilitatorView, JoinView, ParticipantView } from './ui.tsx';
+import { FacilitatorView, HrSummaryView, JoinView, ParticipantView, type HrViewState } from './ui.tsx';
 import { resolveJoinAttempt, type JoinAttempt } from './join-attempt.ts';
 
 const COMMENT_LIMIT = 500;
@@ -51,8 +52,9 @@ export function navigate(path: string): void {
   window.dispatchEvent(new PopStateEvent('popstate'));
 }
 
-export function routeFromPath(pathname: string): 'join' | 'room' | 'facilitator' {
+export function routeFromPath(pathname: string): 'join' | 'room' | 'facilitator' | 'hr' {
   if (pathname.startsWith('/facilitator')) return 'facilitator';
+  if (pathname.startsWith('/hr')) return 'hr';
   if (pathname.startsWith('/room')) return 'room';
   return 'join';
 }
@@ -66,6 +68,7 @@ export function App() {
   }, []);
   if (route === 'room' && roomSession) return <RoomPage />;
   if (route === 'facilitator') return <FacilitatorPage />;
+  if (route === 'hr') return <HrPage />;
   return <JoinPage />;
 }
 
@@ -458,6 +461,57 @@ function FacilitatorPage() {
       onOpen={(questionId) => void mutate('open', questionId)}
       onClose={(questionId) => void mutate('close', questionId)}
       onEnd={() => void mutate('end')}
+    />
+  );
+}
+
+function HrPage() {
+  const [token, setToken] = useState('');
+  const [hasToken, setHasToken] = useState(false);
+  const [pending, setPending] = useState(false);
+  const [state, setState] = useState<HrViewState>('loading');
+  const [summary, setSummary] = useState<HrSummary | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const open = async () => {
+    setPending(true);
+    setError(null);
+    setState('loading');
+    try {
+      const data = await apiFetch<{ status: string; summary: HrSummary }>('/api/hr/summary', { token: token.trim() });
+      setSummary(data.summary);
+      setHasToken(true);
+      setState('ready');
+    } catch (err) {
+      setSummary(null);
+      setHasToken(false);
+      if (err instanceof ApiError) {
+        const body = (err.body ?? {}) as Record<string, unknown>;
+        if (body.code === 'SESSION_NOT_ENDED') setState('not_ended');
+        else if (err.status === 401 || err.status === 403) setState('unauthorized');
+        else {
+          setState('error');
+          setError(`HTTP ${err.status}`);
+        }
+      } else {
+        setState('error');
+        setError('เครือข่ายขัดข้อง');
+      }
+    } finally {
+      setPending(false);
+    }
+  };
+
+  return (
+    <HrSummaryView
+      hasToken={hasToken}
+      token={token}
+      state={state}
+      summary={summary}
+      errorMessage={error}
+      pending={pending}
+      onToken={setToken}
+      onOpen={() => void open()}
     />
   );
 }

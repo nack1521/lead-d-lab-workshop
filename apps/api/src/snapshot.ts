@@ -128,6 +128,7 @@ export interface ParticipantOwnResponse {
   rating: number | null;
   option_id: string | null;
   comment: string | null;
+  text: string | null;
   accepted_at: string;
 }
 
@@ -189,8 +190,9 @@ export async function buildParticipantView(
           rating_value: number | null;
           option_id: string | null;
           comment: string | null;
+          text_value: string | null;
           accepted_at: Date;
-        }[]>`select id, question_id, rating_value, option_id, comment, accepted_at
+        }[]>`select id, question_id, rating_value, option_id, comment, text_value, accepted_at
              from responses where participant_id = ${participantId} and question_id = ${question.id} limit 1`
       : [];
     const own = responses[0] ?? null;
@@ -226,6 +228,7 @@ export async function buildParticipantView(
             rating: own.rating_value,
             option_id: own.option_id,
             comment: own.comment,
+            text: own.text_value,
             accepted_at: new Date(own.accepted_at).toISOString(),
           }
         : null,

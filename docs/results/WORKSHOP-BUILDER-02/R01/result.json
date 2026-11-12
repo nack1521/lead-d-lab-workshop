@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "task_id": "WORKSHOP-BUILDER-02",
+  "run_id": "R01",
+  "reported_at": "2026-11-12T17:35:45+07:00",
+  "producer": "DeepSeek Harness (sole coding writer)",
+  "authoring_tool": "DeepSeek Harness",
+  "model": "deepseek-v4.1-flash-1017",
+  "source_kind": "direct",
+  "baseline_commit": "537d700",
+  "observed_head": "537d700",
+  "branch": "main",
+  "work_kind": "workshop_builder_slice",
+  "status": "READY_FOR_REVIEW",
+  "summary": "Implemented WORKSHOP-BUILDER-02 locally: literal admin demo entry (server-issued admin/hr scopes, no token form), persistent PostgreSQL rooms with score/choice/text questions, reorder and strict post-answer locks, publish/open/close/end lifecycle, participant join/answer (idempotent, no duplicates), realtime facilitator WS fed by an internal room-scoped grant, active-question-first charts with n/base, latest-five text plus stable cursor pagination, and a read-only HR mode enforced server-side. New builder UI follows the approved R02 structure (compact rows, question rail, wide editor + participant preview, neutral chrome, sparse teal, logo asset, 44px controls, focus/reduced motion, deliberate mobile layout). Native tests 145 pass/1 skip/0 fail; builder API tests 9/9; typecheck/default+LAN builds 0; fresh real API/DB flow and reload persistence verified; additive migration 0004 applied. Browser screenshots/real visual-mobile checks, dedicated builder UI tests, Mode B regression, cloud deployment and independent QA are NOT RUN.",
+  "detail_path": "docs/results/WORKSHOP-BUILDER-02/R01/result.md",
+  "user_decision": "Implement the approved Unslop R02 direction; do not reuse rejected R01; weak demo admin access is intentional.",
+  "changed_paths": ["db/migrations/0004_wsp_builder.sql", "apps/api/src/builder-routes.ts", "apps/api/src/app.ts", "apps/api/src/snapshot.ts", "apps/web/src/builder.tsx", "apps/web/src/api.ts", "apps/web/src/ui.tsx", "apps/web/src/containers.tsx", "apps/web/src/state.ts", "apps/web/src/styles.css", "apps/web/src/assets/logo.png", "tests/builder.test.ts", "tests/findings-client.test.tsx", "docs/deployment not changed"],
+  "cases": [
+    {"case_id": "WB2-01", "status": "PASS", "evidence_paths": ["tests/builder.test.ts", "docs/results/WORKSHOP-BUILDER-02/R01/evidence/builder-targeted.log"]},
+    {"case_id": "WB2-02", "status": "PASS", "evidence_paths": ["docs/results/WORKSHOP-BUILDER-02/R01/evidence/builder-live-flow.json"]},
+    {"case_id": "WB2-03", "status": "PARTIAL", "evidence_paths": ["tests/builder.test.ts"], "limitations": "Browser screenshots/real visual, mobile, keyboard and reduced-motion checks NOT RUN."},
+    {"case_id": "WB2-04", "status": "PARTIAL", "limitations": "Builder frontend has no dedicated automated UI test; legacy facilitator UI test retired (1 skip, not pass); participant text UI only API-tested."},
+    {"case_id": "WB2-05", "status": "NOT RUN", "limitations": "Mode B Docker regression, cloud deployment, physical phone/Safari, independent QA."}
+  ],
+  "commands": [
+    {"command": "bun run migrate", "exit_code": 0, "outcome": "0004_wsp_builder.sql applied additively"},
+    {"command": "bun test tests/builder.test.ts", "exit_code": 0, "outcome": "9 pass / 0 fail"},
+    {"command": "bun test tests", "exit_code": 0, "outcome": "145 pass / 1 skip / 0 fail (146 tests)"},
+    {"command": "bun x tsc --noEmit", "exit_code": 0, "outcome": "no type errors"},
+    {"command": "bun run build:web / build:web:lan", "exit_code": 0, "outcome": "both builds succeed"},
+    {"command": "fresh live API/DB flow (curl)", "exit_code": 0, "outcome": "room draft→open, participant rating accepted, report n=1/mean=4, reload persistence, HR read 200/write 403, end"}
+  ],
+  "blockers": [],
+  "not_verified": ["browser screenshots and real desktop/phone visual/interaction", "keyboard/reduced-motion behavior in a real browser", "dedicated builder/HR UI tests", "Mode B Docker regression", "cloud deployment and public HTTPS/WSS", "independent QA and human acceptance"],
+  "next_gate": "Human browser/phone review against the approved R02 board and independent QA; then deployment verification. No push/deploy.",
+  "published": false
+}

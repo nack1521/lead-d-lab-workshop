@@ -122,7 +122,7 @@ export function ParticipantView(props: {
                   : null}
               </div>
             </fieldset>
-          ) : (
+          ) : question.type === 'poll' ? (
             <fieldset disabled={props.questionClosed || props.outcome === 'saved' || props.sending}>
               <legend>เลือกหนึ่งข้อ</legend>
               {(question.options ?? []).map((option) => (
@@ -138,16 +138,16 @@ export function ParticipantView(props: {
                 </label>
               ))}
             </fieldset>
-          )}
+          ) : null}
 
-          <label htmlFor="comment">ความคิดเห็นเพิ่มเติม (ไม่บังคับ)</label>
+          <label htmlFor="comment">{question.type === 'text' ? 'คําตอบข้อความ (จําเป็น)' : 'ความคิดเห็นเพิ่มเติม (ไม่บังคับ)'}</label>
           <textarea
             id="comment"
-            rows={4}
+            rows={question.type === 'text' ? 6 : 4}
             value={props.comment}
             disabled={props.questionClosed || props.outcome === 'saved' || props.sending}
             onChange={(event) => props.onComment(event.target.value)}
-            placeholder="พิมพ์ข้อความได้หลายบรรทัด กด Enter เพื่อขึ้นบรรทัดใหม่"
+            placeholder={question.type === 'text' ? 'พิมพ์คําตอบของคุณ (ไม่เกิน 1000 ตัวอักษร)' : 'พิมพ์ข้อความได้หลายบรรทัด กด Enter เพื่อขึ้นบรรทัดใหม่'}
           />
           <p className={props.countLabel.startsWith('~') ? 'count approximate' : 'count'}>{props.countLabel}</p>
 
@@ -161,7 +161,9 @@ export function ParticipantView(props: {
           {props.outcome === 'saved' ? (
             <p className="saved">
               บันทึกคำตอบและข้อความแล้ว
-              {props.ownResponse?.comment ? <span className="own-comment"> — “{props.ownResponse.comment}”</span> : null}
+              {props.ownResponse?.comment || props.ownResponse?.text ? (
+                <span className="own-comment"> — “{props.ownResponse?.text ?? props.ownResponse?.comment}”</span>
+              ) : null}
             </p>
           ) : null}
           {props.outcome === 'unknown' ? (
@@ -184,7 +186,7 @@ export function ParticipantView(props: {
             </div>
           ) : null}
           {!props.questionClosed && props.outcome !== 'saved' && props.outcome !== 'unknown' && props.outcome !== 'terminal_non_save' ? (
-            <button type="button" onClick={props.onSubmit} disabled={props.sending || (!props.rating && !props.optionId)}>
+            <button type="button" onClick={props.onSubmit} disabled={props.sending || (question.type === 'text' ? props.comment.trim().length === 0 : (!props.rating && !props.optionId))}>
               {props.sending ? 'กำลังส่ง…' : 'ส่งคำตอบ'}
             </button>
           ) : null}

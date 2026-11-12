@@ -17,7 +17,7 @@ export const WS_URL = configuredWsUrl
 export interface Question {
   id: string;
   seq: number;
-  type: 'rating' | 'poll';
+  type: 'rating' | 'poll' | 'text';
   label: string;
   help_text: string | null;
   options: { id: string; label: string }[] | null;
@@ -33,6 +33,7 @@ export interface OwnResponse {
   rating: number | null;
   option_id: string | null;
   comment: string | null;
+  text: string | null;
   accepted_at: string;
 }
 
@@ -54,7 +55,7 @@ export interface ParticipantViewData {
 export interface QuestionAggregate {
   question_id: string;
   seq: number;
-  type: 'rating' | 'poll';
+  type: 'rating' | 'poll' | 'text';
   label: string;
   options: { id: string; label: string }[] | null;
   rating_min: number | null;

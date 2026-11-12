@@ -10,6 +10,7 @@ import {
 import { createRateLimiter, type RateLimiter } from './ratelimit.ts';
 import { buildParticipantView, buildSnapshot, type ParticipantSnapshot, type Snapshot } from './snapshot.ts';
 import { buildHrSummary } from './hr-summary.ts';
+import { createBuilderRoutes } from './builder-routes.ts';
 import { fingerprint, graphemeCount, hashToken, isBlank, normalizeOptionalText } from './text.ts';
 
 export interface HubLike {
@@ -21,7 +22,7 @@ interface Question {
   id: string;
   session_id: string;
   seq: number;
-  type: 'rating' | 'poll';
+  type: 'rating' | 'poll' | 'text';
   label: string;
   help_text: string | null;
   options: { id: string; label: string }[] | null;
@@ -90,6 +91,7 @@ interface ResponseRow {
   rating_value: number | null;
   option_id: string | null;
   comment: string | null;
+  text_value: string | null;
   accepted_at: Date;
 }
 
@@ -100,6 +102,7 @@ function serializeResponse(row: ResponseRow) {
     rating: row.rating_value,
     option_id: row.option_id,
     comment: row.comment,
+    text: row.text_value,
     comment_graphemes: row.comment ? graphemeCount(row.comment).count : 0,
     accepted_at: new Date(row.accepted_at).toISOString(),
   };
@@ -323,12 +326,15 @@ export function createApp(deps: AppDeps) {
       }
       const normalizedComment =
         typeof body.comment === 'string' && body.comment.trim().length > 0 ? body.comment.trim() : null;
+      const normalizedText =
+        typeof body.text === 'string' && body.text.trim().length > 0 ? body.text.trim() : null;
       const payloadFingerprint = fingerprint({
         question_id: question.id,
         type: body.type ?? null,
         rating: body.rating ?? null,
         option_id: body.option_id ?? null,
         comment: normalizedComment,
+        text: normalizedText,
       });
 
       type Outcome =
@@ -385,7 +391,7 @@ export function createApp(deps: AppDeps) {
               };
             }
             const [existing] = await tx<ResponseRow[]>`
-              select id, question_id, rating_value, option_id, comment, accepted_at
+              select id, question_id, rating_value, option_id, comment, text_value, accepted_at
               from responses where id = ${receipt.response_id}`;
             return {
               kind: 'accepted',
@@ -396,7 +402,7 @@ export function createApp(deps: AppDeps) {
             };
           }
           const [live] = await tx<{
-            type: 'rating' | 'poll';
+            type: 'rating' | 'poll' | 'text';
             rating_min: number | null;
             rating_max: number | null;
             options: { id: string; label: string }[] | null;
@@ -432,11 +438,16 @@ export function createApp(deps: AppDeps) {
             if (typeof raw !== 'number' || !Number.isInteger(raw) || raw < min || raw > max) {
               return await persistRejection('INVALID_RATING', 'คะแนนต้องอยู่ในช่วงที่คำถามกำหนด');
             }
-          } else {
+          } else if (live.type === 'poll') {
             const raw = body.option_id;
             const allowed = (live.options ?? []).map((option) => option.id);
             if (typeof raw !== 'string' || !allowed.includes(raw)) {
-              return await persistRejection('INVALID_OPTION', 'ตัวเลือกไม่ตรงกับคำถามนี้');
+              return await persistRejection('INVALID_OPTION', 'ตัวเลือกไม่ตรงกับคําถามนี้');
+            }
+          } else {
+            if (!normalizedText) return await persistRejection('VALIDATION_FAILED', 'ต้องพิมพ์คําตอบข้อความ');
+            if (graphemeCount(normalizedText).count > 1000) {
+              return await persistRejection('VALIDATION_FAILED', 'ข้อความต้องไม่เกิน 1000 ตัวอักษร');
             }
           }
           if (body.comment !== undefined && body.comment !== null && typeof body.comment !== 'string') {
@@ -449,7 +460,7 @@ export function createApp(deps: AppDeps) {
             }
           }
           const [own] = await tx<ResponseRow[]>`
-            select id, question_id, rating_value, option_id, comment, accepted_at from responses
+            select id, question_id, rating_value, option_id, comment, text_value, accepted_at from responses
             where participant_id = ${participantId} and question_id = ${question.id} limit 1`;
           if (own) {
             // Bind this handled key to the stable accepted outcome and fingerprint so a
@@ -472,10 +483,11 @@ export function createApp(deps: AppDeps) {
           }
           const rating = live.type === 'rating' ? (body.rating as number) : null;
           const optionId = live.type === 'poll' ? (body.option_id as string) : null;
+          const textValue = live.type === 'text' ? normalizedText : null;
           const [stored] = await tx<ResponseRow[]>`
-            insert into responses (id, session_id, participant_id, question_id, rating_value, option_id, comment)
-            values (${crypto.randomUUID()}, ${auth.session.id}, ${participantId}, ${question.id}, ${rating}, ${optionId}, ${normalizedComment})
-            returning id, question_id, rating_value, option_id, comment, accepted_at`;
+            insert into responses (id, session_id, participant_id, question_id, rating_value, option_id, comment, text_value)
+            values (${crypto.randomUUID()}, ${auth.session.id}, ${participantId}, ${question.id}, ${rating}, ${optionId}, ${normalizedComment}, ${textValue})
+            returning id, question_id, rating_value, option_id, comment, text_value, accepted_at`;
           await tx`
             insert into submission_receipts
               (id, session_id, participant_id, question_id, idempotency_key, payload_fingerprint, outcome, code, message, response_id)
@@ -563,7 +575,7 @@ export function createApp(deps: AppDeps) {
         });
       }
       const [response] = await sql<ResponseRow[]>`
-        select id, question_id, rating_value, option_id, comment, accepted_at from responses where id = ${receipt.response_id}`;
+        select id, question_id, rating_value, option_id, comment, text_value, accepted_at from responses where id = ${receipt.response_id}`;
       return json({ status: 'accepted', replay: true, response: serializeResponse(response) });
     })
     .get('/api/hr/sessions/:sessionId/summary', async ({ request, params }) => {
@@ -752,7 +764,8 @@ export function createApp(deps: AppDeps) {
       return json({ status: 'revoked', revoked: result.revoked });
     });
 
-  return { app, limiter };
+  const appWithBuilder = app.use(createBuilderRoutes({ sql, config, hub }));
+  return { app: appWithBuilder, limiter };
 }
 
 export type { Snapshot };

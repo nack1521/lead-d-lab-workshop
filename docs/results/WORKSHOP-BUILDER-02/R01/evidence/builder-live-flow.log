@@ -1,0 +1,26 @@
+{
+  "fresh_admin_room": {
+    "join_code": "AA4TJ",
+    "initial_phase": "draft",
+    "published_phase": "open",
+    "open": "{\"status\":\"ok\",\"revision\":1}"
+  },
+  "participant": {
+    "join_status": "joined",
+    "question_type": "rating",
+    "submission": "{\"status\":\"accepted\",\"rating\":4}"
+  },
+  "report": {
+    "n": "1",
+    "mean": "4"
+  },
+  "reload": {
+    "listed_title": "หลักฐาน builder EV-173513",
+    "report_n_after_relogin": "1"
+  },
+  "hr": {
+    "report_http": "200",
+    "mutation_http": "403"
+  },
+  "end_status": "ended"
+}

@@ -6,7 +6,7 @@ export type Outcome = 'draft' | 'sending' | 'saved' | 'terminal_non_save' | 'unk
 
 export interface AttemptPayload {
   questionId: string;
-  type: 'rating' | 'poll';
+  type: 'rating' | 'poll' | 'text';
   rating: number | null;
   optionId: string | null;
   comment: string | null;

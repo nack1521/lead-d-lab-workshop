@@ -23,6 +23,7 @@ import {
   type Outcome,
 } from './state.ts';
 import { FacilitatorView, HrSummaryView, JoinView, ParticipantView, type HrViewState } from './ui.tsx';
+import { BuilderApp } from './builder.tsx';
 import { resolveJoinAttempt, type JoinAttempt } from './join-attempt.ts';
 
 const COMMENT_LIMIT = 500;
@@ -67,8 +68,8 @@ export function App() {
     return () => window.removeEventListener('popstate', onPop);
   }, []);
   if (route === 'room' && roomSession) return <RoomPage />;
-  if (route === 'facilitator') return <FacilitatorPage />;
-  if (route === 'hr') return <HrPage />;
+  if (route === 'facilitator') return <BuilderApp mode="admin" />;
+  if (route === 'hr') return <BuilderApp mode="hr" />;
   return <JoinPage />;
 }
 
@@ -271,7 +272,8 @@ function RoomPage() {
           type: attempt.payload.type,
           rating: attempt.payload.rating ?? undefined,
           option_id: attempt.payload.optionId ?? undefined,
-          comment: attempt.payload.comment ?? undefined,
+          comment: attempt.payload.type === 'text' ? undefined : attempt.payload.comment ?? undefined,
+          text: attempt.payload.type === 'text' ? attempt.payload.comment ?? undefined : undefined,
         },
       });
       const classification = classifyResponse(201, body);

@@ -1,0 +1,17 @@
+bun test v1.4.4 (38afee6c8)
+
+tests/builder.test.ts:
+(pass) WORKSHOP-BUILDER-02 admin authoring and real data flow > wrong passphrase is rejected; valid admin and HR scopes are issued [2.52ms]
+(pass) WORKSHOP-BUILDER-02 admin authoring and real data flow > creates a persistent room and draft questions of all three types [12.09ms]
+(pass) WORKSHOP-BUILDER-02 admin authoring and real data flow > rejects invalid input and supports reorder while no answers exist [5.68ms]
+(pass) WORKSHOP-BUILDER-02 admin authoring and real data flow > participant joins only an open room, answers, gets saved acknowledgement [21.70ms]
+(pass) WORKSHOP-BUILDER-02 admin authoring and real data flow > facilitator live snapshot matches DB and report for score [9.59ms]
+(pass) WORKSHOP-BUILDER-02 admin authoring and real data flow > answer-after-close is rejected and questions lock after answers [11.09ms]
+(pass) WORKSHOP-BUILDER-02 admin authoring and real data flow > choice and text answers, latest five + stable pagination [50.92ms]
+(pass) WORKSHOP-BUILDER-02 admin authoring and real data flow > HR scope is read-only at the server boundary [2.56ms]
+(pass) WORKSHOP-BUILDER-02 admin authoring and real data flow > ending the room persists answers and blocks further mutation [4.75ms]
+
+ 9 pass
+ 0 fail
+ 72 expect() calls
+Ran 9 tests across 1 file. [282.00ms]

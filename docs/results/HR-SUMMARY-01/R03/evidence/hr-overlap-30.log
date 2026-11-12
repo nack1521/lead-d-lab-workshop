@@ -1,0 +1,198 @@
+{
+  "ok": true,
+  "failures": [],
+  "checks": {
+    "fresh_fixture_created": true,
+    "fixture_is_fresh_owned_code": true,
+    "fixture_has_no_participants": true,
+    "fixture_is_active": true,
+    "facilitator_snapshot_baseline_observed": true,
+    "rating_question_open_200": true,
+    "join_client_launched_matches_target": true,
+    "join_server_responded_all": true,
+    "join_all_succeeded": true,
+    "join_observed_overlap": true,
+    "unique_participant_ids_match_joined": true,
+    "rating_client_launched_matches_target": true,
+    "rating_server_responded_all": true,
+    "rating_all_succeeded": true,
+    "rating_observed_overlap": true,
+    "poll_question_open_200": true,
+    "poll_client_launched_matches_target": true,
+    "poll_server_responded_all": true,
+    "poll_all_succeeded": true,
+    "poll_observed_overlap": true,
+    "fresh_frame_matches_committed_revision": true,
+    "fresh_frame_is_after_baseline": true,
+    "fresh_frame_rating_buckets_match_db": true,
+    "fresh_frame_poll_buckets_match_db": true,
+    "fresh_frame_rating_total_matches_db": true,
+    "fresh_frame_poll_total_matches_db": true,
+    "fresh_frame_question_matches_committed_active": true,
+    "db_joined_count_matches": true,
+    "db_rating_rows_match": true,
+    "db_poll_rows_match": true,
+    "session_end_200": true,
+    "hr_summary_200": true,
+    "summary_joined_base_matches": true,
+    "summary_rating_n_matches": true,
+    "summary_rating_buckets_match": true,
+    "summary_rating_mean_matches": true,
+    "summary_poll_n_matches": true,
+    "summary_poll_buckets_match": true,
+    "summary_rating_comments_match": true,
+    "summary_poll_comments_match": true,
+    "summary_unanswered_matches": true,
+    "summary_option_shares_match": true,
+    "summary_contains_no_comment_text": true,
+    "all_sockets_settled": true
+  },
+  "cleanup": {
+    "settled": true,
+    "closeCodes": [
+      1005
+    ]
+  },
+  "session": {
+    "join_code": "HR-DEMO-20261112005222",
+    "session_id": "0d889554-28de-472d-9de3-ecda37ae1d9a"
+  },
+  "targets": {
+    "participants": 30,
+    "ratings": 30,
+    "polls": 27
+  },
+  "phases": [
+    {
+      "phase": "join",
+      "client_launched": 30,
+      "server_responded": 30,
+      "succeeded": 30,
+      "failed": 0,
+      "exceptions": 0,
+      "statuses": {
+        "201": 30
+      },
+      "max_in_flight": 10,
+      "duration_ms": 236,
+      "wave_pause_ms": 60
+    },
+    {
+      "phase": "rating",
+      "client_launched": 30,
+      "server_responded": 30,
+      "succeeded": 30,
+      "failed": 0,
+      "exceptions": 0,
+      "statuses": {
+        "201": 30
+      },
+      "max_in_flight": 10,
+      "duration_ms": 239,
+      "wave_pause_ms": 60
+    },
+    {
+      "phase": "poll",
+      "client_launched": 27,
+      "server_responded": 27,
+      "succeeded": 27,
+      "failed": 0,
+      "exceptions": 0,
+      "statuses": {
+        "201": 27
+      },
+      "max_in_flight": 10,
+      "duration_ms": 208,
+      "wave_pause_ms": 60
+    }
+  ],
+  "observed": {
+    "max_in_flight": 10,
+    "join_unique_ids": 30,
+    "ws_baseline_revision": 0,
+    "committed_revision": 89,
+    "ws_snapshot_frames": 91,
+    "pacing": "concurrency window 10, 60 ms between waves",
+    "duration_ms": 842,
+    "semantics": "client_launched counts client requests started; server_responded counts any HTTP response received"
+  },
+  "db": {
+    "joined": 30,
+    "ratingBuckets": {
+      "1": 6,
+      "2": 6,
+      "3": 6,
+      "4": 6,
+      "5": 6
+    },
+    "pollBuckets": {
+      "clarity": 6,
+      "safety": 7,
+      "skill": 7,
+      "time": 7
+    },
+    "comments": {
+      "rating_comments": 10,
+      "poll_comments": 6
+    }
+  },
+  "summary": {
+    "joined_base": 30,
+    "rating": {
+      "n": 30,
+      "mean": 3,
+      "counts": {
+        "1": 6,
+        "2": 6,
+        "3": 6,
+        "4": 6,
+        "5": 6
+      },
+      "comments": 10
+    },
+    "poll": {
+      "n": 27,
+      "unanswered": 3,
+      "counts": {
+        "clarity": 6,
+        "safety": 7,
+        "skill": 7,
+        "time": 7
+      },
+      "options": [
+        {
+          "option_id": "time",
+          "label": "เวลาสำหรับดูแลทีมไม่พอ",
+          "count": 7,
+          "share": 0.2593
+        },
+        {
+          "option_id": "skill",
+          "label": "ขาดทักษะการให้ feedback",
+          "count": 7,
+          "share": 0.2593
+        },
+        {
+          "option_id": "safety",
+          "label": "กังวลว่าจะกระทบความสัมพันธ์",
+          "count": 7,
+          "share": 0.2593
+        },
+        {
+          "option_id": "clarity",
+          "label": "ไม่รู้ว่าควรถามอะไร",
+          "count": 6,
+          "share": 0.2222
+        }
+      ]
+    },
+    "caveats": [
+      "ข้อมูลนี้เป็น self-report จากผู้เข้าร่วม ไม่ใช่การวินิจฉัยพนักงานหรือการประเมินผลการทำงาน",
+      "แสดงเฉพาะผลรวมรายข้อ ไม่มีชื่อผู้เข้าร่วม ความคิดเห็นรายบุคคล หรือการจัดอันดับรายบุคคล"
+    ]
+  },
+  "private_grant_file": ".local/hr-grants/0d889554-28de-472d-9de3-ecda37ae1d9a.json",
+  "limitations": [
+    "single-machine synthetic run with paced bounded concurrency; not 30 phones and not an SLA"
+  ]
+}

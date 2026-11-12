@@ -1,0 +1,11 @@
+bun test v1.4.4 (38afee6c8)
+
+tests/hr-smoke-support.test.ts:
+(pass) HR-QA-03 cleanup-aware finalization > normal cleanup yields ok with the cleanup verdict included [0.12ms]
+(pass) HR-QA-03 cleanup-aware finalization > an unsettled socket makes the final result nonzero even when earlier checks passed [0.03ms]
+(pass) HR-QA-03 cleanup-aware finalization > an earlier acceptance failure is retained and combined with a good cleanup [0.02ms]
+
+ 3 pass
+ 0 fail
+ 10 expect() calls
+Ran 3 tests across 1 file. [16.00ms]

@@ -1,0 +1,12 @@
+== API image runtime (cloud-style PORT=8080) ==
+health HTTP 200 {"status":"ok"}
+ready HTTP 200 {"status":"ready","db":"ok"}
+hr unauth HTTP 401 {"status":"rejected","code":"UNAUTHORIZED","message":"ต้องมีสิทธิ์เข้าร่วมก่อน","terminal":false}
+root HTTP 500 type=application/json; charset=utf-8
+container status:
+running cmd=[sh docker/start-api.sh]
+startup log (sanitized):
+migrations applied: none
+error: Cannot read file "/app/": EACCES
+error: Cannot read file "/app/": EACCES
+c1 api listening on http://0.0.0.0:8080 (origins: https://example.pages.dev)

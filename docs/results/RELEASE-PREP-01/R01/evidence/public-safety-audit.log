@@ -1,0 +1,54 @@
+== scope ==
+repo=/Users/aiink/Nack/Lead+D-Lab head=13ff83e
+scanner=pattern-grep
+gitleaks=unavailable
+trufflehog=unavailable
+== tracked working-tree pattern counts (values never printed) ==
+PRIVATE_KEY_BLOCK=0
+AWS_ACCESS_KEY=0
+POSTGRES_URL_WITH_PASSWORD=5
+  path: .env.example
+  path: compose.yaml
+  path: docs/results/C1-LOCAL-BUILD/R03/evidence/c1-16-and-hygiene.log
+  path: tests/run-in-docker.sh
+GITHUB_TOKEN=0
+OPENAI_OR_GENERIC_SK=0
+JWT_LIKE_LONG=0
+BEARER_TOKEN_LITERAL=0
+== credential-line classification (placeholder/template vs real-like) ==
+tracked_database_url_total=5
+tracked_database_url_placeholder_or_template=5
+tracked_database_url_real_like_candidates=0
+== full Git history pattern counts ==
+PRIVATE_KEY_BLOCK=0
+AWS_ACCESS_KEY=0
+POSTGRES_URL_WITH_PASSWORD=5
+GITHUB_TOKEN=0
+OPENAI_OR_GENERIC_SK=0
+JWT_LIKE_LONG=0
+history_database_url_total=5
+history_database_url_placeholder_or_template=5
+history_database_url_real_like_candidates=0
+== tracked/committed environment or private-key files ==
+.env.example
+.env.lan
+== files ever added to history matching env/private patterns ==
+.env.example
+.env.lan
+== publication ignore coverage ==
+ignored: .env
+ignored: .env.mode-b
+ignored: .local/fixtures.json
+ignored: .local/lan-certs/server.key
+ignored: .local/hr-grants/example.json
+dockerignore_excludes: .env
+dockerignore_excludes: .local
+dockerignore_excludes: .git
+dockerignore_excludes: node_modules
+dockerignore_excludes: docs
+== public candidate build pattern scan ==
+loopback_refs=0
+private_ip_refs=0
+postgres_url_refs=0
+== limits ==
+pattern-based only; no entropy analysis; history scan excludes binary/PDF internals; no push or external secret service used

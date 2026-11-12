@@ -1,0 +1,6 @@
+api_host_present=1
+ws_host_present=1
+loopback_refs=0
+private_ip_refs=0
+database_url_refs=0
+grant_like_refs=0

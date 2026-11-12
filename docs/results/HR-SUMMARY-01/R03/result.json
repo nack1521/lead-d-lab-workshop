@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "task_id": "HR-SUMMARY-01",
+  "run_id": "R03",
+  "reported_at": "2026-11-12T08:09:23+07:00",
+  "producer": "DeepSeek Harness (single active coding writer)",
+  "authoring_tool": "DeepSeek Harness",
+  "model": "deepseek-v4.1-flash-1017",
+  "source_kind": "direct",
+  "baseline_commit": "c707d6b",
+  "observed_head": "9a909bf",
+  "branch": "main",
+  "work_kind": "hr_qa_closeout",
+  "status": "READY_FOR_REVIEW",
+  "summary": "Closed HR R02 QA items: singleton poll accepted-response API/DB/view with exact counts/share/n/base/unanswered/coverage and rating-unanswered counterpart plus an explicitly asserted rendered small-sample caveat; overlap smoke compares the correlated facilitator frame's own rating/poll buckets and totals with independent DB buckets at committed revision 89; cleanup-aware finalizeRun derives final ok/failures/exit after socket settlement (unsettled socket nonzero, controlled cases). Native 137/0; Mode B 137/0 with 9 declared skips; typecheck/builds 0. Browser/physical Safari NOT RUN.",
+  "detail_path": "docs/results/HR-SUMMARY-01/R03/result.md",
+  "findings": [
+    {"finding_id": "HR-QA-02-singleton-poll", "status": "FIXED", "evidence_paths": ["tests/hr-summary.test.ts", "tests/hr-views.test.tsx", "docs/results/HR-SUMMARY-01/R03/evidence/hr-targeted-green.log"]},
+    {"finding_id": "HR-QA-03-fresh-frame-buckets", "status": "FIXED", "evidence_paths": ["scripts/hr-smoke-overlap.ts", "docs/results/HR-SUMMARY-01/R03/evidence/hr-overlap-30.log"]},
+    {"finding_id": "R02-HR-QA-03-A-cleanup-false-green", "status": "FIXED", "evidence_paths": ["scripts/hr-smoke-support.ts", "tests/hr-smoke-support.test.ts", "docs/results/HR-SUMMARY-01/R03/evidence/hr-smoke-support-red.log", "docs/results/HR-SUMMARY-01/R03/evidence/hr-smoke-support-green.log"]}
+  ],
+  "cases": [
+    {"case_id": "HR-01", "status": "PASS", "evidence_paths": ["docs/results/HR-SUMMARY-01/R03/evidence/hr-overlap-30.log"]},
+    {"case_id": "HR-02", "status": "PASS", "evidence_paths": ["tests/hr-summary.test.ts", "tests/hr-views.test.tsx"]},
+    {"case_id": "HR-03", "status": "PASS", "evidence_paths": ["tests/hr-summary.test.ts"]},
+    {"case_id": "HR-04", "status": "PASS", "evidence_paths": ["tests/hr-summary.test.ts", "tests/hr-views.test.tsx"]},
+    {"case_id": "HR-05", "status": "PARTIAL", "limitations": "Authenticated browser/mobile/keyboard/physical Safari NOT RUN."},
+    {"case_id": "HR-06", "status": "PASS", "evidence_paths": ["docs/results/HR-SUMMARY-01/R03/evidence/mode-a-regression.log", "docs/results/HR-SUMMARY-01/R03/evidence/mode-b-regression.log"], "limitations": "Mode B 9 declared skips."},
+    {"case_id": "HR-07", "status": "PASS", "evidence_paths": ["docs/results/HR-SUMMARY-01/R03/evidence/hr-overlap-30.log"], "limitations": "Single-machine synthetic paced run; not 30 phones/SLA."}
+  ],
+  "commands": [
+    {"command": "bun test tests/hr-smoke-support.test.ts (pre-helper)", "exit_code": 1, "outcome": "RED"},
+    {"command": "bun test tests/hr-summary.test.ts tests/hr-views.test.tsx tests/hr-smoke-support.test.ts", "exit_code": 0, "outcome": "16 pass"},
+    {"command": "bun scripts/hr-smoke-overlap.ts 30 30 27", "exit_code": 0, "outcome": "ok:true; cleanup settled; frame buckets/totals match DB; revision 89"},
+    {"command": "bun test tests", "exit_code": 0, "outcome": "137 pass / 0 fail"},
+    {"command": "tests/run-in-docker.sh c1b_default", "exit_code": 0, "outcome": "137 tests, 0 fail, 9 declared skips"},
+    {"command": "bun x tsc --noEmit / build:web / build:web:lan", "exit_code": 0, "outcome": "all pass"}
+  ],
+  "blockers": [],
+  "not_verified": ["authenticated browser/mobile/keyboard and physical Safari", "30 real devices/SLA", "independent QA/human acceptance"],
+  "next_gate": "User-assisted browser/phone trial and independent review; no deployment/push.",
+  "published": false
+}

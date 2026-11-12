@@ -1,0 +1,8 @@
+== local API + SPA deep links (default build) ==
+api_health HTTP 200
+api_ready HTTP 200
+api_root HTTP 404 type=application/json; charset=utf-8
+web/join HTTP 200
+web/room HTTP 200
+web/facilitator HTTP 200
+web/hr HTTP 200

@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "task_id": "RELEASE-PREP-01",
+  "run_id": "R01",
+  "reported_at": "2026-11-12T08:10:29+07:00",
+  "producer": "DeepSeek Harness (single active coding writer)",
+  "authoring_tool": "DeepSeek Harness",
+  "model": "deepseek-v4.1-flash-1017",
+  "source_kind": "direct",
+  "baseline_commit": "13ff83e",
+  "observed_head": "9a909bf",
+  "branch": "main",
+  "work_kind": "release_preparation_local",
+  "status": "READY_FOR_REVIEW",
+  "summary": "Local deployment artifacts/runbook prepared and verified: dedicated API-only Dockerfile.api with railway.json dockerfilePath and /ready healthcheck (root Dockerfile's web stage cannot be auto-detected as the API), cloud PORT/0.0.0.0 bind with local defaults preserved, additive migrations + DB-backed readiness, exact origins/WSS docs, Cloudflare Pages output/deep-link notes, safe public Vite env with reserved hosts (public bundle has no loopback/private IP/DB/token literals), owner-operated evaluator access and rollback. API image built/run locally (PORT=8080): /health,/ready 200, API route 401, migrations applied. Public-safety pattern audit: 0 real-like credentials (5 placeholder DB-URL lines), only public env files tracked. Native 137/0; Mode B 137/0 with 9 declared skips; typecheck/builds 0. Cloud behaviour, accounts, publication and physical devices are NOT RUN.",
+  "detail_path": "docs/results/RELEASE-PREP-01/R01/result.md",
+  "deliverables": ["Dockerfile.api", "railway.json", ".env.deploy.example", "docs/deployment/RELEASE-PREP-01.md", "scripts/audit-public-safety.sh", "apps/api/src/env.ts PORT support", "apps/api/src/app.ts API root 404"],
+  "cases": [
+    {"case_id": "RP-01", "status": "PASS", "evidence_paths": ["Dockerfile.api", "railway.json", "docs/deployment/RELEASE-PREP-01.md"]},
+    {"case_id": "RP-02", "status": "PASS", "evidence_paths": ["tests/env-cloud.test.ts", "docs/results/RELEASE-PREP-01/R01/evidence/env-cloud-green.log"]},
+    {"case_id": "RP-03", "status": "PASS", "evidence_paths": ["docs/results/RELEASE-PREP-01/R01/evidence/api-image-runtime.log"]},
+    {"case_id": "RP-04", "status": "PASS", "evidence_paths": ["docs/results/RELEASE-PREP-01/R01/evidence/api-image-runtime.log", "tests/facilitator-ws.test.ts"]},
+    {"case_id": "RP-05", "status": "PASS", "evidence_paths": ["docs/results/RELEASE-PREP-01/R01/evidence/build-public.log", "docs/results/RELEASE-PREP-01/R01/evidence/public-build-checks.log"]},
+    {"case_id": "RP-06", "status": "PASS", "evidence_paths": ["docs/results/RELEASE-PREP-01/R01/evidence/local-services.log"]},
+    {"case_id": "RP-07", "status": "PASS", "evidence_paths": ["docs/results/RELEASE-PREP-01/R01/evidence/public-safety-audit.log"], "limitations": "Pattern-based audit only; no gitleaks/trufflehog, no entropy analysis."},
+    {"case_id": "RP-08", "status": "PASS", "evidence_paths": ["docs/results/RELEASE-PREP-01/R01/evidence/mode-a-regression.log", "docs/results/RELEASE-PREP-01/R01/evidence/mode-b-regression.log", "docs/results/RELEASE-PREP-01/R01/evidence/typecheck.log", "docs/results/RELEASE-PREP-01/R01/evidence/build-default-web.log", "docs/results/RELEASE-PREP-01/R01/evidence/build-lan-web.log"], "limitations": "Mode B 9 declared skips."}
+  ],
+  "commands": [
+    {"command": "bun test tests/env-cloud.test.ts (pre-fix)", "exit_code": 1, "outcome": "RED: PORT/bind and invalid PORT"},
+    {"command": "bun test tests/env-cloud.test.ts", "exit_code": 0, "outcome": "4 pass"},
+    {"command": "DOCKER_BUILDKIT=0 docker build -f Dockerfile.api", "exit_code": 0, "outcome": "image built (default buildx blocked by sandbox)"},
+    {"command": "docker run … PORT=8080", "exit_code": 0, "outcome": "/health 200, /ready 200, API route 401; listening 0.0.0.0:8080"},
+    {"command": "VITE_*=.invalid bun run build:web", "exit_code": 0, "outcome": "public hosts present; 0 loopback/private-IP/DB/token refs"},
+    {"command": "sh scripts/audit-public-safety.sh", "exit_code": 0, "outcome": "0 real-like credentials; 5 placeholder DB-URL lines"},
+    {"command": "bun test tests", "exit_code": 0, "outcome": "137 pass / 0 fail"},
+    {"command": "tests/run-in-docker.sh c1b_default", "exit_code": 0, "outcome": "137 tests, 0 fail, 9 declared skips"},
+    {"command": "bun x tsc --noEmit / build:web / build:web:lan", "exit_code": 0, "outcome": "all pass"}
+  ],
+  "blockers": ["Cloud accounts/cost/region/publication require explicit owner approval; cloud behaviour NOT RUN"],
+  "not_verified": ["accounts/resources/region/cost", "Railway/Pages deployment, real HTTPS/WSS, provider PORT/healthcheck/SPA behaviour", "custom domain/push/public history decision", "physical Safari/phone and 30-device load"],
+  "next_gate": "Owner reviews local artifacts/runbook and decides accounts/cost/region/publication; then deploy manually and re-run the smoke checklist in cloud.",
+  "published": false
+}

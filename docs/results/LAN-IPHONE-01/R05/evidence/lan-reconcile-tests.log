@@ -1,0 +1,12 @@
+bun test v1.4.4 (38afee6c8)
+
+tests/lan-verifier-reconcile.test.ts:
+(pass) LAN verifier possibly-committed control reconciliation > a committed control with a discarded acknowledgement is detected and exactly restored [14.46ms]
+(pass) LAN verifier possibly-committed control reconciliation > a rejected control that commits nothing leaves the fixture unchanged and needs no restore [5.26ms]
+(pass) LAN verifier possibly-committed control reconciliation > lifecycle divergence rules cover status, active question, receiving and closed_at [0.05ms]
+(pass) LAN verifier possibly-committed control reconciliation > an unknown session yields no lifecycle (verifier fails closed rather than restoring blindly) [0.38ms]
+
+ 4 pass
+ 0 fail
+ 19 expect() calls
+Ran 4 tests across 1 file. [177.00ms]

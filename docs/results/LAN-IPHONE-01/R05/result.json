@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "task_id": "LAN-IPHONE-01",
+  "run_id": "R05",
+  "reported_at": "2026-11-12T08:09:49+07:00",
+  "producer": "DeepSeek Harness (single active coding writer)",
+  "authoring_tool": "DeepSeek Harness",
+  "model": "deepseek-v4.1-flash-1017",
+  "source_kind": "direct",
+  "baseline_commit": "13ff83e",
+  "observed_head": "9a909bf",
+  "branch": "main",
+  "work_kind": "lan_verifier_lost_ack_reconcile",
+  "status": "READY_FOR_REVIEW",
+  "summary": "R04-QA-01 fixed narrowly: the LAN verifier reconciles authoritative session/question lifecycle after dispatched controls instead of trusting acknowledgements, restores an exactly-supported prior lifecycle when divergence exists (including a control committed with a lost/discarded ack), leaves genuinely unchanged fixtures untouched (no reopen/revision bump) and fails closed on unavailable state. Controlled real-PostgreSQL tests 4/4 pass on isolated synthetic fixtures; live verifier was not run on known fixtures. Native 137/0; Mode B 137/0 with 9 declared skips; typecheck/builds 0. Physical iPhone remains NOT RUN; C1/CA/proxy dispositions preserved.",
+  "detail_path": "docs/results/LAN-IPHONE-01/R05/result.md",
+  "findings": [
+    {"finding_id": "R04-QA-01", "status": "FIXED", "evidence_paths": ["lan/verify.ts", "lan/lifecycle-support.ts", "tests/lan-verifier-reconcile.test.ts", "docs/results/LAN-IPHONE-01/R05/evidence/lan-reconcile-tests.log"]}
+  ],
+  "commands": [
+    {"command": "bun test tests/lan-verifier-reconcile.test.ts", "exit_code": 0, "outcome": "4 pass"},
+    {"command": "bun test tests", "exit_code": 0, "outcome": "137 pass / 0 fail"},
+    {"command": "tests/run-in-docker.sh c1b_default", "exit_code": 0, "outcome": "137 tests, 0 fail, 9 declared skips"},
+    {"command": "bun x tsc --noEmit", "exit_code": 0, "outcome": "no type errors"}
+  ],
+  "blockers": [],
+  "not_verified": ["live LAN verifier run (deliberately not run on known fixtures)", "physical iPhone/Safari and CA/device trust", "independent QA"],
+  "next_gate": "Independent review plus user device/trust action for LAN; no LAN/C1 rewrite.",
+  "published": false
+}

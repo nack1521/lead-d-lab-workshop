@@ -1,0 +1,28 @@
+bun test v1.4.4 (38afee6c8)
+
+tests/hr-smoke-support.test.ts:
+(pass) HR-QA-03 cleanup-aware finalization > normal cleanup yields ok with the cleanup verdict included [1.25ms]
+(pass) HR-QA-03 cleanup-aware finalization > an unsettled socket makes the final result nonzero even when earlier checks passed [0.27ms]
+(pass) HR-QA-03 cleanup-aware finalization > an earlier acceptance failure is retained and combined with a good cleanup [0.03ms]
+
+tests/hr-summary.test.ts:
+(pass) HR-02 empty / partial aggregates with explicit denominators > an ended session with zero responses is an honest empty summary (no zero mean) [20.85ms]
+(pass) HR-02 empty / partial aggregates with explicit denominators > partial answers keep per-question n/base/coverage distinct (rating n=2, poll n=2 of 3 joined) [46.55ms]
+(pass) HR-QA-02 actual singleton n=1 accepted-response case > one accepted rating response yields exact n=1/base/counts/mean and an unanswered poll [12.99ms]
+(pass) HR-QA-02 actual singleton poll response (rating unanswered counterpart) > one accepted poll response yields exact option count/share and rating remains empty [13.96ms]
+(pass) HR-01 persisted summary after facilitator control, answers and end > HR summary equals independent DB counts and survives reload [44.13ms]
+(pass) HR-03 authorization matrix and read-only privacy > only an unexpired, unrevoked session-scoped HR grant can read; HR cannot mutate [38.84ms]
+(pass) HR-03 authorization matrix and read-only privacy > not-ended and unauthorized states are distinct from empty [4.07ms]
+
+tests/hr-views.test.tsx:
+(pass) HR-02/HR-05 HR view states, denominators and caveats > ready view shows per-question n, denominator, coverage, distributions, mean and caveats [7.03ms]
+(pass) HR-02/HR-05 HR view states, denominators and caveats > zero-response session shows an honest empty state, not a zero mean [0.68ms]
+(pass) HR-02/HR-05 HR view states, denominators and caveats > not-ended, unauthorized, loading and error states stay distinct [0.63ms]
+(pass) HR-QA-01/02 known-zero copy and actual n=1 view > a known zero joined base is shown as zero participants, not as an unknown denominator [0.14ms]
+(pass) HR-QA-01/02 known-zero copy and actual n=1 view > n=1 renders the mean and 100% share with explicit n and caveat [0.23ms]
+(pass) HR-QA-02 singleton poll view and rendered small-sample caveat > n=1 poll shows its 100% share and the rendered caveat is asserted [0.60ms]
+
+ 16 pass
+ 0 fail
+ 188 expect() calls
+Ran 16 tests across 3 files. [460.00ms]

@@ -1,0 +1,47 @@
+bun test v1.4.4 (38afee6c8)
+
+tests/cors-preflight.test.ts:
+31 |   test('PATCH preflight from a separate Pages-like origin advertises the required methods and headers', async () => {
+32 |     const response = await preflight('PATCH', PAGES_ORIGIN);
+33 |     expect(response.status).toBe(204);
+34 |     expect(response.headers.get('access-control-allow-origin')).toBe(PAGES_ORIGIN);
+35 |     const methods = (response.headers.get('access-control-allow-methods') ?? '').split(',').map((value) => value.trim());
+36 |     expect(methods).toEqual(expect.arrayContaining(['GET', 'POST', 'OPTIONS', 'PATCH', 'DELETE']));
+                         ^
+error: expect(received).toEqual(expected)
+
+- ExpectArrayContaining {}
++ [
++   "GET",
++   "POST",
++   "OPTIONS",
++ ]
+
+- Expected  - 1
++ Received  + 5
+
+      at <anonymous> (/Users/aiink/Nack/Lead+D-Lab/tests/cors-preflight.test.ts:36:21)
+(fail) WB2-CLOUD-CORS-01 real-server preflight for builder mutations > PATCH preflight from a separate Pages-like origin advertises the required methods and headers [9.89ms]
+42 | 
+43 |   test('DELETE preflight from a separate Pages-like origin advertises DELETE', async () => {
+44 |     const response = await preflight('DELETE', PAGES_ORIGIN);
+45 |     expect(response.status).toBe(204);
+46 |     expect(response.headers.get('access-control-allow-origin')).toBe(PAGES_ORIGIN);
+47 |     expect(response.headers.get('access-control-allow-methods') ?? '').toContain('DELETE');
+                                                                            ^
+error: expect(received).toContain(expected)
+
+Expected to contain: "DELETE"
+Received: "GET, POST, OPTIONS"
+
+      at <anonymous> (/Users/aiink/Nack/Lead+D-Lab/tests/cors-preflight.test.ts:47:72)
+(fail) WB2-CLOUD-CORS-01 real-server preflight for builder mutations > DELETE preflight from a separate Pages-like origin advertises DELETE [0.77ms]
+(pass) WB2-CLOUD-CORS-01 real-server preflight for builder mutations > denied and null origins remain refused without CORS headers [0.68ms]
+(pass) WB2-CLOUD-CORS-01 real-server preflight for builder mutations > credential-free PATCH/DELETE follow-ups resolve with readable 401 JSON, not a transport failure [7.37ms]
+(pass) authenticated builder PATCH/DELETE persistence and guards > authenticated PATCH persists a draft label and DELETE removes an unanswered question [25.95ms]
+(pass) authenticated builder PATCH/DELETE persistence and guards > active, answered and ended question guards plus HR read-only remain enforced [21.40ms]
+
+ 4 pass
+ 2 fail
+ 36 expect() calls
+Ran 6 tests across 1 file. [420.00ms]

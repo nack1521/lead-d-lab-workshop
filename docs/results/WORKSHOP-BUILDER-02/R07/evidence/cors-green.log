@@ -1,0 +1,14 @@
+bun test v1.4.4 (38afee6c8)
+
+tests/cors-preflight.test.ts:
+(pass) WB2-CLOUD-CORS-01 real-server preflight for builder mutations > PATCH preflight from a separate Pages-like origin advertises the required methods and headers [0.85ms]
+(pass) WB2-CLOUD-CORS-01 real-server preflight for builder mutations > DELETE preflight from a separate Pages-like origin advertises DELETE [0.13ms]
+(pass) WB2-CLOUD-CORS-01 real-server preflight for builder mutations > denied and null origins remain refused without CORS headers [0.47ms]
+(pass) WB2-CLOUD-CORS-01 real-server preflight for builder mutations > credential-free PATCH/DELETE follow-ups resolve with readable 401 JSON, not a transport failure [6.33ms]
+(pass) authenticated builder PATCH/DELETE persistence and guards > authenticated PATCH persists a draft label and DELETE removes an unanswered question [22.05ms]
+(pass) authenticated builder PATCH/DELETE persistence and guards > active, answered and ended question guards plus HR read-only remain enforced [24.60ms]
+
+ 6 pass
+ 0 fail
+ 39 expect() calls
+Ran 6 tests across 1 file. [297.00ms]

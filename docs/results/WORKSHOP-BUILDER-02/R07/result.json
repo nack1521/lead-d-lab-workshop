@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "task_id": "WORKSHOP-BUILDER-02",
+  "run_id": "R07",
+  "reported_at": "2026-11-12T22:44:34+07:00",
+  "producer": "DeepSeek Harness (sole coding writer)",
+  "authoring_tool": "DeepSeek Harness",
+  "model": "deepseek-v4.1-flash-1017",
+  "source_kind": "direct",
+  "baseline_commit": "e3bb136",
+  "observed_head": "0fd4de6",
+  "branch": "main",
+  "work_kind": "builder_cors_hotfix",
+  "status": "READY_FOR_REVIEW",
+  "summary": "Fixed WB2-CLOUD-CORS-01 narrowly: the real Bun.serve OPTIONS handler now explicitly advertises GET, POST, PATCH, DELETE, OPTIONS (was GET, POST, OPTIONS), preserving exact-origin allowlist, authorization/content-type headers, max-age and Vary. Added fail-first real-server preflight regressions for Pages-like PATCH/DELETE, denied/null origins, credential-free follow-ups returning readable 401 JSON, authenticated PATCH persistence, DELETE persistence (GET+DB), and preserved active/answered/ended/HR guards on isolated test DBs. Targeted 6/6; full suite 177 pass/0 skip/0 fail; typecheck 0; API image builds successfully. Production/browser verification and deployment remain NOT RUN; no content deletion, reset or push/deploy.",
+  "detail_path": "docs/results/WORKSHOP-BUILDER-02/R07/result.md",
+  "finding_ids": ["WB2-CLOUD-CORS-01"],
+  "cases": [
+    {"case_id": "WB2-R07-01", "status": "PASS", "evidence_paths": ["apps/api/src/server.ts", "tests/cors-preflight.test.ts", "docs/results/WORKSHOP-BUILDER-02/R07/evidence/cors-green.log"]},
+    {"case_id": "WB2-R07-02", "status": "PASS", "evidence_paths": ["docs/results/WORKSHOP-BUILDER-02/R07/evidence/cors-red.log", "docs/results/WORKSHOP-BUILDER-02/R07/evidence/cors-green.log"]},
+    {"case_id": "WB2-R07-03", "status": "PASS", "evidence_paths": ["tests/cors-preflight.test.ts"]},
+    {"case_id": "WB2-R07-04", "status": "PASS", "evidence_paths": ["docs/results/WORKSHOP-BUILDER-02/R07/evidence/mode-a-regression.log", "docs/results/WORKSHOP-BUILDER-02/R07/evidence/typecheck.log", "docs/results/WORKSHOP-BUILDER-02/R07/evidence/api-image-build.log"]},
+    {"case_id": "WB2-R07-05", "status": "NOT RUN", "limitations": "Production deployment/cloud OPTIONS recheck and real browser PATCH/DELETE; writer run is local-only."}
+  ],
+  "commands": [
+    {"command": "bun test tests/cors-preflight.test.ts (pre-fix)", "exit_code": 1, "outcome": "RED: PATCH/DELETE preflight missing methods"},
+    {"command": "bun test tests/cors-preflight.test.ts", "exit_code": 0, "outcome": "6 pass / 0 fail"},
+    {"command": "bun test tests", "exit_code": 0, "outcome": "177 pass / 0 skip / 0 fail"},
+    {"command": "bun x tsc --noEmit", "exit_code": 0, "outcome": "no type errors"},
+    {"command": "DOCKER_BUILDKIT=0 docker build -f Dockerfile.api", "exit_code": 0, "outcome": "API image built/tagged"}
+  ],
+  "blockers": [],
+  "not_verified": ["production deployment and cloud OPTIONS recheck", "real Pages browser PATCH/DELETE and legitimate delete on draft question", "coordinator retest after deploy"],
+  "next_gate": "Deploy narrow hotfix under explicit approval; recheck production preflight and browser-origin readable 401; user retests legitimate delete/PATCH while guards hold.",
+  "published": false
+}

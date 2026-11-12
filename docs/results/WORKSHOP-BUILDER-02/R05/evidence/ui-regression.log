@@ -1,0 +1,36 @@
+bun test v1.4.4 (38afee6c8)
+
+tests/web-views.test.tsx:
+(pass) C1-15 English participant UI and stored labels > join instructions use the current English participant entry copy [2.56ms]
+(pass) C1-15 English participant UI and stored labels > rating question keeps its stored label plus English scale and field copy [1.12ms]
+(pass) C1-15 English participant UI and stored labels > a multi-line draft is preserved verbatim in the textarea [0.33ms]
+(pass) C1-15 English participant UI and stored labels > terminal non-save shows English error, draft and fresh attempt actions [0.25ms]
+(pass) C1-15 English participant UI and stored labels > unknown state offers reconcile and never claims the answer was saved [0.19ms]
+(pass) C1-15 English participant UI and stored labels > HTML-like comment and nickname render as escaped text, not markup [0.16ms]
+(pass) C1-15 English participant UI and stored labels > closed question renders read-only and hides submit [0.14ms]
+(pass) C1-15 facilitator view states > live snapshot renders aggregate counts without nickname or comment [0.60ms]
+(pass) C1-15 facilitator view states > current facilitator route source carries no Thai stale-copy claim [0.17ms]
+
+tests/builder.test.ts:
+(pass) WORKSHOP-BUILDER-02 admin authoring and real data flow > wrong passphrase is rejected; valid admin and HR scopes are issued [2.69ms]
+(pass) WORKSHOP-BUILDER-02 admin authoring and real data flow > creates a persistent room and draft questions of all three types [13.15ms]
+(pass) WORKSHOP-BUILDER-02 admin authoring and real data flow > rejects invalid input and supports reorder while no answers exist [6.48ms]
+(pass) WORKSHOP-BUILDER-02 admin authoring and real data flow > participant joins only an open room, answers, gets saved acknowledgement [21.77ms]
+(pass) WORKSHOP-BUILDER-02 admin authoring and real data flow > facilitator live snapshot matches DB and report for score [11.22ms]
+(pass) WORKSHOP-BUILDER-02 admin authoring and real data flow > answer-after-close is rejected and questions lock after answers [10.14ms]
+(pass) WORKSHOP-BUILDER-02 admin authoring and real data flow > choice and text answers, latest five + stable pagination [56.83ms]
+(pass) WORKSHOP-BUILDER-02 admin authoring and real data flow > HR scope is read-only at the server boundary [2.53ms]
+(pass) WORKSHOP-BUILDER-02 admin authoring and real data flow > ending the room persists answers and blocks further mutation [4.57ms]
+
+tests/hr-views.test.tsx:
+(pass) HR-02/HR-05 HR view states, denominators and caveats > current HR route uses the English builder report surface [0.17ms]
+(pass) HR-02/HR-05 HR view states, denominators and caveats > zero-response session shows an honest empty state, not a zero mean [4.80ms]
+(pass) HR-02/HR-05 HR view states, denominators and caveats > not-ended, unauthorized, loading and error states stay distinct [0.41ms]
+(pass) HR-QA-01/02 known-zero copy and actual n=1 view > a known zero joined base is shown as zero participants, not as an unknown denominator [0.24ms]
+(pass) HR-QA-01/02 known-zero copy and actual n=1 view > n=1 renders the mean and 100% share with explicit n and caveat [0.99ms]
+(pass) HR-QA-02 singleton poll view and rendered small-sample caveat > n=1 poll shows its 100% share and the rendered caveat is asserted [0.76ms]
+
+ 24 pass
+ 0 fail
+ 150 expect() calls
+Ran 24 tests across 3 files. [365.00ms]

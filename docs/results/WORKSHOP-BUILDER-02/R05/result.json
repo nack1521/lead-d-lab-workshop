@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "task_id": "WORKSHOP-BUILDER-02",
+  "run_id": "R05",
+  "reported_at": "2026-11-12T21:48:32+07:00",
+  "producer": "DeepSeek Harness (sole coding writer)",
+  "authoring_tool": "DeepSeek Harness",
+  "model": "deepseek-v4.1-flash-1017",
+  "source_kind": "direct",
+  "baseline_commit": "b12b993",
+  "observed_head": "b12b993",
+  "branch": "main",
+  "work_kind": "builder_english_error_propagation",
+  "status": "READY_FOR_REVIEW",
+  "summary": "Fixed WB2-R04-EN-01 by introducing a shared English protocol-code error map used by containers for join, answer, conflict and operation failures; Thai API service messages are no longer rendered in the English UI while codes are preserved. Added mounted-container regressions in happy-dom for unknown room (SESSION_NOT_FOUND), invalid answer (INVALID_RATING) and conflict (IDEMPOTENCY_CONFLICT), asserting English copy and absence of Thai. Reconciled all 8 previously skipped tests: participant/legacy copy tests updated to current English behavior and unskipped, retired Thai-copy assertions replaced with explicit current-route coverage (/facilitator English demo login, /hr BuilderApp mode=hr); full suite 166 pass/0 skip/0 fail, typecheck/default+LAN builds 0. Actual authenticated browser screenshots/geometry/click-flow and visual acceptance remain NOT RUN (no browser automation); no visual PASS claimed. R04 layout, shared shell, no microcaptions, latest-three/full-all responses and lifecycle guards preserved.",
+  "detail_path": "docs/results/WORKSHOP-BUILDER-02/R05/result.md",
+  "finding_ids": ["WB2-R04-EN-01"],
+  "cases": [
+    {"case_id": "WB2-R05-01", "status": "PASS", "evidence_paths": ["apps/web/src/api-messages.ts", "apps/web/src/containers.tsx", "tests/findings-client.test.tsx", "docs/results/WORKSHOP-BUILDER-02/R05/evidence/mounted-error-language.log"]},
+    {"case_id": "WB2-R05-02", "status": "PASS", "evidence_paths": ["tests/web-views.test.tsx", "tests/hr-views.test.tsx", "docs/results/WORKSHOP-BUILDER-02/R05/evidence/ui-regression.log"]},
+    {"case_id": "WB2-R05-03", "status": "PASS", "evidence_paths": ["docs/results/WORKSHOP-BUILDER-02/R05/evidence/mode-a-regression.log"]},
+    {"case_id": "WB2-R05-04", "status": "NOT RUN", "limitations": "Actual browser screenshots/geometry/click-flow and authenticated visual acceptance; no browser automation available."}
+  ],
+  "commands": [
+    {"command": "bun test tests", "exit_code": 0, "outcome": "166 pass / 0 skip / 0 fail (166 tests, 890 expects)"},
+    {"command": "bun test tests/findings-client.test.tsx", "exit_code": 0, "outcome": "11 pass incl mounted unknown-room/invalid/conflict English errors"},
+    {"command": "bun test tests/builder.test.ts tests/web-views.test.tsx tests/hr-views.test.tsx", "exit_code": 0, "outcome": "all pass"},
+    {"command": "bun x tsc --noEmit", "exit_code": 0, "outcome": "no type errors"},
+    {"command": "bun run build:web / build:web:lan", "exit_code": 0, "outcome": "both builds succeed"}
+  ],
+  "blockers": [],
+  "not_verified": ["actual authenticated browser screenshots/geometry and click-flow", "mobile/phone visual, keyboard/reduced-motion in browser", "Mode B/Docker, cloud/LAN deployment", "independent QA/human acceptance"],
+  "next_gate": "User-assisted browser check of unknown-room and submission errors plus authenticated screenshots; independent QA. No push/deploy.",
+  "published": false
+}

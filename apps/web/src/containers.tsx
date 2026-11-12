@@ -25,6 +25,7 @@ import {
 import { FacilitatorView, HrSummaryView, JoinView, ParticipantView, type HrViewState } from './ui.tsx';
 import { BuilderApp } from './builder.tsx';
 import { resolveJoinAttempt, type JoinAttempt } from './join-attempt.ts';
+import { englishErrorMessage } from './api-messages.ts';
 
 const COMMENT_LIMIT = 500;
 
@@ -314,7 +315,7 @@ function RoomPage() {
           outcome: 'terminal_non_save',
           oldRequestTerminal: false,
           attempt: null,
-          errorMessage: 'คำตอบเดิมถูกบันทึกไว้แล้ว และไม่สามารถเขียนทับได้',
+          errorMessage: 'An existing response is already saved and cannot be overwritten.',
         });
       } else {
         // Unknown: keep the attempt and its immutable payload for reconcile only.
@@ -518,28 +519,15 @@ function HrPage() {
   );
 }
 
-const SERVER_FIELD_MESSAGES: Record<string, string> = {
-  VALIDATION_FAILED: 'Please check the response and try again.',
-  INVALID_RATING: 'Choose a score within the allowed range.',
-  INVALID_OPTION: 'Choose one of the available options.',
-  TYPE_MISMATCH: 'This response type does not match the question.',
-  PAYLOAD_TOO_LARGE: 'Your response is too large.',
-  QUESTION_CLOSED: 'This question is closed.',
-  QUESTION_NOT_ACTIVE: 'This question is not active.',
-  SESSION_ENDED: 'This session has ended.',
-  UNAUTHORIZED: 'You no longer have access to this session.',
-  FORBIDDEN: 'You do not have permission for this action.',
-};
-
 function readFieldMessage(body: unknown): string | null {
   const record = body && typeof body === 'object' ? (body as Record<string, unknown>) : null;
   if (!record) return null;
   const code = typeof record.code === 'string' ? record.code : null;
-  if (code && SERVER_FIELD_MESSAGES[code]) return SERVER_FIELD_MESSAGES[code];
-  return typeof record.message === 'string' ? record.message : null;
+  if (code) return englishErrorMessage(record, '');
+  return typeof record.message === 'string' && /^[\x20-\x7E]+$/.test(record.message) ? record.message : null;
 }
 
 function readErrorMessage(err: unknown, fallback: string): string {
-  if (err instanceof ApiError) return readFieldMessage(err.body) ?? fallback;
+  if (err instanceof ApiError) return englishErrorMessage(err.body, fallback);
   return fallback;
 }

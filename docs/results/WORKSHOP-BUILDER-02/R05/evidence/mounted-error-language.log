@@ -1,0 +1,19 @@
+bun test v1.4.4 (38afee6c8)
+
+tests/findings-client.test.tsx:
+(pass) C1-RV-03 lost join acknowledgement keeps one logical join > an uncertain join reuses the same operation key on unchanged retry [471.95ms]
+(pass) C1-RV-03 lost join acknowledgement keeps one logical join > a nickname-only change is still the same join; a different room code is a new join [481.38ms]
+(pass) C1-RV-05 outcome and draft state follow the authoritative question > a saved answer does not carry into the next unanswered question [465.96ms]
+(pass) C1-RV-05 outcome and draft state follow the authoritative question > an unresolved earlier attempt stays with the old question during a transition [467.32ms]
+(pass) R02-QA-04 an uncertain join keeps its original payload and shows the stored label > editing the nickname does not change the pending payload or the displayed identity [441.75ms]
+(pass) R02-QA-05 equal-revision reconciliation in the participant container > an equal-revision push carrying the own accepted answer is applied [447.98ms]
+(pass) C1-RV-04 authoritative snapshots and truthful Live > a delayed older HTTP response cannot overwrite newer WebSocket state [466.68ms]
+(pass) C1-RV-04 authoritative snapshots and truthful Live > current /facilitator route renders the English demo login, not the retired token form [423.14ms]
+(pass) C1-RV-04 authoritative snapshots and truthful Live > an unknown room code renders an English API error, never Thai service copy [432.62ms]
+(pass) C1-RV-04 authoritative snapshots and truthful Live > an invalid answer renders the English protocol-code message, not the Thai server message [452.27ms]
+(pass) C1-RV-04 authoritative snapshots and truthful Live > a conflicting response renders the English conflict message [455.23ms]
+
+ 11 pass
+ 0 fail
+ 47 expect() calls
+Ran 11 tests across 1 file. [5.40s]

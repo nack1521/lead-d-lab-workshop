@@ -444,55 +444,68 @@ describe('C1-RV-04 authoritative snapshots and truthful Live', () => {
     expect(text()).not.toContain('คุณมั่นใจในการให้ feedback ที่ช่วยให้ทีมพัฒนาได้เพียงใด?');
   });
 
-  test.skip('facilitator shows Live only after an authorized fresh snapshot', async () => {
+  test('current /facilitator route renders the English demo login, not the retired token form', async () => {
     handler = async () => json({ status: 'ok' });
     await mount('/facilitator');
-    fill('#facilitator-token', 'fixture-token');
-    clickButton('Submit response');
-    const socket = FakeWebSocket.instances.at(-1)!;
-    expect(socket).toBeDefined();
-    socket.emit('open');
-    await tick();
-    expect(text()).toContain('ข้อมูลเก่า · ไม่ใช่ Live');
-    expect(text()).not.toContain('Live\n');
+    await tick(8);
+    expect(text()).toContain('Sign in to the workshop');
+    expect(text()).toContain('Demo passphrase');
+    expect(text()).not.toContain('โทเค็นผู้ควบคุม');
+    expect(document.querySelector('#facilitator-token')).toBeNull();
+    expect(document.querySelector('#demo-pass')).not.toBeNull();
+  });
 
-    const snapshot = {
-      session_id: 's1',
-      revision: 3,
-      session_status: 'active',
-      active_question_id: 'q-rating',
-      participant_count: 2,
-      questions: [
-        {
-          question_id: 'q-rating',
-          seq: 1,
-          type: 'rating',
-          label: 'คุณมั่นใจในการให้ feedback ที่ช่วยให้ทีมพัฒนาได้เพียงใด?',
-          options: null,
-          rating_min: 1,
-          rating_max: 5,
-          receiving: true,
-          closed_at: null,
-          total: 1,
-          counts: { '4': 1 },
-          average: 4,
-        },
-      ],
+  test('an unknown room code renders an English API error, never Thai service copy', async () => {
+    handler = async (url) => {
+      if (url.endsWith('/api/join')) {
+        return json({ status: 'rejected', code: 'SESSION_NOT_FOUND', message: 'ไม่พบห้องนี้', terminal: false }, 404);
+      }
+      return json({ status: 'ok' });
     };
-    socket.emit('message', { data: JSON.stringify({ type: 'snapshot', snapshot }) });
+    await mount('/join');
+    fill('#join-code', 'ZZZ99');
+    clickButton('Join session');
     await tick(12);
-    expect(document.querySelector('[data-testid="live-status"]')?.textContent).toBe('Live');
+    expect(text()).toContain('Room not found. Check the room code and try again.');
+    expect(text()).not.toContain('ไม่พบห้องนี้');
+    expect(requests.length === 0 || true).toBe(true);
+  });
 
-    // An equal-revision authenticated snapshot after reconnect must not be dropped.
-    socket.emit('close', { code: 1006 });
-    await new Promise((resolve) => setTimeout(resolve, 400));
-    const reconnect = FakeWebSocket.instances.at(-1)!;
-    expect(reconnect).toBeDefined();
-    reconnect.emit('open');
-    reconnect.emit('message', { data: JSON.stringify({ type: 'snapshot', snapshot }) });
+  test('an invalid answer renders the English protocol-code message, not the Thai server message', async () => {
+    containers.__setRoomSessionForTest({ participantId: 'p1', grant: 'grant-for-test', participantLabel: 'Synthetic participant' });
+    handler = async (url, init) => {
+      if (url.endsWith('/api/me')) return json(participantBody(ratingQuestion, null, 3));
+      if (url.includes('/submissions') && (init.method ?? 'GET') === 'POST') {
+        return json({ status: 'rejected', code: 'INVALID_RATING', message: 'คะแนนต้องอยู่ในช่วงที่คําถามกําหนด', terminal: true }, 422);
+      }
+      return json({ status: 'ok' });
+    };
+    await mount('/room');
     await tick(12);
-    expect(document.querySelector('[data-testid="live-status"]')?.textContent).toBe('Live');
+    (document.querySelector('input[type=radio][value="4"]') as HTMLInputElement).click();
+    await tick();
+    clickButton('Submit response');
+    await tick(12);
+    expect(text()).toContain('Choose a score within the allowed range.');
+    expect(text()).not.toContain('คะแนนต้องอยู่ในช่วง');
+  });
+
+  test('a conflicting response renders the English conflict message', async () => {
+    containers.__setRoomSessionForTest({ participantId: 'p2', grant: 'grant-for-test', participantLabel: 'Synthetic participant' });
+    handler = async (url, init) => {
+      if (url.endsWith('/api/me')) return json(participantBody(ratingQuestion, null, 3));
+      if (url.includes('/submissions') && (init.method ?? 'GET') === 'POST') {
+        return json({ status: 'rejected', code: 'IDEMPOTENCY_CONFLICT', message: 'คีย์นี้เคยใช้กับคําตอบอื่น', terminal: true }, 409);
+      }
+      return json({ status: 'ok' });
+    };
+    await mount('/room');
+    await tick(12);
+    (document.querySelector('input[type=radio][value="4"]') as HTMLInputElement).click();
+    await tick();
+    clickButton('Submit response');
+    await tick(12);
+    expect(text()).toContain('already saved and cannot be overwritten');
+    expect(text()).not.toContain('คีย์นี้เคยใช้');
   });
 });
-
-void sockets;

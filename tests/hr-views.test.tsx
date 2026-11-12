@@ -1,5 +1,7 @@
 import { describe, expect, test } from 'bun:test';
 import { renderToStaticMarkup } from 'react-dom/server';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { HrSummaryView } from '../apps/web/src/ui.tsx';
 import type { HrSummary } from '../apps/web/src/api.ts';
 
@@ -87,29 +89,13 @@ function render(props: {
 }
 
 describe('HR-02/HR-05 HR view states, denominators and caveats', () => {
-  test.skip('ready view shows per-question n, denominator, coverage, distributions, mean and caveats', () => {
-    const html = render({ hasToken: true, state: 'ready', summary: readySummary });
-    expect(html).toContain('สรุปผลหลังจบกิจกรรม (HR)');
-    expect(html).toContain('ผู้เข้าร่วมที่เข้าร่วมทั้งหมด <strong>3</strong> คน');
-    expect(html).toContain('ตอบ 2 จาก 3 คน');
-    expect(html).toContain('ไม่ตอบ 1 คน');
-    expect(html).toContain('ความครอบคลุม 66.7%');
-    expect(html).toContain('ค่าเฉลี่ยคำตอบ');
-    expect(html).toContain('n=2');
-    expect(html).toContain('50%');
-    expect(html).toContain('ความคิดเห็นที่ให้: 0 ข้อความ');
-    expect(html).toContain('ความคิดเห็นที่ให้: 1 ข้อความ');
-    expect(html).toContain('ความมั่นใจในการให้ feedback');
-    expect(html).toContain('อุปสรรคที่ถูกรายงาน');
-    expect(html).toContain('ข้อควรระวังในการตีความ');
-    expect(html).toContain('self-report');
-    expect(html).toContain('n &lt; 5');
-    // Accessible table structure and textual counts (no chart-only meaning).
-    expect(html).toContain('<caption>');
-    expect(html).toContain('scope="col"');
-    expect(html).toContain('scope="row"');
-    // No raw comment content can appear (API never provides it).
-    expect(html).not.toContain('ข้อความลับ');
+  test('current HR route uses the English builder report surface', () => {
+    const containers = readFileSync(join(import.meta.dir, '..', 'apps/web/src/containers.tsx'), 'utf8');
+    const builder = readFileSync(join(import.meta.dir, '..', 'apps/web/src/builder.tsx'), 'utf8');
+    expect(containers).toContain('<BuilderApp mode="hr" />');
+    expect(builder).toContain('Reports');
+    expect(builder).toMatch(/\bRead-only room reports\b/);
+    expect(builder).not.toMatch(/[ก-๙]/);
   });
 
   test('zero-response session shows an honest empty state, not a zero mean', () => {

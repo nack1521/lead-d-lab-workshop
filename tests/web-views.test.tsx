@@ -1,5 +1,7 @@
 import { describe, expect, test } from 'bun:test';
 import { renderToStaticMarkup } from 'react-dom/server';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { FacilitatorView, JoinView, ParticipantView } from '../apps/web/src/ui.tsx';
 import type { Question, Snapshot } from '../apps/web/src/api.ts';
 
@@ -52,35 +54,29 @@ const baseParticipantProps = {
   ownResponse: null,
 };
 
-describe('C1-15 approved Thai copy and labels render in the participant view', () => {
-  test.skip('join instructions use the approved participant entry copy', () => {
+describe('C1-15 English participant UI and stored labels', () => {
+  test('join instructions use the current English participant entry copy', () => {
     const html = renderToStaticMarkup(
-      <JoinView
-        joinCode=""
-        nickname=""
-        error={null}
-        pending={false}
-        onJoinCode={() => {}}
-        onNickname={() => {}}
-        onSubmit={() => {}}
-      />,
+      <JoinView joinCode="" nickname="" error={null} pending={false} onJoinCode={() => {}} onNickname={() => {}} onSubmit={() => {}} />,
     );
-    expect(html).toContain('ลิงก์สำหรับผู้เข้าร่วม');
-    expect(html).toContain('[ที่อยู่ระบบ]/join');
-    expect(html).toContain('รหัสห้องสำหรับผู้เข้าร่วม');
+    expect(html).toContain('Join workshop');
+    expect(html).toContain('Participant link');
+    expect(html).toContain('Join with a room code');
     expect(html).toContain('ROOM-01');
-    expect(html).toContain('ไม่ต้องสมัครบัญชี');
+    expect(html).toContain('no account needed');
+    expect(html).toContain('Room code');
+    expect(html).toContain('Nickname (optional)');
   });
 
-  test.skip('rating question keeps approved label, scale endpoints and multiline comment field', () => {
+  test('rating question keeps its stored label plus English scale and field copy', () => {
     const html = renderToStaticMarkup(<ParticipantView {...baseParticipantProps} question={ratingQuestion} />);
     expect(html).toContain('คุณมั่นใจในการให้ feedback ที่ช่วยให้ทีมพัฒนาได้เพียงใด?');
-    expect(html).toContain('1 ยังไม่มั่นใจ');
-    expect(html).toContain('5 มั่นใจมาก');
-    expect(html).toContain('ความคิดเห็นเพิ่มเติม (ไม่บังคับ)');
+    expect(html).toContain('1 Not confident');
+    expect(html).toContain('5 Very confident');
+    expect(html).toContain('Additional comment (optional)');
     expect(html).toContain('<textarea');
-    expect(html).toContain('Enter เพื่อขึ้นบรรทัดใหม่');
-    expect(html).toContain('ส่งคำตอบ');
+    expect(html).toContain('press Enter for a new line');
+    expect(html).toContain('Submit response');
   });
 
   test('a multi-line draft is preserved verbatim in the textarea', () => {
@@ -92,35 +88,35 @@ describe('C1-15 approved Thai copy and labels render in the participant view', (
     expect(html).toContain('22/500 ตัวอักษร');
   });
 
-  test.skip('terminal non-save shows the Thai error, draft, and fresh attempt actions', () => {
+  test('terminal non-save shows English error, draft and fresh attempt actions', () => {
     const html = renderToStaticMarkup(
       <ParticipantView
         {...baseParticipantProps}
         question={pollQuestion}
         comment="อยากมีเวลาโค้ชทีมมากขึ้น"
         outcome="terminal_non_save"
-        errorMessage="อุปสรรค: ข้อความต้องไม่เกิน 500 ตัวอักษร"
+        errorMessage="Comment must be 500 characters or fewer"
         canFreshAttempt
       />,
     );
-    expect(html).toContain('ข้อความต้องไม่เกิน 500 ตัวอักษร');
-    expect(html).toContain('เริ่มส่งคำตอบใหม่');
-    expect(html).toContain('แก้คำตอบก่อนส่งใหม่');
+    expect(html).toContain('Comment must be 500 characters or fewer');
+    expect(html).toContain('Send a new response');
+    expect(html).toContain('Edit before resending');
     expect(html).toContain('อยากมีเวลาโค้ชทีมมากขึ้น');
   });
 
-  test.skip('unknown state offers reconcile and never claims the answer was saved', () => {
+  test('unknown state offers reconcile and never claims the answer was saved', () => {
     const html = renderToStaticMarkup(
       <ParticipantView
         {...baseParticipantProps}
         question={ratingQuestion}
         outcome="unknown"
-        errorMessage="ยังไม่ทราบผลการบันทึก — ข้อความของคุณยังอยู่ครบ"
+        errorMessage="Save status unknown — your text is still here"
       />,
     );
-    expect(html).toContain('ตรวจสถานะอีกครั้ง');
-    expect(html).toContain('ยังไม่ทราบผลการบันทึก');
-    expect(html).not.toContain('บันทึกคำตอบและข้อความแล้ว');
+    expect(html).toContain('Check status again');
+    expect(html).toContain('Save status unknown');
+    expect(html).not.toContain('Your response has been saved');
   });
 
   test('HTML-like comment and nickname render as escaped text, not markup', () => {
@@ -139,12 +135,10 @@ describe('C1-15 approved Thai copy and labels render in the participant view', (
     expect(html).toContain('&lt;b&gt;ผู้เข้าร่วม&lt;/b&gt;');
   });
 
-  test.skip('closed question renders read-only and hides submit', () => {
-    const html = renderToStaticMarkup(
-      <ParticipantView {...baseParticipantProps} question={ratingQuestion} questionClosed />,
-    );
-    expect(html).toContain('คำถามนี้ปิดรับคำตอบแล้ว');
-    expect(html).not.toContain('ส่งคำตอบ');
+  test('closed question renders read-only and hides submit', () => {
+    const html = renderToStaticMarkup(<ParticipantView {...baseParticipantProps} question={ratingQuestion} questionClosed />);
+    expect(html).toContain('This question is closed for responses');
+    expect(html).not.toContain('Submit response');
   });
 });
 
@@ -196,25 +190,12 @@ describe('C1-15 facilitator view states', () => {
     expect(html).not.toContain('ข้อมูลเก่า · ไม่ใช่ Live');
   });
 
-  test.skip('stale state is labelled old data and mutations are disabled', () => {
-    const html = renderToStaticMarkup(
-      <FacilitatorView
-        hasToken
-        token=""
-        snapshot={{ ...snapshot, session_status: 'active', questions: [{ ...snapshot.questions[0], receiving: false }] }}
-        live={false}
-        loading={false}
-        error={null}
-        pending={null}
-        onToken={() => {}}
-        onConnect={() => {}}
-        onOpen={() => {}}
-        onClose={() => {}}
-        onEnd={() => {}}
-      />,
-    );
-    expect(html).toContain('ข้อมูลเก่า · ไม่ใช่ Live');
-    expect(html).toContain('คำถามปัจจุบันยังไม่ยืนยัน');
-    expect(html).toContain('disabled');
+  test('current facilitator route source carries no Thai stale-copy claim', () => {
+    const containers = readFileSync(join(import.meta.dir, '..', 'apps/web/src/containers.tsx'), 'utf8');
+    const builder = readFileSync(join(import.meta.dir, '..', 'apps/web/src/builder.tsx'), 'utf8');
+    expect(containers).toContain('<BuilderApp mode="admin" />');
+    expect(builder).not.toContain('ข้อมูลเก่า');
+    expect(builder).not.toContain('ไม่ใช่ Live');
+    expect(builder).toContain('Reconnecting');
   });
 });

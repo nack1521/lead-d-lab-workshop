@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import logoUrl from './assets/logo.png';
-import { connectSocket } from './api.ts';
+import { API_BASE, connectSocket } from './api.ts';
+import { readJsonBody } from './api-base.ts';
 
 /**
  * WORKSHOP-BUILDER-02 admin/HR workspace. Demo passphrase `admin`, real API
@@ -8,8 +9,6 @@ import { connectSocket } from './api.ts';
  * compact room rows, numbered question rail, wide editor with adjacent
  * participant preview, one active-question chart, neutral chrome and sparse teal.
  */
-const API_BASE = import.meta.env.VITE_API_BASE_URL ? String(import.meta.env.VITE_API_BASE_URL) : '';
-
 type Phase = 'draft' | 'open' | 'ended';
 
 interface RoomRow {
@@ -64,9 +63,8 @@ async function api<T>(path: string, token: string | null, init: RequestInit = {}
   if (init.body) headers.set('content-type', 'application/json');
   if (token) headers.set('authorization', `Bearer ${token}`);
   const response = await fetch(`${API_BASE}${path}`, { ...init, headers });
-  const text = await response.text();
   let body: any = null;
-  try { body = text ? JSON.parse(text) : null; } catch { body = null; }
+  try { body = await readJsonBody(response); } catch (err) { body = null; if (response.ok) throw err as Error; }
   if (!response.ok) {
     const error = new Error(body?.message ?? `HTTP ${response.status}`) as Error & { status?: number; code?: string };
     error.status = response.status;

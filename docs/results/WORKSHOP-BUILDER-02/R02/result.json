@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "task_id": "WORKSHOP-BUILDER-02",
+  "run_id": "R02",
+  "reported_at": "2026-11-12T18:17:16+07:00",
+  "producer": "DeepSeek Harness (sole coding writer)",
+  "authoring_tool": "DeepSeek Harness",
+  "model": "deepseek-v4.1-flash-1017",
+  "source_kind": "direct",
+  "baseline_commit": "fae05e9",
+  "observed_head": "fae05e9",
+  "branch": "main",
+  "work_kind": "builder_local_api_base_fix",
+  "status": "READY_FOR_REVIEW",
+  "summary": "Fixed WB2-LOCAL-API-01 by extracting the existing browser API/WS base policy into a shared module used by both the participant API module and the builder: native local HTTP uses http://127.0.0.1:3000, explicit cloud URLs win unchanged, and secure pages without explicit URLs stay same-origin (no loopback baked into LAN/public builds). Added a frontend integration-seam regression test (resolver cases, builder-import static guard, HTML-200-not-JSON guard); default build contains the local fallback while the public build has 0 loopback refs. Builder/API/WS tests 9/9, seam 5/5, full suite 150 pass/1 skip/0 fail, typecheck and default/LAN builds pass. Actual browser roundtrip, mobile/visual checks and cloud regression are NOT RUN; Unslop R02 visual contract unchanged.",
+  "detail_path": "docs/results/WORKSHOP-BUILDER-02/R02/result.md",
+  "finding_ids": ["WB2-LOCAL-API-01"],
+  "cases": [
+    {"case_id": "WB2-R02-01", "status": "PASS", "evidence_paths": ["apps/web/src/api-base.ts", "apps/web/src/api.ts", "apps/web/src/builder.tsx", "tests/web-api-base.test.ts"]},
+    {"case_id": "WB2-R02-02", "status": "PASS", "evidence_paths": ["tests/builder.test.ts", "docs/results/WORKSHOP-BUILDER-02/R02/evidence/builder-targeted.log"]},
+    {"case_id": "WB2-R02-03", "status": "PASS", "evidence_paths": ["docs/results/WORKSHOP-BUILDER-02/R02/evidence/build-web-default.log", "docs/results/WORKSHOP-BUILDER-02/R02/evidence/build-web-public.log"]},
+    {"case_id": "WB2-R02-04", "status": "NOT RUN", "limitations": "Actual browser roundtrip/phone viewport and authenticated entry were not run; no browser automation in this environment."}
+  ],
+  "commands": [
+    {"command": "bun test tests/web-api-base.test.ts", "exit_code": 0, "outcome": "5 pass / 0 fail"},
+    {"command": "bun test tests/builder.test.ts", "exit_code": 0, "outcome": "9 pass / 0 fail"},
+    {"command": "bun test tests", "exit_code": 0, "outcome": "150 pass / 1 skip / 0 fail (151 tests)"},
+    {"command": "bun x tsc --noEmit", "exit_code": 0, "outcome": "no type errors"},
+    {"command": "bun run build:web", "exit_code": 0, "outcome": "native bundle includes http://127.0.0.1:3000 fallback"},
+    {"command": "VITE_*=.invalid bun run build:web", "exit_code": 0, "outcome": "0 loopback refs in public candidate"},
+    {"command": "bun run build:web:lan", "exit_code": 0, "outcome": "LAN build succeeds"}
+  ],
+  "blockers": [],
+  "not_verified": ["actual browser roundtrip and authenticated entry", "text/latest-five/pagination and HR read-only in a browser", "phone viewport/mobile/keyboard/reduced-motion", "cloud/LAN deployed regression", "independent QA/human acceptance"],
+  "next_gate": "User-assisted browser roundtrip on native local then cloud/LAN smoke; independent QA. No push/deploy.",
+  "published": false
+}

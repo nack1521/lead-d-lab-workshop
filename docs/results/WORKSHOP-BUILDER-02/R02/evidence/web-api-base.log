@@ -1,0 +1,13 @@
+bun test v1.4.4 (38afee6c8)
+
+tests/web-api-base.test.ts:
+(pass) frontend API base policy shared by builder and participant > native local HTTP keeps the existing 127.0.0.1:3000 API and ws defaults [0.21ms]
+(pass) frontend API base policy shared by builder and participant > explicit cloud URLs win unchanged [0.01ms]
+(pass) frontend API base policy shared by builder and participant > secure LAN pages with no explicit URL stay same-origin (no loopback baked in) [0.01ms]
+(pass) frontend API base policy shared by builder and participant > builder imports the shared API_BASE instead of keeping its own default [0.79ms]
+(pass) frontend API base policy shared by builder and participant > an HTML 200 is not silently accepted as an authenticated JSON result [2.06ms]
+
+ 5 pass
+ 0 fail
+ 14 expect() calls
+Ran 5 tests across 1 file. [15.00ms]

@@ -1,0 +1,13 @@
+$ bun run --cwd apps/web build
+$ vite build
+vite v6.4.5 building for production...
+transforming...
+✓ 34 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                   0.45 kB │ gzip:  0.32 kB
+dist/assets/logo-B4PyPIVx.png    76.66 kB
+dist/assets/index-DJoiMUxu.css   14.19 kB │ gzip:  3.54 kB
+dist/assets/index-DPrAY2e4.js   181.70 kB │ gzip: 57.26 kB
+✓ built in 379ms
+public_loopback_refs=0

@@ -1,0 +1,52 @@
+{
+  "tracked_database_URL_matches": [
+    {
+      "path": ".env.deploy.example",
+      "line": 5,
+      "classification": "reviewed_uppercase_USER_PRIVATE_HOST_DBNAME_template"
+    },
+    {
+      "path": ".env.example",
+      "line": 6,
+      "classification": "template_marker"
+    },
+    {
+      "path": ".env.example",
+      "line": 7,
+      "classification": "template_marker"
+    },
+    {
+      "path": "compose.yaml",
+      "line": 26,
+      "classification": "template_marker"
+    },
+    {
+      "path": "docs/results/C1-LOCAL-BUILD/R03/evidence/c1-16-and-hygiene.log",
+      "line": 11,
+      "classification": "template_marker"
+    },
+    {
+      "path": "docs/results/RELEASE-PREP-01/R01/evidence/env-cloud-red.log",
+      "line": 31,
+      "classification": "matches_isolated_config_test_literal"
+    },
+    {
+      "path": "tests/env-cloud.test.ts",
+      "line": 4,
+      "classification": "matches_isolated_config_test_literal"
+    },
+    {
+      "path": "tests/run-in-docker.sh",
+      "line": 16,
+      "classification": "template_marker"
+    }
+  ],
+  "history_diff_line_classifications": {
+    "matches_isolated_config_test_literal": 2,
+    "template_marker": 5,
+    "reviewed_uppercase_deployment_template": 1
+  },
+  "scanner": "limited_pattern_review_not_entropy_scan",
+  "confirmed_live_secret_claim": false,
+  "publication_still_requires_approval": true
+}

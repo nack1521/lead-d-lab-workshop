@@ -1,0 +1,17 @@
+{
+  "ready": 200,
+  "health": 200,
+  "unauthenticated_HR": 401,
+  "root": 404,
+  "allowed_origin_preflight": 204,
+  "denied_origin": 403,
+  "ws_upgrade": true,
+  "nonroot_user": true,
+  "cloud_PORT": 8080,
+  "database": "fresh_uniquely_owned_test_database",
+  "ok": true,
+  "owned_container_removed": true,
+  "owned_test_database_removed": true,
+  "cleanup_ok": true,
+  "actual_exit_code": 0
+}

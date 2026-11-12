@@ -1,0 +1,11 @@
+{
+  "build_exit": 0,
+  "assets": 1,
+  "reserved_https_present": true,
+  "reserved_wss_present": true,
+  "loopback_refs": 0,
+  "private_ipv4_refs": 0,
+  "database_url_refs": 0,
+  "default_dist_unchanged": true,
+  "cloud_deployed": false
+}

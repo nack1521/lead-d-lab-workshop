@@ -51,10 +51,8 @@ Status: **LOCAL PREPARATION ONLY / CLOUD NOT RUN**. All cloud behaviour below (a
 
 ## Owner-operated evaluator access (after approval only)
 1. In Railway, keep `DATABASE_URL` server-side and use private networking/TLS; do not enable public DB exposure for convenience.
-2. Create a **fresh synthetic** session for the final take (do not reuse known local ROOM fixtures or an already completed demo). Preferred owner flow: with a temporary private `DATABASE_URL` from the Railway dashboard (never committed), run locally:
-   `bun run apps/api/src/hr-demo-fixture.ts` → writes ignored `.local/hr-demo/<CODE>.json` with a fresh `HR-DEMO-*` session and facilitator grant.
-   Drive synthetic answers with `bun scripts/hr-smoke.ts ...` (or manually), then end the session with the facilitator page.
-3. Mint scoped trial grants locally with `bun run apps/api/src/issue-hr-grant.ts <session>` (HR) and any facilitator grant already in the private fixture file; supply them to the evaluator out-of-band. Grants expire: mint at submission time and do not extend TTLs silently. Never publish a grant-issuer/bootstrap endpoint.
+2. Create a **fresh synthetic** session inside an approved API container/one-off environment attached to the same Railway private network. Run the included `bun run apps/api/src/hr-demo-fixture.ts` there; its `.local/hr-demo/<CODE>.json` is private storage **inside that environment**, not automatically on the Mac. A Railway private DNS DATABASE_URL is not directly reachable from a local Mac. Do not add public PostgreSQL access merely to seed the demo.
+3. Use the deployed frontend manually for facilitator/participant trial, then end the session. Run the included `bun run apps/api/src/issue-hr-grant.ts <session>` in the approved private-network environment. Retrieve the generated private credential files only through an owner-approved secure mechanism, keep them out of logs/recording, and supply scoped grants to the evaluator privately. The mechanism/account permissions still require validation after approval. The API-only image does not include root smoke scripts: automated cloud smoke needs a separately approved in-network runner with the required source, rather than assuming `scripts/hr-smoke.ts` exists in the API image or can access a private DB from the Mac. Grants expire; mint at submission time without silently extending TTLs or exposing a public issuer.
 4. Keep grants, `.env`, local CA/dev certificates and fixture files off-screen during recording.
 
 ## Final smoke checklist (local now; cloud/phone after approval)

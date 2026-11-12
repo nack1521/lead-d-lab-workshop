@@ -1,0 +1,8 @@
+Workspace: /Users/aiink/Nack/Lead+D-Lab
+Read AGENTS.md, docs/CODING-WORKFLOW.md, docs/ANTIGRAVITY-RESULT-PROTOCOL.md and docs/handoffs/HR-SUMMARY-01-R02.md.
+
+Continue HR-SUMMARY-01, next unused run (expected R02), one writer. Close only the three QA items together: HR-QA-01 known-zero denominator copy; HR-QA-02 an actual n=1 API/DB/view case and accurate old test title; HR-QA-03 a fresh isolated overlapping 30-participant HTTP/PostgreSQL/WS verification, not sequential await-in-loop traffic. Assert all target successes, actual overlap observations, per-bucket DB reconciliation and a fresh aggregate frame correlated to committed revision. Respect rate limits; disclose phase pacing, timing and limitations. Failed checks must exit nonzero; settle all sockets.
+
+Preserve real HR functionality, read-only role/session/expiry/privacy and positive-n visibility with explicit counts; no minimum-five gate. Use TDD and safe regression/typecheck/builds. Review fixture subprocess side effects; do not run the known LAN verifier against existing fixtures or expand into a LAN/C1 rewrite.
+
+Preserve dirty/protected/unattributed work and immutable reports. No reset, push/deploy/tunnel, global/network/trust changes, new dependencies or provider switch. Deliver immutable HR-SUMMARY-01/<RUN>/result.md and result.json with source HEAD, actual commands/exits and evidence; INDEX last. Owned local commits only. Checkpoint before budget exhaustion. Physical Safari and authenticated browser checks remain pending unless actually exercised safely.

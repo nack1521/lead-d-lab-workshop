@@ -1,0 +1,43 @@
+{
+  "http_status": 200,
+  "unauthenticated_status": 401,
+  "session_status": "ended",
+  "joined_base": 30,
+  "questions": [
+    {
+      "type": "rating",
+      "n": 30,
+      "joined_base": 30,
+      "unanswered": 0,
+      "coverage_ratio": 1,
+      "counts": {
+        "1": 6,
+        "2": 6,
+        "3": 6,
+        "4": 6,
+        "5": 6
+      },
+      "mean": 3,
+      "db_matches": true
+    },
+    {
+      "type": "poll",
+      "n": 27,
+      "joined_base": 30,
+      "unanswered": 3,
+      "coverage_ratio": 0.9,
+      "counts": {
+        "time": 7,
+        "clarity": 6,
+        "skill": 7,
+        "safety": 7
+      },
+      "mean": null,
+      "db_matches": true
+    }
+  ],
+  "reload_stable": true,
+  "raw_private_fields_absent": true,
+  "read_only": true,
+  "fixture_mutated": false
+}

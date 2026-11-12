@@ -1,0 +1,11 @@
+Workspace: /Users/aiink/Nack/Lead+D-Lab
+
+Read AGENTS.md, docs/CODING-WORKFLOW.md, docs/ANTIGRAVITY-RESULT-PROTOCOL.md and docs/handoffs/HR-SUMMARY-01.md. Implement HR-SUMMARY-01, next unused run (expected R01), one active writer. This new local HR slice is user-authorized; historical C1 exclusions do not block it.
+
+Build a minimal complete, authorized read-only HR summary after session end from real PostgreSQL data. Reuse approved H01/H02/H03 design and existing React/Elysia/Bun/WS stack. Show rating/poll distributions, feedback-confidence descriptions, reported blockers, and exact per-question respondent counts/coverage bases. The user explicitly chose NO minimum-five gate: any positive n can show aggregates, always disclose n and its denominator; n=0 is empty, not a zero mean. Keep small-sample/self-report caveats. No raw names/comments/individual ranking or diagnostic claims.
+
+Restore normal local services without resets; if Docker is unavailable, ask me to open Docker Desktop. Use fresh owned synthetic fixtures, not known ROOM sessions. Add explicit session-scoped HR authorization and additive migration if needed, test all role branches and preserve existing expiry/revoke/retry semantics. Never expose credentials.
+
+Run TDD, DB-backed correctness/privacy cases including n=0/1/partial, actual browser flow, regression/typecheck/builds and a bounded isolated 30-participant smoke if feasible. Declare skipped/blocked evidence honestly. Preserve protected dirty files and immutable reports. Keep the remaining LAN verifier lost-control-ack issue separate; do not run it on known fixtures or claim it resolved.
+
+Deliver immutable docs/results/HR-SUMMARY-01/<RUN>/result.md + result.json with HEAD, actual commands/exits, evidence and private local trial instructions. INDEX last. Owned meaningful local commits only. No push/deploy/public tunnel, global/network/trust changes, destructive reset or automatic provider switch. Checkpoint before budget exhaustion.

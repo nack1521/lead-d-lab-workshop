@@ -1,0 +1,13 @@
+bun test v1.4.4 (38afee6c8)
+
+tests/builder-r06.test.tsx:
+(pass) WORKSHOP-BUILDER-02 R06 inline alignment and header parity > room top header no longer renders an extra Rooms button [0.07ms]
+(pass) WORKSHOP-BUILDER-02 R06 inline alignment and header parity > breadcrumb segments share an inline centerline without centering the row [0.02ms]
+(pass) WORKSHOP-BUILDER-02 R06 inline alignment and header parity > Results label and question buttons share a row centerline [0.01ms]
+(pass) WORKSHOP-BUILDER-02 R06 inline alignment and header parity > Add question label aligns with the three type buttons
+(pass) WORKSHOP-BUILDER-02 R06 inline alignment and header parity > Home header structure remains the shared Shell without layout changes [0.06ms]
+
+ 5 pass
+ 0 fail
+ 23 expect() calls
+Ran 5 tests across 1 file. [8.00ms]

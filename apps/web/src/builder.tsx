@@ -53,7 +53,7 @@ async function api<T>(path: string, token: string | null, init: RequestInit = {}
 const phaseLabel = (phase: Phase) => (phase === 'draft' ? 'Draft' : phase === 'open' ? 'Open' : 'Ended');
 const typeLabel = (type: QType) => (type === 'rating' ? 'Score' : type === 'poll' ? 'Multiple choice' : 'Text response');
 
-function Shell({ mode, subtitle, children, onHome }: { mode: 'admin' | 'hr'; subtitle: string; children: React.ReactNode; onHome?: () => void }) {
+function Shell({ mode, subtitle, children }: { mode: 'admin' | 'hr'; subtitle: string; children: React.ReactNode }) {
   return (
     <div className="app-shell">
       <header className="topbar">
@@ -62,7 +62,7 @@ function Shell({ mode, subtitle, children, onHome }: { mode: 'admin' | 'hr'; sub
           <span className="brand-name">Lead+D Lab</span>
           <span className="brand-suffix">{mode === 'hr' ? 'HR report' : 'Workshop builder'}</span>
         </div>
-        <div className="topbar-actions">{onHome ? <button type="button" className="ghost" onClick={onHome}>Rooms</button> : null}<span className="topbar-note">{subtitle}</span></div>
+        <div className="topbar-actions"><span className="topbar-note">{subtitle}</span></div>
       </header>
       <main className="content">{children}</main>
     </div>
@@ -284,7 +284,7 @@ function Workspace({ mode, token, room, onBack }: { mode: 'admin' | 'hr'; token:
   const selected = questions.find((question) => question.id === selectedId) ?? null;
 
   return (
-    <Shell mode={mode} subtitle={readOnly ? 'Read-only room reports' : 'Workshop room'} onHome={onBack}>
+    <Shell mode={mode} subtitle={readOnly ? 'Read-only room reports' : 'Workshop room'}>
     <div className="workspace">
       <aside className="sidebar">
         <button type="button" className="back" onClick={onBack}>‹ Rooms</button>

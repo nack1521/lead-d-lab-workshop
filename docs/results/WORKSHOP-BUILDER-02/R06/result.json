@@ -1,0 +1,33 @@
+{
+  "schema_version": 1,
+  "task_id": "WORKSHOP-BUILDER-02",
+  "run_id": "R06",
+  "reported_at": "2026-11-12T22:11:11+07:00",
+  "producer": "DeepSeek Harness (sole coding writer)",
+  "authoring_tool": "DeepSeek Harness",
+  "model": "deepseek-v4.1-flash-1017",
+  "source_kind": "direct",
+  "baseline_commit": "87de855",
+  "observed_head": "87de855",
+  "branch": "main",
+  "work_kind": "builder_inline_alignment",
+  "status": "READY_FOR_REVIEW",
+  "summary": "Narrow R06 source fixes: breadcrumb Rooms/title/slash share an inline centerline via inline-flex/line-height/zero block margins without centering the page; Results: and Q-buttons align on one centerline; Add question label aligns with equal Score/Multiple choice/Text response controls on desktop while all-stacking at narrow widths; the extra top-header Rooms button was removed from room management (breadcrumb and sidebar back remain) to restore Home header height/logo/brand centerline parity through the unchanged Shell; Home layout frozen. Source regressions 5/5; full suite 171 pass/0 skip/0 fail; typecheck/default+LAN builds 0. Actual browser screenshots/computed geometry and visual alignment acceptance are NOT RUN: safaridriver exists but Remote Automation is disabled and no headless browser/deps are available; no visual PASS claimed.",
+  "detail_path": "docs/results/WORKSHOP-BUILDER-02/R06/result.md",
+  "cases": [
+    {"case_id": "WB2-R06-01", "status": "PASS", "evidence_paths": ["apps/web/src/builder.tsx", "apps/web/src/styles.css", "tests/builder-r06.test.tsx"]},
+    {"case_id": "WB2-R06-02", "status": "PASS", "evidence_paths": ["tests/builder-r06.test.tsx", "tests/builder-r04.test.tsx"]},
+    {"case_id": "WB2-R06-03", "status": "PASS", "evidence_paths": ["docs/results/WORKSHOP-BUILDER-02/R06/evidence/mode-a-regression.log"]},
+    {"case_id": "WB2-R06-04", "status": "NOT RUN", "limitations": "Actual desktop/mobile screenshots, computed header/logo/breadcrumb/Results/Add-question geometry and optical alignment; browser automation unavailable."}
+  ],
+  "commands": [
+    {"command": "bun test tests/builder-r06.test.tsx", "exit_code": 0, "outcome": "5 pass / 0 fail"},
+    {"command": "bun test tests", "exit_code": 0, "outcome": "171 pass / 0 skip / 0 fail (171 tests)"},
+    {"command": "bun x tsc --noEmit", "exit_code": 0, "outcome": "no type errors"},
+    {"command": "bun run build:web / build:web:lan", "exit_code": 0, "outcome": "both builds succeed"}
+  ],
+  "blockers": ["No browser automation: safaridriver WebDriver session unavailable (Safari Remote Automation disabled) and no Chrome/Chromium/Playwright without new dependencies"],
+  "not_verified": ["actual screenshots and computed geometry at 1440/1280/390, ended and draft/open", "header rectangle/logo centerline parity measurement", "mobile visual/keyboard/reduced-motion", "authenticated browser click-flow", "Mode B/cloud/LAN, independent QA"],
+  "next_gate": "User-assisted screenshots/computed geometry of Home vs room header and the three alignment rows; then independent QA. No push/deploy.",
+  "published": false
+}

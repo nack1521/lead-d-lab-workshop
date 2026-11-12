@@ -19,7 +19,7 @@ describe('WORKSHOP-BUILDER-02 R04 shared English shell and all-responses UI', ()
 
   test('one persistent Shell wraps room list and workspace with a Rooms path', () => {
     expect((builderSource.match(/<Shell /g) ?? []).length).toBeGreaterThanOrEqual(2);
-    expect(builderSource).toContain('onHome={onBack}');
+    expect(builderSource).toContain('className="back" onClick={onBack}>‹ Rooms');
     expect(builderSource).toContain('aria-label="Breadcrumb"');
     expect(builderSource).toContain('room-title');
     expect(builderSource).toContain('Room code:');

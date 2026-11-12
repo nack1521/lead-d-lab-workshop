@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "task_id": "WORKSHOP-BUILDER-02",
+  "run_id": "R04",
+  "reported_at": "2026-11-12T21:33:37+07:00",
+  "producer": "DeepSeek Harness (sole coding writer)",
+  "authoring_tool": "DeepSeek Harness",
+  "model": "deepseek-v4.1-flash-1017",
+  "source_kind": "direct",
+  "baseline_commit": "a325994",
+  "observed_head": "a325994",
+  "branch": "main",
+  "work_kind": "builder_english_shell_fullview",
+  "status": "READY_FOR_REVIEW",
+  "summary": "R04 local UI correction: system-owned UI localized to English (builder/admin/HR, participant join/answer/errors/accessibility, HTML lang/title; API field errors mapped by code; historical DB content untouched); one persistent branded top header + breadcrumb/Rooms path across Rooms/Questions/Dashboard/HR with subordinate room sidebar; fluid full-width layout with 32/16px gutters, prominent room title and secondary Room code/status, compact list rows; Add question with three equal Score/Multiple-choice/Text controls integrated in the workspace (3-col or fully stacked, never 2+1); removed visible demo disclaimer and technical n/base captions while preserving truthful counts/denominators in data and screen-reader descriptions; text summary newest THREE with View all responses full view that includes every answer (latest three exactly once) using stable newest-first cursor pagination; ended-room per-question charts/read-only HR/create dialog/guards/API-base preserved. Verified: builder 9/9, UI seams 12/12, full 155 pass/8 declared skips/0 fail, typecheck/builds 0. Actual browser screenshots/click-flow/geometry, mobile and visual acceptance are NOT RUN (no browser automation available), so visual PASS is explicitly not claimed.",
+  "detail_path": "docs/results/WORKSHOP-BUILDER-02/R04/result.md",
+  "cases": [
+    {"case_id": "WB2-R04-01", "status": "PASS", "evidence_paths": ["tests/builder-r04.test.tsx", "apps/web/src/builder.tsx", "apps/web/src/ui.tsx", "apps/web/index.html"]},
+    {"case_id": "WB2-R04-02", "status": "PASS", "evidence_paths": ["tests/builder-r04.test.tsx", "apps/web/src/builder.tsx", "apps/web/src/styles.css"]},
+    {"case_id": "WB2-R04-03", "status": "PASS", "evidence_paths": ["tests/builder-r04.test.tsx"], "limitations": "Bounding boxes/screenshots NOT RUN; CSS/source verified only."},
+    {"case_id": "WB2-R04-04", "status": "PASS", "evidence_paths": ["tests/builder-views-r03.test.tsx", "tests/builder-r04.test.tsx"]},
+    {"case_id": "WB2-R04-05", "status": "PASS", "evidence_paths": ["tests/builder.test.ts", "tests/builder-views-r03.test.tsx", "tests/builder-r04.test.tsx"]},
+    {"case_id": "WB2-R04-06", "status": "NOT RUN", "limitations": "Browser screenshots/click-flow/geometry/mobile 1440/1280/390; no browser automation available. Visual acceptance open."}
+  ],
+  "commands": [
+    {"command": "bun test tests/builder.test.ts", "exit_code": 0, "outcome": "9 pass / 0 fail incl full-view pagination latest-three once"},
+    {"command": "bun test tests/builder-views-r03.test.tsx tests/builder-r04.test.tsx", "exit_code": 0, "outcome": "12 pass / 0 fail"},
+    {"command": "bun test tests", "exit_code": 0, "outcome": "155 pass / 8 declared skips / 0 fail (163 tests)"},
+    {"command": "bun x tsc --noEmit", "exit_code": 0, "outcome": "no type errors"},
+    {"command": "bun run build:web / build:web:lan", "exit_code": 0, "outcome": "both builds succeed"}
+  ],
+  "blockers": ["Browser automation/headless browser unavailable; required screenshots, geometry and click-flow cannot be captured in this environment"],
+  "not_verified": ["actual browser screenshots and measured desktop/mobile geometry", "browser click-flow create/answer/graphs/ended/HR", "keyboard/reduced-motion in a real browser", "Mode B/Docker, cloud/LAN deployment", "independent QA/human acceptance"],
+  "next_gate": "User-assisted browser screenshots/geometry and click-flow at 1440/1280/390, then independent QA. No push/deploy.",
+  "published": false
+}

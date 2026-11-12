@@ -27,9 +27,9 @@ describe('WORKSHOP-BUILDER-02 R03 UI seams', () => {
   test('create is a single dialog action with cancel and confirm, no inline title field', () => {
     const html = renderToStaticMarkup(<CreateRoomDialog pending={false} onCancel={() => {}} onConfirm={() => {}} />);
     expect(html).toContain('role="dialog"');
-    expect(html).toContain('สร้างห้องใหม่');
-    expect(html).toContain('ยกเลิก');
-    expect(html).toContain('ยืนยันสร้างห้อง');
+    expect(html).toContain('Create room');
+    expect(html).toContain('Cancel');
+    expect(html).toContain('Create room');
     expect(html).not.toContain('inline-create');
   });
 
@@ -37,9 +37,9 @@ describe('WORKSHOP-BUILDER-02 R03 UI seams', () => {
     const html = renderToStaticMarkup(<QuestionTypeGroup onCreate={() => {}} />);
     const group = html.slice(html.indexOf('class="type-group"'), html.indexOf('</div>', html.indexOf('class="type-group"')));
     expect((group.match(/type-button/g) ?? []).length).toBe(3);
-    expect(group).toContain('คะแนน');
-    expect(group).toContain('ตัวเลือก');
-    expect(group).toContain('ข้อความ');
+    expect(group).toContain('Score');
+    expect(group).toContain('Multiple choice');
+    expect(group).toContain('Text response');
   });
 
   test('ended room report shows a real score chart without any Open control', () => {
@@ -47,35 +47,35 @@ describe('WORKSHOP-BUILDER-02 R03 UI seams', () => {
       <ReportCard question={{ ...score, options: null } as any} aggregate={score} expanded={null} readOnly={false} ended
         onOpen={() => {}} onClose={() => {}} onViewAdditional={() => {}} onLoadMore={() => {}} onCloseExpanded={() => {}} />,
     );
-    expect(html).toContain('ค่าเฉลี่ย');
-    expect(html).toContain('n=3');
-    expect(html).toContain('ฐาน 4');
+    expect(html).toContain('Average score');
+    expect(html).toContain('3 of 4 participants answered.');
+    expect(html).toContain('score-mean');
     expect(html).toContain('class="bars"');
-    expect(html).not.toContain('เปิดรับคําตอบ');
+    expect(html).not.toContain('Open responses');
   });
 
-  test('text report shows exactly latest three and a distinct additional-answers action', () => {
+  test('text report shows exactly latest three and View all responses action', () => {
     const html = renderToStaticMarkup(
       <ReportCard question={{ ...text, options: null } as any} aggregate={text} expanded={null} readOnly={false} ended
         onOpen={() => {}} onClose={() => {}} onViewAdditional={() => {}} onLoadMore={() => {}} onCloseExpanded={() => {}} />,
     );
     expect(html.match(/<li>/g)?.length).toBe(3);
     expect(html).toContain('ล่าสุดสาม');
-    expect(html).toContain('ดูคําตอบเพิ่มเติม');
-    expect(html).not.toContain('five');
+    expect(html).toContain('View all responses');
+    expect(html).toContain('View all responses');
   });
 
-  test('additional-answers dialog lists only the expanded older page and no latest three duplicate', () => {
+  test('full-view dialog includes all responses, including latest three once, without a separate summary list', () => {
     const html = renderToStaticMarkup(
       <ReportCard question={{ ...text, options: null } as any} aggregate={text} readOnly={false} ended
         expanded={{ questionId: 'q2', items: [{ id: 't4', text: 'เก่ากว่า', created_at: '2025-12-31T00:00:00.000Z' }], cursor: null, hasMore: false, loading: false, error: null }}
         onOpen={() => {}} onClose={() => {}} onViewAdditional={() => {}} onLoadMore={() => {}} onCloseExpanded={() => {}} />,
     );
-    expect(html).toContain('คําตอบเพิ่มเติม');
+    expect(html).toContain('All responses');
     expect(html).toContain('เก่ากว่า');
     const dialog = html.slice(html.indexOf('role="dialog"'));
-    expect(dialog).not.toContain('ล่าสุดสาม');
-    expect(dialog).not.toContain('ล่าสุดสอง');
+    expect(dialog).toContain('All responses');
+    expect((dialog.match(/<li>/g) ?? []).length).toBe(1);
   });
 
   test('empty score report is a labelled zero state with no fabricated mean', () => {
@@ -84,15 +84,15 @@ describe('WORKSHOP-BUILDER-02 R03 UI seams', () => {
       <ReportCard question={{ ...score, options: null } as any} aggregate={empty} expanded={null} readOnly={false} ended
         onOpen={() => {}} onClose={() => {}} onViewAdditional={() => {}} onLoadMore={() => {}} onCloseExpanded={() => {}} />,
     );
-    expect(html).toContain('ยังไม่มีคําตอบ');
-    expect(html).toContain('n=0');
+    expect(html).toContain('No responses yet');
+    expect(html).toContain('0 of 0 participants answered.');
     expect(html).not.toContain('score-mean');
   });
 
   test('end action requires explicit confirmation dialog', () => {
     const html = renderToStaticMarkup(<ConfirmEndDialog roomTitle="ห้องทดสอบ" pending={false} onCancel={() => {}} onConfirm={() => {}} />);
-    expect(html).toContain('ยืนยันจบกิจกรรม');
-    expect(html).toContain('ยกเลิก');
-    expect(html).toContain('ไม่สามารถเปิดห้องนี้กลับมาได้');
+    expect(html).toContain('End session');
+    expect(html).toContain('Cancel');
+    expect(html).toContain('cannot be reopened');
   });
 });

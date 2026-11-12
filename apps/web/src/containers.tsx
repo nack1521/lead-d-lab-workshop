@@ -105,12 +105,12 @@ function JoinPage() {
         participantId: result.participant_id,
         grant: result.grant,
         // The stored participant label is authoritative, never the typed retry field.
-        participantLabel: result.participant?.nickname ?? 'ผู้เข้าร่วม',
+        participantLabel: result.participant?.nickname ?? 'Participant',
       };
       navigate('/room');
     } catch (err) {
       // Unknown outcome: keep the same key and immutable payload for the next retry.
-      setError(readErrorMessage(err, 'เข้าร่วมไม่สำเร็จ กรุณาตรวจรหัสห้อง'));
+      setError(readErrorMessage(err, 'เข้าร่วมไม่สำเร็จ กรุณาตรวจRoom code'));
     } finally {
       setPending(false);
     }
@@ -296,7 +296,7 @@ function RoomPage() {
           },
         }));
       } else {
-        setMeta({ outcome: 'unknown', errorMessage: 'ยังไม่ทราบผลการบันทึก — ข้อความของคุณยังอยู่ครบ' });
+        setMeta({ outcome: 'unknown', errorMessage: 'Save status unknown — your text is still here' });
       }
     } catch (err) {
       const status = err instanceof ApiError ? err.status : 0;
@@ -318,7 +318,7 @@ function RoomPage() {
         });
       } else {
         // Unknown: keep the attempt and its immutable payload for reconcile only.
-        setMeta({ outcome: 'unknown', errorMessage: 'ยังไม่ทราบผลการบันทึก — ข้อความของคุณยังอยู่ครบ' });
+        setMeta({ outcome: 'unknown', errorMessage: 'Save status unknown — your text is still here' });
       }
     } finally {
       setSending(false);
@@ -417,7 +417,7 @@ function FacilitatorPage() {
       },
       onError: (code) => {
         if (code === 'UNAUTHORIZED') {
-          setError('โทเค็นผู้ควบคุมไม่ถูกต้องหรือหมดอายุ');
+          setError('Facilitator token is invalid or expired.');
           setConnected(false);
           setLive(false);
           setLoading(false);
@@ -431,7 +431,7 @@ function FacilitatorPage() {
   const mutate = async (kind: 'open' | 'close' | 'end', questionId?: string) => {
     const currentSessionId = sessionIdRef.current;
     if (!currentSessionId) {
-      setError('ยังไม่ได้รับข้อมูลห้องจากเซิร์ฟเวอร์');
+      setError('Room data was not received from the server.');
       return;
     }
     setPending(`${kind}:${questionId ?? ''}`);
@@ -443,7 +443,7 @@ function FacilitatorPage() {
           : `/api/facilitator/sessions/${currentSessionId}/questions/${questionId}/${kind}`;
       await apiFetch(path, { method: 'POST', token });
     } catch (err) {
-      setError(readErrorMessage(err, 'คำสั่งไม่สำเร็จ กรุณาตรวจสถานะอีกครั้ง'));
+      setError(readErrorMessage(err, 'คำสั่งไม่สำเร็จ กรุณาCheck status again'));
     } finally {
       setPending(null);
     }
@@ -497,7 +497,7 @@ function HrPage() {
         }
       } else {
         setState('error');
-        setError('เครือข่ายขัดข้อง');
+        setError('Network error.');
       }
     } finally {
       setPending(false);
@@ -518,9 +518,24 @@ function HrPage() {
   );
 }
 
+const SERVER_FIELD_MESSAGES: Record<string, string> = {
+  VALIDATION_FAILED: 'Please check the response and try again.',
+  INVALID_RATING: 'Choose a score within the allowed range.',
+  INVALID_OPTION: 'Choose one of the available options.',
+  TYPE_MISMATCH: 'This response type does not match the question.',
+  PAYLOAD_TOO_LARGE: 'Your response is too large.',
+  QUESTION_CLOSED: 'This question is closed.',
+  QUESTION_NOT_ACTIVE: 'This question is not active.',
+  SESSION_ENDED: 'This session has ended.',
+  UNAUTHORIZED: 'You no longer have access to this session.',
+  FORBIDDEN: 'You do not have permission for this action.',
+};
+
 function readFieldMessage(body: unknown): string | null {
-  if (!body || typeof body !== 'object') return null;
-  const record = body as Record<string, unknown>;
+  const record = body && typeof body === 'object' ? (body as Record<string, unknown>) : null;
+  if (!record) return null;
+  const code = typeof record.code === 'string' ? record.code : null;
+  if (code && SERVER_FIELD_MESSAGES[code]) return SERVER_FIELD_MESSAGES[code];
   return typeof record.message === 'string' ? record.message : null;
 }
 

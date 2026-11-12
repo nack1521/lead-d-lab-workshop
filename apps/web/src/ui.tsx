@@ -2,11 +2,11 @@ import type { Outcome } from './state.ts';
 import type { Question, QuestionAggregate, OwnResponse, Snapshot, HrQuestionSummary, HrSummary } from './api.ts';
 
 const RATING_LABELS: Record<number, string> = {
-  1: '1 ยังไม่มั่นใจ',
+  1: '1 Not confident',
   2: '2',
   3: '3',
   4: '4',
-  5: '5 มั่นใจมาก',
+  5: '5 Very confident',
 };
 
 export function JoinView(props: {
@@ -20,13 +20,13 @@ export function JoinView(props: {
 }) {
   return (
     <main className="screen">
-      <h1>เข้าร่วมเวิร์กช็อป</h1>
-      <section className="card" aria-label="วิธีเข้าร่วม">
-        <h2>ลิงก์สำหรับผู้เข้าร่วม</h2>
-        <p className="mono">[ที่อยู่ระบบ]/join</p>
-        <h2>รหัสห้องสำหรับผู้เข้าร่วม</h2>
+      <h1>Join workshop</h1>
+      <section className="card" aria-label="How to join">
+        <h2>Participant link</h2>
+        <p className="mono">[system address]/join</p>
+        <h2>Join with a room code</h2>
         <p className="mono">ROOM-01</p>
-        <p>เปิดลิงก์ → กรอกรหัสห้อง → ไม่ต้องสมัครบัญชี</p>
+        <p>Open the link → enter the room code → no account needed</p>
       </section>
       <form
         className="card"
@@ -35,7 +35,7 @@ export function JoinView(props: {
           props.onSubmit();
         }}
       >
-        <label htmlFor="join-code">รหัสห้อง</label>
+        <label htmlFor="join-code">Room code</label>
         <input
           id="join-code"
           value={props.joinCode}
@@ -43,7 +43,7 @@ export function JoinView(props: {
           autoComplete="off"
           required
         />
-        <label htmlFor="nickname">ชื่อเล่น (ไม่บังคับ)</label>
+        <label htmlFor="nickname">Nickname (optional)</label>
         <input
           id="nickname"
           value={props.nickname}
@@ -56,9 +56,9 @@ export function JoinView(props: {
           </p>
         ) : null}
         <button type="submit" disabled={props.pending}>
-          {props.pending ? 'กำลังเข้าร่วม…' : 'เข้าร่วมกิจกรรม'}
+          {props.pending ? 'Joining…' : 'Join session'}
         </button>
-        <p className="hint">ไม่ต้องสมัครบัญชี และไม่ต้องใช้ชื่อจริง</p>
+        <p className="hint">No account or real name required</p>
       </form>
     </main>
   );
@@ -88,23 +88,23 @@ export function ParticipantView(props: {
   return (
     <main className="screen">
       <header className="room-header">
-        <h1>คำถามสำหรับผู้เข้าร่วม</h1>
-        <p className="hint">เข้าร่วมในชื่อ “{props.participantLabel}”</p>
+        <h1>Participant question</h1>
+        <p className="hint">Joined as “{props.participantLabel}”</p>
       </header>
       {!question ? (
         <section className="card">
-          <p>ยังไม่มีคำถามที่เปิดอยู่</p>
+          <p>No question is open right now</p>
         </section>
       ) : (
-        <section className="card" aria-label="คำถามปัจจุบัน">
-          <p className="eyebrow">ข้อ {String(question.seq).padStart(2, '0')}</p>
+        <section className="card" aria-label="Current question">
+          <p className="eyebrow">Question {String(question.seq).padStart(2, '0')}</p>
           <h2>{question.label}</h2>
           {question.help_text ? <p className="hint">{question.help_text}</p> : null}
-          {props.questionClosed ? <p className="notice">คำถามนี้ปิดรับคำตอบแล้ว</p> : null}
+          {props.questionClosed ? <p className="notice">This question is closed for responses</p> : null}
 
           {question.type === 'rating' ? (
             <fieldset disabled={props.questionClosed || props.outcome === 'saved' || props.sending}>
-              <legend>เลือกคะแนน</legend>
+              <legend>Choose a score</legend>
               <div className="scale">
                 {(question.options ?? []).length === 0
                   ? ratingValues(question).map((value) => (
@@ -124,7 +124,7 @@ export function ParticipantView(props: {
             </fieldset>
           ) : question.type === 'poll' ? (
             <fieldset disabled={props.questionClosed || props.outcome === 'saved' || props.sending}>
-              <legend>เลือกหนึ่งข้อ</legend>
+              <legend>Choose one option</legend>
               {(question.options ?? []).map((option) => (
                 <label key={option.id} className={props.optionId === option.id ? 'option selected' : 'option'}>
                   <input
@@ -140,14 +140,14 @@ export function ParticipantView(props: {
             </fieldset>
           ) : null}
 
-          <label htmlFor="comment">{question.type === 'text' ? 'คําตอบข้อความ (จําเป็น)' : 'ความคิดเห็นเพิ่มเติม (ไม่บังคับ)'}</label>
+          <label htmlFor="comment">{question.type === 'text' ? 'Text response (required)' : 'Additional comment (optional)'}</label>
           <textarea
             id="comment"
             rows={question.type === 'text' ? 6 : 4}
             value={props.comment}
             disabled={props.questionClosed || props.outcome === 'saved' || props.sending}
             onChange={(event) => props.onComment(event.target.value)}
-            placeholder={question.type === 'text' ? 'พิมพ์คําตอบของคุณ (ไม่เกิน 1000 ตัวอักษร)' : 'พิมพ์ข้อความได้หลายบรรทัด กด Enter เพื่อขึ้นบรรทัดใหม่'}
+            placeholder={question.type === 'text' ? 'Type your response (up to 1000 characters)' : 'Multi-line text is allowed; press Enter for a new line'}
           />
           <p className={props.countLabel.startsWith('~') ? 'count approximate' : 'count'}>{props.countLabel}</p>
 
@@ -157,10 +157,10 @@ export function ParticipantView(props: {
             </p>
           ) : null}
 
-          {props.outcome === 'sending' ? <p className="hint">กำลังส่งคำตอบและข้อความ…</p> : null}
+          {props.outcome === 'sending' ? <p className="hint">Sending your response…</p> : null}
           {props.outcome === 'saved' ? (
             <p className="saved">
-              บันทึกคำตอบและข้อความแล้ว
+              Your response has been saved
               {props.ownResponse?.comment || props.ownResponse?.text ? (
                 <span className="own-comment"> — “{props.ownResponse?.text ?? props.ownResponse?.comment}”</span>
               ) : null}
@@ -168,26 +168,26 @@ export function ParticipantView(props: {
           ) : null}
           {props.outcome === 'unknown' ? (
             <div>
-              <p className="notice">ยังไม่ทราบผลการบันทึก — ข้อความของคุณยังอยู่ครบ</p>
+              <p className="notice">Save status unknown — your text is still here</p>
               <button type="button" onClick={props.onReconcile}>
-                ตรวจสถานะอีกครั้ง
+                Check status again
               </button>
             </div>
           ) : null}
           {props.outcome === 'terminal_non_save' ? (
             <div className="actions">
               <button type="button" onClick={props.onFreshAttempt} disabled={!props.canFreshAttempt}>
-                เริ่มส่งคำตอบใหม่
+                Send a new response
               </button>
               <button type="button" className="secondary" onClick={props.onFreshAttempt} disabled={!props.canFreshAttempt}>
-                แก้คำตอบก่อนส่งใหม่
+                Edit before resending
               </button>
-              <p className="hint">ใช้คำตอบเดิมได้ ไม่ต้องพิมพ์ใหม่</p>
+              <p className="hint">You can reuse your existing answer.</p>
             </div>
           ) : null}
           {!props.questionClosed && props.outcome !== 'saved' && props.outcome !== 'unknown' && props.outcome !== 'terminal_non_save' ? (
             <button type="button" onClick={props.onSubmit} disabled={props.sending || (question.type === 'text' ? props.comment.trim().length === 0 : (!props.rating && !props.optionId))}>
-              {props.sending ? 'กำลังส่ง…' : 'ส่งคำตอบ'}
+              {props.sending ? 'Sending…' : 'Submit response'}
             </button>
           ) : null}
         </section>
@@ -219,7 +219,7 @@ export function FacilitatorView(props: {
   return (
     <main className="screen wide">
       <header>
-        <h1>ผู้ควบคุมกิจกรรม</h1>
+        <h1>Session facilitator</h1>
         {props.snapshot ? (
           <p className="hint">
             ห้อง {props.snapshot.revision >= 0 ? '' : ''}
@@ -227,12 +227,12 @@ export function FacilitatorView(props: {
           </p>
         ) : null}
         <p className={props.live ? 'live' : 'stale'} data-testid="live-status">
-          {props.live ? 'Live' : 'ข้อมูลเก่า · ไม่ใช่ Live'}
+          {props.live ? 'Live' : 'Cached data — not live'}
         </p>
       </header>
       {!props.hasToken ? (
         <section className="card">
-          <label htmlFor="facilitator-token">โทเค็นผู้ควบคุม (เฉพาะเครื่องนี้)</label>
+          <label htmlFor="facilitator-token">Facilitator token (this device only)</label>
           <input
             id="facilitator-token"
             value={props.token}
@@ -240,7 +240,7 @@ export function FacilitatorView(props: {
             autoComplete="off"
           />
           <button type="button" onClick={props.onConnect} disabled={props.loading}>
-            {props.loading ? 'กำลังเชื่อมต่อ…' : 'เชื่อมต่อ'}
+            {props.loading ? 'กำลังConnect…' : 'Connect'}
           </button>
           <p className="hint">โทเค็น local fixture อยู่ใน .local/fixtures.json และไม่ถูกแสดงบนหน้านี้ซ้ำ</p>
         </section>
@@ -250,12 +250,12 @@ export function FacilitatorView(props: {
           {props.error}
         </p>
       ) : null}
-      {!props.snapshot && props.hasToken ? <p>ยังไม่ได้รับ snapshot ที่ยืนยันแล้ว</p> : null}
+      {!props.snapshot && props.hasToken ? <p>No confirmed snapshot yet</p> : null}
       {props.snapshot ? (
         <section className="grid" aria-label="ผลรวมคำตอบ">
           {props.snapshot.questions.map((question) => (
             <article className="card" key={question.question_id}>
-              <p className="eyebrow">ข้อ {String(question.seq).padStart(2, '0')}</p>
+              <p className="eyebrow">Question {String(question.seq).padStart(2, '0')}</p>
               <h2>{question.label}</h2>
               {props.snapshot?.active_question_id === question.question_id && !question.receiving ? (
                 <p className="notice">คำถามปัจจุบันยังไม่ยืนยัน — ผลล่าสุดยังเป็นข้อมูลเก่า</p>
@@ -289,7 +289,7 @@ export function FacilitatorView(props: {
       ) : null}
       {props.snapshot ? (
         <button type="button" className="danger" onClick={props.onEnd} disabled={!props.live || props.pending !== null || props.snapshot.session_status === 'ended'}>
-          จบกิจกรรม
+          End session
         </button>
       ) : null}
     </main>
@@ -360,7 +360,7 @@ export function HrSummaryView(props: {
   return (
     <main className="screen hr-screen">
       <header className="hr-header">
-        <h1>สรุปผลหลังจบกิจกรรม (HR)</h1>
+        <h1>สรุปผลหลังEnd session (HR)</h1>
         <p className="hint">อ่านได้เฉพาะผู้มีสิทธิ์ HR ของกิจกรรมนี้ · ข้อมูลรวมเท่านั้น</p>
       </header>
 
@@ -396,13 +396,13 @@ export function HrSummaryView(props: {
       ) : null}
       {props.state === 'not_ended' ? (
         <section className="card" role="status">
-          <p className="notice">กิจกรรมนี้ยังไม่จบ — สรุปผลจะแสดงหลังจบกิจกรรม</p>
+          <p className="notice">กิจกรรมนี้ยังไม่จบ — สรุปผลจะแสดงหลังEnd session</p>
         </section>
       ) : null}
       {props.state === 'error' ? (
         <section className="card" role="alert">
           <p className="error">โหลดสรุปผลไม่สำเร็จ{props.errorMessage ? `: ${props.errorMessage}` : ''}</p>
-          <p className="hint">การเชื่อมต่อขัดข้องไม่ใช่ข้อมูลศูนย์ กรุณาลองใหม่</p>
+          <p className="hint">การConnectขัดข้องไม่ใช่ข้อมูลศูนย์ กรุณาลองใหม่</p>
         </section>
       ) : null}
 
@@ -414,7 +414,7 @@ export function HrSummaryView(props: {
               <strong>{summary.session.question_count}</strong> ข้อ
             </p>
             {summary.session.ended_at ? (
-              <p className="hint">จบกิจกรรมเมื่อ {new Date(summary.session.ended_at).toLocaleString('th-TH')}</p>
+              <p className="hint">End sessionเมื่อ {new Date(summary.session.ended_at).toLocaleString('th-TH')}</p>
             ) : null}
             {allEmpty ? (
               <p className="notice" role="status">
@@ -435,7 +435,7 @@ export function HrSummaryView(props: {
               : (question.options ?? []).map((option) => option.id);
             return (
               <section className="card hr-question" key={question.id} aria-label={`คำถามข้อ ${question.seq}`}>
-                <p className="eyebrow">ข้อ {String(question.seq).padStart(2, '0')}</p>
+                <p className="eyebrow">Question {String(question.seq).padStart(2, '0')}</p>
                 <h2>{question.label}</h2>
                 {question.help_text ? <p className="hint">{question.help_text}</p> : null}
                 <p className="hr-coverage">{coverageText(question)}</p>
@@ -459,9 +459,9 @@ export function HrSummaryView(props: {
                           const count = question.counts[value] ?? 0;
                           const label = isRating
                             ? value === String(question.rating_min)
-                              ? `${value} ยังไม่มั่นใจ`
+                              ? `${value} Not confident`
                               : value === String(question.rating_max)
-                                ? `${value} มั่นใจมาก`
+                                ? `${value} Very confident`
                                 : value
                             : (question.options ?? []).find((option) => option.id === value)?.label ?? value;
                           const percent = Math.round((count / question.n) * 1000) / 10;

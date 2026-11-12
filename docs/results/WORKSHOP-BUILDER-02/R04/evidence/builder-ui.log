@@ -1,0 +1,22 @@
+bun test v1.4.4 (38afee6c8)
+
+tests/builder-views-r03.test.tsx:
+(pass) WORKSHOP-BUILDER-02 R03 UI seams > create is a single dialog action with cancel and confirm, no inline title field [2.34ms]
+(pass) WORKSHOP-BUILDER-02 R03 UI seams > three question-type controls are one deliberate group [0.22ms]
+(pass) WORKSHOP-BUILDER-02 R03 UI seams > ended room report shows a real score chart without any Open control [0.85ms]
+(pass) WORKSHOP-BUILDER-02 R03 UI seams > text report shows exactly latest three and View all responses action [0.25ms]
+(pass) WORKSHOP-BUILDER-02 R03 UI seams > full-view dialog includes all responses, including latest three once, without a separate summary list [0.22ms]
+(pass) WORKSHOP-BUILDER-02 R03 UI seams > empty score report is a labelled zero state with no fabricated mean [0.08ms]
+(pass) WORKSHOP-BUILDER-02 R03 UI seams > end action requires explicit confirmation dialog [0.12ms]
+
+tests/builder-r04.test.tsx:
+(pass) WORKSHOP-BUILDER-02 R04 shared English shell and all-responses UI > builder system UI source is English and carries no demo disclaimer [0.09ms]
+(pass) WORKSHOP-BUILDER-02 R04 shared English shell and all-responses UI > one persistent Shell wraps room list and workspace with a Rooms path [0.06ms]
+(pass) WORKSHOP-BUILDER-02 R04 shared English shell and all-responses UI > Add question and three equal type controls are integrated in the workspace [0.09ms]
+(pass) WORKSHOP-BUILDER-02 R04 shared English shell and all-responses UI > system dialogs are English [0.17ms]
+(pass) WORKSHOP-BUILDER-02 R04 shared English shell and all-responses UI > visible report captions drop technical n/base text but keep accessible descriptions [0.19ms]
+
+ 12 pass
+ 0 fail
+ 53 expect() calls
+Ran 12 tests across 2 files. [24.00ms]

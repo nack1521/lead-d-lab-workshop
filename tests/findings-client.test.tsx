@@ -227,12 +227,12 @@ describe('C1-RV-03 lost join acknowledgement keeps one logical join', () => {
     await mount('/join');
     fill('#join-code', 'ROOM-01');
     fill('#nickname', 'ผู้ร่วมทดสอบ');
-    clickButton('เข้าร่วมกิจกรรม');
+    clickButton('Join session');
     await tick();
     expect(text()).toContain('เข้าร่วมไม่สำเร็จ');
     expect(requests).toHaveLength(1);
 
-    clickButton('เข้าร่วมกิจกรรม');
+    clickButton('Join session');
     await tick(12);
     expect(requests).toHaveLength(2);
     expect(String(requests[1].body?.join_key)).toBe(String(requests[0].body?.join_key));
@@ -260,18 +260,18 @@ describe('C1-RV-03 lost join acknowledgement keeps one logical join', () => {
     await mount('/join');
     fill('#join-code', 'ROOM-01');
     fill('#nickname', 'ชื่อแรก');
-    clickButton('เข้าร่วมกิจกรรม');
+    clickButton('Join session');
     await tick();
     expect(requests).toHaveLength(1);
 
     fill('#nickname', 'ชื่อที่แก้');
-    clickButton('เข้าร่วมกิจกรรม');
+    clickButton('Join session');
     await tick(12);
     expect(String(requests[1].body?.join_key)).toBe(String(requests[0].body?.join_key));
     // The uncertain join payload stays immutable and the stored label is authoritative.
     expect(String(requests[1].body?.nickname)).toBe('ชื่อแรก');
     expect(text()).toContain('ชื่อแรก');
-    expect(text()).not.toContain('เข้าร่วมในชื่อ “ชื่อที่แก้”');
+    expect(text()).not.toContain('Joined as “ชื่อที่แก้”');
 
     // A different room is an explicit new join operation, not a retry.
     containers.__resetForTest();
@@ -286,10 +286,10 @@ describe('C1-RV-03 lost join acknowledgement keeps one logical join', () => {
     };
     await mount('/join');
     fill('#join-code', 'ROOM-01');
-    clickButton('เข้าร่วมกิจกรรม');
+    clickButton('Join session');
     await tick();
     fill('#join-code', 'ROOM-02');
-    clickButton('เข้าร่วมกิจกรรม');
+    clickButton('Join session');
     await tick();
     expect(requests).toHaveLength(2);
     expect(String(requests[1].body?.join_key)).not.toBe(String(requests[0].body?.join_key));
@@ -305,7 +305,7 @@ describe('C1-RV-05 outcome and draft state follow the authoritative question', (
     };
     await mount('/room');
     await tick(12);
-    expect(text()).toContain('บันทึกคำตอบและข้อความแล้ว');
+    expect(text()).toContain('Your response has been saved');
 
     const socket = FakeWebSocket.instances[0];
     expect(socket).toBeDefined();
@@ -320,7 +320,7 @@ describe('C1-RV-05 outcome and draft state follow the authoritative question', (
     await tick(12);
     expect(text()).not.toContain('บันทึกคำตอบและข้อความแล้ว');
     expect(text()).toContain('อุปสรรคสำคัญที่สุดในการให้ feedback ต่อทีมคืออะไร?');
-    const submit = [...document.querySelectorAll('button')].find((button) => (button.textContent ?? '').includes('ส่งคำตอบ'));
+    const submit = [...document.querySelectorAll('button')].find((button) => (button.textContent ?? '').includes('Submit response'));
     expect(submit).toBeDefined();
     const options = [...document.querySelectorAll('input[type=radio]')] as HTMLInputElement[];
     expect(options.length).toBeGreaterThan(0);
@@ -330,7 +330,7 @@ describe('C1-RV-05 outcome and draft state follow the authoritative question', (
       data: JSON.stringify({ type: 'state', revision: 6, session_status: 'active', question: ratingQuestion, own_response: acceptedOwn }),
     });
     await tick(12);
-    expect(text()).toContain('บันทึกคำตอบและข้อความแล้ว');
+    expect(text()).toContain('Your response has been saved');
   });
 
   test('an unresolved earlier attempt stays with the old question during a transition', async () => {
@@ -345,9 +345,9 @@ describe('C1-RV-05 outcome and draft state follow the authoritative question', (
     const ratingInput = document.querySelector('input[type=radio][value="4"]') as HTMLInputElement;
     ratingInput.click();
     await tick();
-    clickButton('ส่งคำตอบ');
+    clickButton('Submit response');
     await tick(10);
-    expect(text()).toContain('ยังไม่ทราบผลการบันทึก');
+    expect(text()).toContain('Save status unknown');
 
     const socket = FakeWebSocket.instances[0];
     socket.emit('open');
@@ -355,8 +355,8 @@ describe('C1-RV-05 outcome and draft state follow the authoritative question', (
       data: JSON.stringify({ type: 'state', revision: 3, session_status: 'active', question: pollQuestion, own_response: null }),
     });
     await tick(12);
-    expect(text()).not.toContain('ยังไม่ทราบผลการบันทึก');
-    const submit = [...document.querySelectorAll('button')].find((button) => (button.textContent ?? '').includes('ส่งคำตอบ'));
+    expect(text()).not.toContain('Save status unknown');
+    const submit = [...document.querySelectorAll('button')].find((button) => (button.textContent ?? '').includes('Submit response'));
     expect(submit).toBeDefined();
   });
 });
@@ -382,11 +382,11 @@ describe('R02-QA-04 an uncertain join keeps its original payload and shows the s
     await mount('/join');
     fill('#join-code', 'ROOM-01');
     fill('#nickname', 'ชื่อเดิมที่บันทึก');
-    clickButton('เข้าร่วมกิจกรรม');
+    clickButton('Join session');
     await tick();
     expect(text()).toContain('เข้าร่วมไม่สำเร็จ');
     fill('#nickname', 'ชื่อที่แก้ภายหลัง');
-    clickButton('เข้าร่วมกิจกรรม');
+    clickButton('Join session');
     await tick(12);
     expect(requests).toHaveLength(2);
     expect(String(requests[1].body?.join_key)).toBe(String(requests[0].body?.join_key));
@@ -412,7 +412,7 @@ describe('R02-QA-05 equal-revision reconciliation in the participant container',
       data: JSON.stringify({ type: 'state', revision: 5, session_status: 'active', question: ratingQuestion, own_response: acceptedOwn }),
     });
     await tick(12);
-    expect(text()).toContain('บันทึกคำตอบและข้อความแล้ว');
+    expect(text()).toContain('Your response has been saved');
   });
 });
 
@@ -448,7 +448,7 @@ describe('C1-RV-04 authoritative snapshots and truthful Live', () => {
     handler = async () => json({ status: 'ok' });
     await mount('/facilitator');
     fill('#facilitator-token', 'fixture-token');
-    clickButton('เชื่อมต่อ');
+    clickButton('Submit response');
     const socket = FakeWebSocket.instances.at(-1)!;
     expect(socket).toBeDefined();
     socket.emit('open');

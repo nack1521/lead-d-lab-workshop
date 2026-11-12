@@ -142,19 +142,28 @@ describe('WORKSHOP-BUILDER-02 admin authoring and real data flow', () => {
     expect(textAgg.text.latest).toHaveLength(3);
     expect(textAgg.text.has_more).toBe(true);
     const latestIds = new Set(textAgg.text.latest.map((item: any) => item.id));
-    // Additional answers are a distinct older feed starting after the latest three.
-    const page1 = await call(`/api/admin/rooms/${roomId}/questions/${textId.value}/text?limit=2&cursor=${textAgg.text.next_cursor}`, { token: admin });
-    expect(page1.status).toBe(200);
-    expect(page1.body.items).toHaveLength(2);
-    expect(page1.body.items.every((item: any) => !latestIds.has(item.id))).toBe(true);
-    expect(page1.body.has_more).toBe(true);
-    const page2 = await call(`/api/admin/rooms/${roomId}/questions/${textId.value}/text?limit=2&cursor=${page1.body.next_cursor}`, { token: admin });
-    expect(page2.status).toBe(200);
-    expect(page2.body.items).toHaveLength(2);
-    expect(page2.body.has_more).toBe(false);
-    const allAdditionalIds = [...page1.body.items, ...page2.body.items].map((item: any) => item.id);
-    expect(new Set(allAdditionalIds).size).toBe(4);
-    expect(allAdditionalIds.every((id: string) => !latestIds.has(id))).toBe(true);
+    expect(latestIds.size).toBe(3);
+    // R04 full view: newest-first pages from the very start, including the
+    // latest three exactly once, with stable cursor pagination and no omissions.
+    const seen: string[] = [];
+    let cursor: string | null = null;
+    let pageCount = 0;
+    do {
+      const query = cursor ? `&cursor=${encodeURIComponent(cursor)}` : '';
+      const page = await call(`/api/admin/rooms/${roomId}/questions/${textId.value}/text?limit=2${query}`, { token: admin });
+      expect(page.status).toBe(200);
+      expect(page.body.items.length).toBeGreaterThan(0);
+      expect(page.body.items.length).toBeLessThanOrEqual(2);
+      pageCount += 1;
+      seen.push(...page.body.items.map((item: any) => item.id));
+      cursor = page.body.has_more ? page.body.next_cursor : null;
+    } while (cursor && pageCount < 10);
+    expect(pageCount).toBe(4);
+    expect(seen).toHaveLength(7);
+    expect(new Set(seen).size).toBe(7);
+    // The newest three appear in the full view exactly once (R04 supersedes older-only detail).
+    expect([...latestIds].every((id) => seen.includes(String(id)))).toBe(true);
+    expect(seen.filter((id) => latestIds.has(id))).toHaveLength(3);
   });
 
   test('HR scope is read-only at the server boundary', async () => {

@@ -37,10 +37,21 @@ export function loadConfig(env: Record<string, string | undefined> = process.env
     .split(',')
     .map((value) => value.trim())
     .filter(Boolean);
+  // Cloud platforms (e.g. Railway) provide PORT and expect a 0.0.0.0 bind.
+  // Local Mode A/B keep loopback:3000 unless explicitly overridden; API_PORT and
+  // API_HOST always take precedence over the platform PORT variable.
+  const hasExplicitApiPort = env.API_PORT !== undefined && env.API_PORT !== '';
+  const hasPlatformPort = env.PORT !== undefined && env.PORT !== '';
+  const apiPort = hasExplicitApiPort
+    ? num(env, 'API_PORT', 3000)
+    : hasPlatformPort
+      ? num(env, 'PORT', 3000)
+      : 3000;
+  const apiHost = env.API_HOST || (hasPlatformPort && !hasExplicitApiPort ? '0.0.0.0' : '127.0.0.1');
   return {
     databaseUrl,
-    apiHost: env.API_HOST || '127.0.0.1',
-    apiPort: num(env, 'API_PORT', 3000),
+    apiHost,
+    apiPort,
     allowedOrigins,
     participantGrantTtlSeconds: num(env, 'GRANT_TTL_PARTICIPANT_SECONDS', 14400),
     facilitatorGrantTtlSeconds: num(env, 'GRANT_TTL_FACILITATOR_SECONDS', 28800),

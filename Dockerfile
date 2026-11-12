@@ -23,6 +23,8 @@ RUN bun install --frozen-lockfile --production
 COPY apps/api ./apps/api
 COPY db ./db
 COPY docker/start-api.sh ./docker/start-api.sh
+RUN chmod 755 docker/start-api.sh \
+ && chmod -R a+rX /app/apps /app/db /app/docker
 USER bun
 EXPOSE 3000
 CMD ["sh", "docker/start-api.sh"]

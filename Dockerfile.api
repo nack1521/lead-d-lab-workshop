@@ -1,0 +1,22 @@
+# syntax=docker/dockerfile:1
+# Dedicated API image for cloud deployment (e.g. Railway).
+# The root Dockerfile's LAST stage is the static web host, so a platform that
+# auto-detects the root Dockerfile without an explicit path would deploy the
+# wrong service. This file is API-only and is the verified deployment target.
+FROM oven/bun:1.4.4-alpine@sha256:4cf82f5686b196504fe119db3fcd9185b191f82ece82c40680e597228ec6070a
+WORKDIR /app
+COPY package.json bun.lock ./
+COPY apps/api/package.json apps/api/package.json
+COPY apps/web/package.json apps/web/package.json
+RUN bun install --frozen-lockfile --production
+COPY apps/api ./apps/api
+COPY db ./db
+COPY docker/start-api.sh ./docker/start-api.sh
+RUN chmod 755 docker/start-api.sh \
+ && chmod -R a+rX /app/apps /app/db /app/docker
+USER bun
+# Cloud platforms inject PORT and require 0.0.0.0. Local runs keep 127.0.0.1:3000
+# unless API_HOST/API_PORT is set; the entrypoint applies additive migrations then
+# execs the API, and /ready is the DB-backed readiness endpoint.
+EXPOSE 3000
+CMD ["sh", "docker/start-api.sh"]

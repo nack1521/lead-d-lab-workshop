@@ -165,6 +165,7 @@ export function createApp(deps: AppDeps) {
       // Never echo request bodies, tokens or database errors to clients.
       return rejected('INTERNAL_ERROR', 'ระบบไม่พร้อมให้บริการชั่วคราว', 500);
     })
+    .get('/', () => rejected('NOT_FOUND', 'API only; use /health, /ready, /api', 404))
     .get('/health', () => json({ status: 'ok' }))
     .get('/ready', async () => {
       try {

@@ -1,0 +1,15 @@
+bun test v1.4.4 (38afee6c8)
+
+tests/builder-views-r03.test.tsx:
+(pass) WORKSHOP-BUILDER-02 R03 UI seams > create is a single dialog action with cancel and confirm, no inline title field [1.77ms]
+(pass) WORKSHOP-BUILDER-02 R03 UI seams > three question-type controls are one deliberate group [0.20ms]
+(pass) WORKSHOP-BUILDER-02 R03 UI seams > ended room report shows a real score chart without any Open control [0.97ms]
+(pass) WORKSHOP-BUILDER-02 R03 UI seams > text report shows exactly latest three and a distinct additional-answers action [0.27ms]
+(pass) WORKSHOP-BUILDER-02 R03 UI seams > additional-answers dialog lists only the expanded older page and no latest three duplicate [0.21ms]
+(pass) WORKSHOP-BUILDER-02 R03 UI seams > empty score report is a labelled zero state with no fabricated mean [0.08ms]
+(pass) WORKSHOP-BUILDER-02 R03 UI seams > end action requires explicit confirmation dialog [0.09ms]
+
+ 7 pass
+ 0 fail
+ 28 expect() calls
+Ran 7 tests across 1 file. [32.00ms]

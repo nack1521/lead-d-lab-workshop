@@ -317,9 +317,13 @@ export function createBuilderRoutes(deps: { sql: Sql; config: Config; hub: Build
           const options = (q.options ?? []).map((option) => ({ ...option, count: counts[option.id] ?? 0, share: n > 0 ? Math.round(((counts[option.id] ?? 0) / n) * 10000) / 10000 : null }));
           reportQuestions.push({ ...base, counts, options: options.sort((a, b) => b.count - a.count || a.label.localeCompare(b.label)) });
         } else {
+          // Latest THREE responses (newest first). Additional older answers are a
+          // distinct paginated feed starting strictly before the third answer.
           const latest = await sql<{ id: string; text_value: string; accepted_at: Date }[]>`
-            select id, text_value, accepted_at from responses where question_id = ${q.id} order by accepted_at asc, id asc limit 5`;
-          reportQuestions.push({ ...base, text: { total: n, latest: latest.map((row) => ({ id: row.id, text: row.text_value, created_at: iso(row.accepted_at) })), page: 1, limit: 5, has_more: n > 5, next_cursor: n > 5 && latest.length === 5 ? encodeCursor(latest[4]) : null } });
+            select id, text_value, accepted_at from responses where question_id = ${q.id}
+            order by accepted_at desc, id desc limit 3`;
+          const cursorRow = latest.length === 3 ? latest[2] : latest[latest.length - 1] ?? null;
+          reportQuestions.push({ ...base, text: { total: n, latest: latest.map((row) => ({ id: row.id, text: row.text_value, created_at: iso(row.accepted_at) })), page: 1, limit: 3, has_more: n > latest.length, next_cursor: n > latest.length && cursorRow ? encodeCursor(cursorRow) : null } });
         }
       }
       return J({ status: 'ok', room: roomJson(found), joined_base: joinedBase, questions: reportQuestions, generated_at: new Date().toISOString() });
@@ -337,9 +341,9 @@ export function createBuilderRoutes(deps: { sql: Sql; config: Config; hub: Build
       if (cursor && !parsed) return R('VALIDATION_FAILED', 'cursor ไม่ถูกต้อง', 422);
       const rows = parsed
         ? await sql<{ id: string; text_value: string; accepted_at: Date }[]>`select id, text_value, accepted_at from responses where question_id = ${q.id}
-            and (accepted_at, id) > ((select accepted_at from responses where id = ${parsed.id}), ${parsed.id})
-            order by accepted_at asc, id asc limit ${limit + 1}`
-        : await sql<{ id: string; text_value: string; accepted_at: Date }[]>`select id, text_value, accepted_at from responses where question_id = ${q.id} order by accepted_at asc, id asc limit ${limit + 1}`;
+            and (accepted_at, id) < ((select accepted_at from responses where id = ${parsed.id}), ${parsed.id})
+            order by accepted_at desc, id desc limit ${limit + 1}`
+        : await sql<{ id: string; text_value: string; accepted_at: Date }[]>`select id, text_value, accepted_at from responses where question_id = ${q.id} order by accepted_at desc, id desc limit ${limit + 1}`;
       const [totalRow] = await sql<{ count: number }[]>`select count(*)::int as count from responses where question_id = ${q.id}`;
       const pageRows = rows.slice(0, limit);
       const hasMore = rows.length > limit;

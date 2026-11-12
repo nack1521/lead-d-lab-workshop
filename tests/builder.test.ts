@@ -139,17 +139,22 @@ describe('WORKSHOP-BUILDER-02 admin authoring and real data flow', () => {
     expect(pollAgg.options.find((option: any) => option.id === 'choice-1').share).toBe(1);
     const textAgg = report.body.questions.find((question: any) => question.id === textId.value);
     expect(textAgg.n).toBe(7);
-    expect(textAgg.text.latest).toHaveLength(5);
+    expect(textAgg.text.latest).toHaveLength(3);
     expect(textAgg.text.has_more).toBe(true);
-    const page1 = await call(`/api/admin/rooms/${roomId}/questions/${textId.value}/text?limit=5`, { token: admin });
+    const latestIds = new Set(textAgg.text.latest.map((item: any) => item.id));
+    // Additional answers are a distinct older feed starting after the latest three.
+    const page1 = await call(`/api/admin/rooms/${roomId}/questions/${textId.value}/text?limit=2&cursor=${textAgg.text.next_cursor}`, { token: admin });
     expect(page1.status).toBe(200);
-    expect(page1.body.items).toHaveLength(5);
+    expect(page1.body.items).toHaveLength(2);
+    expect(page1.body.items.every((item: any) => !latestIds.has(item.id))).toBe(true);
     expect(page1.body.has_more).toBe(true);
-    const page2 = await call(`/api/admin/rooms/${roomId}/questions/${textId.value}/text?limit=5&cursor=${page1.body.next_cursor}`, { token: admin });
-    // Stable pagination: the remaining rows are exactly total - first page.
-    expect(page2.body.items).toHaveLength(Math.max(0, page1.body.total - page1.body.items.length));
+    const page2 = await call(`/api/admin/rooms/${roomId}/questions/${textId.value}/text?limit=2&cursor=${page1.body.next_cursor}`, { token: admin });
+    expect(page2.status).toBe(200);
+    expect(page2.body.items).toHaveLength(2);
     expect(page2.body.has_more).toBe(false);
-    expect(page1.body.items[0].id).not.toBe(page2.body.items[0].id);
+    const allAdditionalIds = [...page1.body.items, ...page2.body.items].map((item: any) => item.id);
+    expect(new Set(allAdditionalIds).size).toBe(4);
+    expect(allAdditionalIds.every((id: string) => !latestIds.has(id))).toBe(true);
   });
 
   test('HR scope is read-only at the server boundary', async () => {

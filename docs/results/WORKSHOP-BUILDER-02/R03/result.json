@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "task_id": "WORKSHOP-BUILDER-02",
+  "run_id": "R03",
+  "reported_at": "2026-11-12T20:28:49+07:00",
+  "producer": "DeepSeek Harness (sole coding writer)",
+  "authoring_tool": "DeepSeek Harness",
+  "model": "deepseek-v4.1-flash-1017",
+  "source_kind": "direct",
+  "baseline_commit": "c8c8eb7",
+  "observed_head": "c8c8eb7",
+  "branch": "main",
+  "work_kind": "builder_r03_corrections",
+  "status": "READY_FOR_REVIEW",
+  "summary": "Applied R03 corrections: single Create button opens a title dialog whose confirm is the only POST (pending guard, cancel no row, success enters Questions workspace); 4px spacing rhythm and compact rectangular room rows with single-line Create, wrapping sidebar title, 44px controls; three equal question-type controls in one group (3-col desktop, stacked on narrow, never 2+1); Dashboard now renders persisted score/choice charts for every question independent of lifecycle, with separate ดูผล navigation and เปิดรับคําตอบ controls, zero states, neutral ended mode and explicit End confirmation; report text is exactly the latest three newest-first with a distinct older-answer cursor feed (no duplication) for facilitator and HR; fresh draft/open rooms publish/open without ROOM_ENDED while the ended-room server guard remains 409 and UI hides mutations after authoritative end; report reads do not mutate revision. UI seam tests 7/7, builder API/DB/WS tests 9/9, full suite 157 pass/1 skip/0 fail, typecheck/default+LAN builds 0, live report-after-end/HR/guard evidence captured. Browser screenshots and real visual/mobile flows NOT RUN.",
+  "detail_path": "docs/results/WORKSHOP-BUILDER-02/R03/result.md",
+  "cases": [
+    {"case_id": "WB2-R03-01", "status": "PASS", "evidence_paths": ["tests/builder-views-r03.test.tsx", "docs/results/WORKSHOP-BUILDER-02/R03/evidence/builder-views.log"]},
+    {"case_id": "WB2-R03-02", "status": "PARTIAL", "limitations": "Spacing/mobile/keyboard visual measurement and screenshots NOT RUN; CSS rhythm implemented from the requested values."},
+    {"case_id": "WB2-R03-03", "status": "PASS", "evidence_paths": ["tests/builder-views-r03.test.tsx", "apps/web/src/builder.tsx", "apps/web/src/styles.css"]},
+    {"case_id": "WB2-R03-04", "status": "PASS", "evidence_paths": ["tests/builder-views-r03.test.tsx", "docs/results/WORKSHOP-BUILDER-02/R03/evidence/report-after-end.json"]},
+    {"case_id": "WB2-R03-05", "status": "PASS", "evidence_paths": ["tests/builder.test.ts", "docs/results/WORKSHOP-BUILDER-02/R03/evidence/report-after-end.json"]},
+    {"case_id": "WB2-R03-06", "status": "PASS", "evidence_paths": ["docs/results/WORKSHOP-BUILDER-02/R03/evidence/report-after-end.json"], "limitations": "UI gating verified by source/seam tests; actual browser click path NOT RUN."},
+    {"case_id": "WB2-R03-07", "status": "NOT RUN", "limitations": "Actual browser/screenshot/phone flow, Mode B, cloud/LAN deployment, independent QA."}
+  ],
+  "commands": [
+    {"command": "bun test tests/builder-views-r03.test.tsx", "exit_code": 0, "outcome": "7 pass / 0 fail"},
+    {"command": "bun test tests/builder.test.ts", "exit_code": 0, "outcome": "9 pass / 0 fail"},
+    {"command": "bun test tests", "exit_code": 0, "outcome": "157 pass / 1 skip / 0 fail (158 tests)"},
+    {"command": "bun x tsc --noEmit", "exit_code": 0, "outcome": "no type errors"},
+    {"command": "bun run build:web / build:web:lan", "exit_code": 0, "outcome": "both builds succeed"},
+    {"command": "live API/DB report-after-end flow", "exit_code": 0, "outcome": "publish/open 200; 4 text answers; latest 3 + older page; report read-only; ended report retained; ended open 409; HR read 200/write 403"}
+  ],
+  "blockers": [],
+  "not_verified": ["browser screenshots and real desktop/phone visual/spacing measurement", "browser create/open/answer/report/text-pagination interactions", "Mode B/Docker regression", "cloud/LAN deployment", "independent QA/human acceptance"],
+  "next_gate": "User-assisted browser review of R03 at desktop/phone widths and report/text flows; independent QA. No push/deploy.",
+  "published": false
+}

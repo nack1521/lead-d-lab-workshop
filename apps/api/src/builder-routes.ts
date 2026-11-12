@@ -19,13 +19,14 @@ const R = (code: string, message: string, status: number, extra: Record<string, 
 const bearer = (request: Request) => /^Bearer (.+)$/.exec(request.headers.get('authorization') ?? '')?.[1] ?? null;
 const iso = (value: Date | null) => (value ? new Date(value).toISOString() : null);
 
-interface Room { id: string; title: string | null; join_code: string; status: 'active' | 'ended'; published: boolean; revision: number; active_question_id: string | null; created_at: Date; ended_at: Date | null; }
+interface Room { id: string; title: string | null; join_code: string; status: 'active' | 'ended'; published: boolean; revision: number; active_question_id: string | null; created_at: Date; ended_at: Date | null; answer_mode: 'facilitator' | 'self_paced'; }
 interface Question { id: string; session_id: string; seq: number; type: 'rating' | 'poll' | 'text'; label: string; help_text: string | null; options: { id: string; label: string }[] | null; rating_min: number | null; rating_max: number | null; receiving: boolean; closed_at: Date | null; }
 type QType = Question['type'];
 
 const roomJson = (room: Room) => ({
   id: room.id, title: room.title ?? 'ห้องเวิร์กช็อป', join_code: room.join_code, status: room.status,
   phase: room.status === 'ended' ? 'ended' : room.published ? 'open' : 'draft', published: room.published,
+  answer_mode: room.answer_mode,
   revision: Number(room.revision), active_question_id: room.active_question_id,
   created_at: iso(room.created_at), ended_at: iso(room.ended_at),
 });
@@ -90,7 +91,7 @@ export function createBuilderRoutes(deps: { sql: Sql; config: Config; hub: Build
   }
   const adminOnly = (scope: 'admin' | 'hr') => (scope === 'admin' ? null : R('FORBIDDEN', 'สิทธิ์ HR อ่านได้อย่างเดียว', 403));
   async function room(id: string): Promise<Room | null> {
-    const [row] = await sql<Room[]>`select id, title, join_code, status, published, revision, active_question_id, created_at, ended_at from sessions where id = ${id} limit 1`;
+    const [row] = await sql<Room[]>`select id, title, join_code, status, published, revision, active_question_id, created_at, ended_at, answer_mode from sessions where id = ${id} limit 1`;
     return row ?? null;
   }
   async function question(id: string): Promise<Question | null> {
@@ -121,7 +122,7 @@ export function createBuilderRoutes(deps: { sql: Sql; config: Config; hub: Build
     .get('/api/admin/rooms', async ({ request }) => {
       const a = await auth(request); if (!a.ok) return a.response;
       const rooms = await sql<(Room & { questions: number; participants: number; responses: number })[]>`
-        select s.id, s.title, s.join_code, s.status, s.published, s.revision, s.active_question_id, s.created_at, s.ended_at,
+        select s.id, s.title, s.join_code, s.status, s.published, s.revision, s.active_question_id, s.created_at, s.ended_at, s.answer_mode,
           (select count(*)::int from questions q where q.session_id = s.id) as questions,
           (select count(*)::int from participants p where p.session_id = s.id) as participants,
           (select count(*)::int from responses r where r.session_id = s.id) as responses
@@ -138,7 +139,7 @@ export function createBuilderRoutes(deps: { sql: Sql; config: Config; hub: Build
       const id = crypto.randomUUID();
       const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
       const code = Array.from(crypto.getRandomValues(new Uint8Array(5))).map((b) => alphabet[b % alphabet.length]).join('');
-      await sql`insert into sessions (id, join_code, title, published, active_question_id) values (${id}, ${code}, ${title}, false, null)`;
+      await sql`insert into sessions (id, join_code, title, published, active_question_id, answer_mode) values (${id}, ${code}, ${title}, false, null, 'self_paced')`;
       const created = await room(id);
       return J({ status: 'ok', room: roomJson(created as Room) }, 201);
     })
@@ -155,6 +156,7 @@ export function createBuilderRoutes(deps: { sql: Sql; config: Config; hub: Build
       const found = await room(String(params.roomId));
       if (!found) return R('ROOM_NOT_FOUND', 'ไม่พบห้องนี้', 404);
       if (found.status === 'ended') return R('ROOM_ENDED', 'ห้องนี้จบแล้ว', 409);
+      if (found.answer_mode === 'self_paced' && found.published) return R('ROOM_OPEN_STRUCTURE_LOCKED', 'ห้องเปิดแล้ว จึงเพิ่มคําถามไม่ได้', 409);
       let body: Record<string, unknown>;
       try { body = (await request.json()) as Record<string, unknown>; } catch { return R('INVALID_JSON', 'ข้อมูลคําขอไม่ถูกต้อง', 400); }
       const parsed = parseQuestion(body);
@@ -177,6 +179,10 @@ export function createBuilderRoutes(deps: { sql: Sql; config: Config; hub: Build
       let body: Record<string, unknown>;
       try { body = (await request.json()) as Record<string, unknown>; } catch { return R('INVALID_JSON', 'ข้อมูลคําขอไม่ถูกต้อง', 400); }
       const responses = await responseCount(q.id);
+      if (found.answer_mode === 'self_paced' && found.published) {
+        const disallowed = Object.keys(body).filter((key) => key !== 'label' && key !== 'help_text');
+        if (disallowed.length) return R('ROOM_OPEN_STRUCTURE_LOCKED', 'ห้องเปิดแล้ว แก้ได้เฉพาะถ้อยคําและคําแนะนํา', 409);
+      }
       if (responses > 0) {
         const disallowed = Object.keys(body).filter((key) => key !== 'label' && key !== 'help_text');
         if (disallowed.length) return R('QUESTION_LOCKED', 'คําถามนี้มีคําตอบแล้ว แก้ได้เฉพาะถ้อยคําและคําแนะนํา', 409);
@@ -200,6 +206,7 @@ export function createBuilderRoutes(deps: { sql: Sql; config: Config; hub: Build
       const found = await room(String(params.roomId));
       if (!found) return R('ROOM_NOT_FOUND', 'ไม่พบห้องนี้', 404);
       if (found.status === 'ended') return R('ROOM_ENDED', 'ห้องนี้จบแล้ว', 409);
+      if (found.answer_mode === 'self_paced' && found.published) return R('ROOM_OPEN_STRUCTURE_LOCKED', 'ห้องเปิดแล้ว จึงลบคําถามไม่ได้', 409);
       const q = await question(String(params.questionId));
       if (!q || q.session_id !== found.id) return R('QUESTION_NOT_FOUND', 'ไม่พบคําถามนี้', 404);
       if ((await responseCount(q.id)) > 0) return R('QUESTION_LOCKED', 'ลบคําถามที่มีคําตอบแล้วไม่ได้', 409);
@@ -212,6 +219,7 @@ export function createBuilderRoutes(deps: { sql: Sql; config: Config; hub: Build
       const denied = adminOnly(a.scope); if (denied) return denied;
       const found = await room(String(params.roomId));
       if (!found) return R('ROOM_NOT_FOUND', 'ไม่พบห้องนี้', 404);
+      if (found.answer_mode === 'self_paced' && found.published) return R('ROOM_OPEN_STRUCTURE_LOCKED', 'ห้องเปิดแล้ว จึงสลับลําดับไม่ได้', 409);
       const [count] = await sql<{ count: number }[]>`select count(*)::int as count from responses where session_id = ${found.id}`;
       if (count.count > 0) return R('QUESTION_LOCKED', 'ห้องนี้มีคําตอบแล้ว จึงสลับลําดับไม่ได้', 409);
       let body: Record<string, unknown>;
@@ -236,6 +244,10 @@ export function createBuilderRoutes(deps: { sql: Sql; config: Config; hub: Build
       const found = await room(String(params.roomId));
       if (!found) return R('ROOM_NOT_FOUND', 'ไม่พบห้องนี้', 404);
       if (found.status === 'ended') return R('ROOM_ENDED', 'ห้องนี้จบแล้ว', 409);
+      const [questionCount] = await sql<{ count: number }[]>`select count(*)::int as count from questions where session_id = ${found.id}`;
+      if (questionCount.count === 0) return R('ROOM_EMPTY', 'เพิ่มคําถามอย่างน้อยหนึ่งข้อก่อนเปิดห้อง', 409);
+      // Room-level availability for self-paced rooms: do not select a per-question
+      // active question; legacy facilitator rooms keep active_question_id behavior.
       await sql`update sessions set published = true where id = ${found.id}`;
       return J({ status: 'ok', room: roomJson((await room(found.id)) as Room) });
     })
@@ -244,6 +256,7 @@ export function createBuilderRoutes(deps: { sql: Sql; config: Config; hub: Build
       const denied = adminOnly(a.scope); if (denied) return denied;
       const found = await room(String(params.roomId));
       if (!found) return R('ROOM_NOT_FOUND', 'ไม่พบห้องนี้', 404);
+      if (found.answer_mode === 'self_paced') return R('ROOM_LEVEL_OPEN_ONLY', 'ห้องนี้เปิดทุกรายการพร้อมกัน', 409);
       const q = await question(String(params.questionId));
       if (!q || q.session_id !== found.id) return R('QUESTION_NOT_FOUND', 'ไม่พบคําถามนี้', 404);
       if (found.status === 'ended') return R('ROOM_ENDED', 'ห้องนี้จบแล้ว', 409);
@@ -262,6 +275,7 @@ export function createBuilderRoutes(deps: { sql: Sql; config: Config; hub: Build
       const denied = adminOnly(a.scope); if (denied) return denied;
       const found = await room(String(params.roomId));
       if (!found) return R('ROOM_NOT_FOUND', 'ไม่พบห้องนี้', 404);
+      if (found.answer_mode === 'self_paced') return R('ROOM_LEVEL_OPEN_ONLY', 'ห้องนี้เปิดทุกรายการพร้อมกัน', 409);
       const [updated] = await sql<{ id: string }[]>`
         update questions set receiving = false, closed_at = coalesce(closed_at, now())
         where id = ${String(params.questionId)} and session_id = ${found.id} and receiving = true returning id`;

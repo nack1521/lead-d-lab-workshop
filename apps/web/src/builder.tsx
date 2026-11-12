@@ -15,7 +15,7 @@ type QType = 'rating' | 'poll' | 'text';
 interface Option { id: string; label: string }
 interface RoomRow {
   id: string; title: string; join_code: string; status: 'active' | 'ended'; phase: Phase;
-  published: boolean; revision: number; active_question_id: string | null;
+  published: boolean; revision: number; active_question_id: string | null; answer_mode: 'facilitator' | 'self_paced';
   counts?: { questions: number; participants: number; responses: number };
 }
 interface QuestionRow {
@@ -225,6 +225,7 @@ function Workspace({ mode, token, room, onBack }: { mode: 'admin' | 'hr'; token:
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [connected, setConnected] = useState(false);
   const [confirmEnd, setConfirmEnd] = useState(false);
+  const [busy, setBusy] = useState<string | null>(null);
   const [ending, setEnding] = useState(false);
   const [expanded, setExpanded] = useState<ExpandedText | null>(null);
   const wsRef = useRef<{ close: () => void } | null>(null);
@@ -234,18 +235,20 @@ function Workspace({ mode, token, room, onBack }: { mode: 'admin' | 'hr'; token:
 
   const refresh = async () => {
     try {
-      const workspace = await api<{ room: RoomRow; questions: QuestionRow[]; snapshot: Snapshot; realtime_grant: string }>(`/api/admin/rooms/${currentRoom.id}/workspace`, token);
+      const [workspace, reportData] = await Promise.all([
+        api<{ room: RoomRow; questions: QuestionRow[]; snapshot: Snapshot; realtime_grant: string }>(`/api/admin/rooms/${currentRoom.id}/workspace`, token),
+        api<Report>(`/api/admin/rooms/${currentRoom.id}/report`, token),
+      ]);
       setCurrentRoom(workspace.room);
       setQuestions(workspace.questions);
       setSnapshot(workspace.snapshot);
       setLastUpdated(new Date());
+      setReport(reportData);
       if (!selectedId && workspace.questions.length > 0) setSelectedId(workspace.questions[0].id);
-      setReport(await api<Report>(`/api/admin/rooms/${currentRoom.id}/report`, token));
       if (!wsRef.current) {
         wsRef.current = connectSocket(workspace.realtime_grant, {
           onSnapshot: (incoming) => {
             setSnapshot(incoming as Snapshot); setLastUpdated(new Date()); setConnected(true);
-            void api<Report>(`/api/admin/rooms/${currentRoom.id}/report`, token).then(setReport).catch(() => {});
           },
           onStatus: (value) => setConnected(value === 'open'),
           onError: () => setConnected(false),
@@ -256,10 +259,40 @@ function Workspace({ mode, token, room, onBack }: { mode: 'admin' | 'hr'; token:
 
   useEffect(() => { void refresh(); return () => { wsRef.current?.close(); wsRef.current = null; }; }, [currentRoom.id]);
 
+  const refreshReport = async () => {
+    try { setReport(await api<Report>(`/api/admin/rooms/${currentRoom.id}/report`, token)); }
+    catch (err) { setStatus(err instanceof Error ? err.message : 'Could not refresh results'); }
+  };
+
   const mutate = async (path: string, body?: unknown, method = 'POST') => {
-    if (!canMutate) return;
-    try { setStatus(null); await api(`/api/admin/rooms/${currentRoom.id}${path}`, token, { method, ...(body === undefined ? {} : { body: JSON.stringify(body) }) }); await refresh(); }
-    catch (err) { setStatus(err instanceof Error ? err.message : 'That action failed'); }
+    if (!canMutate || busy) return;
+    setBusy(path);
+    try {
+      setStatus(null);
+      const result = await api<Record<string, any>>(`/api/admin/rooms/${currentRoom.id}${path}`, token, { method, ...(body === undefined ? {} : { body: JSON.stringify(body) }) });
+      // Use the authoritative mutation result instead of a second workspace read
+      // (which also used to issue a fresh realtime grant and refetch the report).
+      if (result?.question) {
+        setQuestions((previous) => {
+          const exists = previous.some((question) => question.id === result.question.id);
+          const next = exists ? previous.map((question) => question.id === result.question.id ? result.question : question) : [...previous, result.question];
+          return next;
+        });
+        if (path === '/questions') setSelectedId(result.question.id);
+      }
+      if (Array.isArray(result?.order)) {
+        setQuestions((previous) => {
+          const byId = new Map(previous.map((question) => [question.id, question]));
+          return result.order.map((id: string) => byId.get(id)).filter(Boolean) as QuestionRow[];
+        });
+      }
+      if (path === '/end' || path === '/publish') {
+        if (result?.room) setCurrentRoom(result.room);
+        if (path === '/end') setTab('dashboard');
+      }
+      if (tab === 'dashboard') await refreshReport();
+    } catch (err) { setStatus(err instanceof Error ? err.message : 'That action failed'); }
+    finally { setBusy(null); }
   };
 
   const loadAdditionalText = async (questionId: string, cursor: string | null, append = false) => {
@@ -294,7 +327,7 @@ function Workspace({ mode, token, room, onBack }: { mode: 'admin' | 'hr'; token:
         </div>
         <nav className="side-nav" aria-label="Room navigation">
           {!readOnly && !ended ? <button type="button" className={tab === 'questions' ? 'active' : ''} onClick={() => setTab('questions')}>Questions</button> : null}
-          <button type="button" className={tab === 'dashboard' ? 'active' : ''} onClick={() => setTab('dashboard')}>{readOnly ? 'Reports' : 'Dashboard'}</button>
+          <button type="button" className={tab === 'dashboard' ? 'active' : ''} onClick={() => { setTab('dashboard'); void refreshReport(); }}>{readOnly ? 'Reports' : 'Dashboard'}</button>
         </nav>
         {canMutate ? (
           <div className="side-actions">
@@ -341,10 +374,13 @@ function Workspace({ mode, token, room, onBack }: { mode: 'admin' | 'hr'; token:
             }}
             onOpen={(questionId) => void mutate(`/questions/${questionId}/open`)}
             onClose={(questionId) => void mutate(`/questions/${questionId}/close`)}
+            answerMode={currentRoom.answer_mode}
+            structureLocked={currentRoom.answer_mode === 'self_paced' && currentRoom.published}
+            busy={busy}
           />
         ) : (
           <Dashboard
-            readOnly={readOnly} ended={ended} questions={questions} report={report} snapshot={snapshot}
+            readOnly={readOnly} ended={ended} questions={questions} report={report} snapshot={snapshot} answerMode={currentRoom.answer_mode}
             onOpen={(questionId) => void mutate(`/questions/${questionId}/open`)}
             onClose={(questionId) => void mutate(`/questions/${questionId}/close`)}
             expanded={expanded}
@@ -367,14 +403,14 @@ function Workspace({ mode, token, room, onBack }: { mode: 'admin' | 'hr'; token:
   );
 }
 
-export function QuestionTypeGroup({ onCreate }: { onCreate: (type: QType) => void }) {
+export function QuestionTypeGroup({ onCreate, disabled = false }: { onCreate: (type: QType) => void; disabled?: boolean }) {
   return (
     <section className="question-types" aria-label="Add question">
       <span className="types-label">Add question</span>
       <div className="type-group" role="group">
-        <button type="button" className="type-button" onClick={() => onCreate('rating')}>Score</button>
-        <button type="button" className="type-button" onClick={() => onCreate('poll')}>Multiple choice</button>
-        <button type="button" className="type-button" onClick={() => onCreate('text')}>Text response</button>
+        <button type="button" className="type-button" onClick={() => onCreate('rating')} disabled={disabled}>Score</button>
+        <button type="button" className="type-button" onClick={() => onCreate('poll')} disabled={disabled}>Multiple choice</button>
+        <button type="button" className="type-button" onClick={() => onCreate('text')} disabled={disabled}>Text response</button>
       </div>
     </section>
   );
@@ -384,11 +420,16 @@ function QuestionsTab(props: {
   questions: QuestionRow[]; selected: QuestionRow | null; selectedId: string | null; onSelect: (id: string) => void;
   onCreate: (type: QType) => void; onSave: (id: string, body: Record<string, unknown>) => void; onDelete: (id: string) => void;
   onMove: (id: string, direction: 'up' | 'down') => void; onOpen: (id: string) => void; onClose: (id: string) => void;
+  answerMode: 'facilitator' | 'self_paced'; structureLocked: boolean; busy: string | null;
 }) {
   const { questions, selected } = props;
   return (
     <>
-      <QuestionTypeGroup onCreate={props.onCreate} />
+      {props.structureLocked ? (
+        <p className="lock-note">This room is open. Questions, order, types and options are locked; wording and help text can still be edited.</p>
+      ) : (
+        <QuestionTypeGroup onCreate={props.onCreate} disabled={Boolean(props.busy)} />
+      )}
       <div className="editor-layout">
         <div className="question-rail">
           <div className="rail-head"><span>Questions</span></div>
@@ -407,7 +448,7 @@ function QuestionsTab(props: {
         </div>
         <div className="editor-panel">
           {!selected ? <p className="muted">Select a question or add a new one</p> : (
-            <QuestionEditor key={selected.id} question={selected} onSave={props.onSave} onDelete={props.onDelete} onMove={props.onMove} onOpen={props.onOpen} onClose={props.onClose} />
+            <QuestionEditor key={selected.id} question={selected} answerMode={props.answerMode} structureLocked={props.structureLocked} busy={props.busy} onSave={props.onSave} onDelete={props.onDelete} onMove={props.onMove} onOpen={props.onOpen} onClose={props.onClose} />
           )}
         </div>
         <aside className="preview-panel">
@@ -419,7 +460,7 @@ function QuestionsTab(props: {
   );
 }
 
-function QuestionEditor(props: { question: QuestionRow; onSave: (id: string, body: Record<string, unknown>) => void; onDelete: (id: string) => void; onMove: (id: string, direction: 'up' | 'down') => void; onOpen: (id: string) => void; onClose: (id: string) => void }) {
+function QuestionEditor(props: { question: QuestionRow; answerMode: 'facilitator' | 'self_paced'; structureLocked: boolean; busy: string | null; onSave: (id: string, body: Record<string, unknown>) => void; onDelete: (id: string) => void; onMove: (id: string, direction: 'up' | 'down') => void; onOpen: (id: string) => void; onClose: (id: string) => void }) {
   const q = props.question;
   const [label, setLabel] = useState(q.label);
   const [help, setHelp] = useState(q.help_text ?? '');
@@ -432,9 +473,9 @@ function QuestionEditor(props: { question: QuestionRow; onSave: (id: string, bod
       <div className="editor-head">
         <span className="type-chip">{typeLabel(q.type)}</span>
         <div className="editor-tools">
-          <button type="button" className="ghost" onClick={() => props.onMove(q.id, 'up')} aria-label="Move up">↑</button>
-          <button type="button" className="ghost" onClick={() => props.onMove(q.id, 'down')} aria-label="Move down">↓</button>
-          <button type="button" className="ghost danger-text" onClick={() => props.onDelete(q.id)} disabled={locked} aria-label="Delete question">Delete</button>
+          <button type="button" className="ghost" onClick={() => props.onMove(q.id, 'up')} disabled={props.structureLocked || Boolean(props.busy)} aria-label="Move up">↑</button>
+          <button type="button" className="ghost" onClick={() => props.onMove(q.id, 'down')} disabled={props.structureLocked || Boolean(props.busy)} aria-label="Move down">↓</button>
+          <button type="button" className="ghost danger-text" onClick={() => props.onDelete(q.id)} disabled={locked || props.structureLocked || Boolean(props.busy)} aria-label="Delete question">Delete</button>
         </div>
       </div>
       {locked ? <p className="lock-note">This question has responses: only wording and help text can change. Type, range, options and deletion are locked.</p> : null}
@@ -462,8 +503,8 @@ function QuestionEditor(props: { question: QuestionRow; onSave: (id: string, bod
         </div>
       ) : null}
       <div className="editor-actions">
-        <button type="button" className="primary" onClick={() => props.onSave(q.id, { label, help_text: help, ...(locked ? {} : q.type === 'rating' ? { rating_min: min, rating_max: max } : q.type === 'poll' ? { options } : {}) })}>Save changes</button>
-        {q.receiving ? <button type="button" className="secondary" onClick={() => props.onClose(q.id)}>Close responses</button> : <button type="button" className="secondary" onClick={() => props.onOpen(q.id)} disabled={q.locked}>Open responses</button>}
+        <button type="button" className="primary" onClick={() => props.onSave(q.id, { label, help_text: help, ...(locked || props.structureLocked ? {} : q.type === 'rating' ? { rating_min: min, rating_max: max } : q.type === 'poll' ? { options } : {}) })} disabled={Boolean(props.busy)}>{props.busy ? 'Saving…' : 'Save changes'}</button>
+        {props.answerMode === 'facilitator' ? (q.receiving ? <button type="button" className="secondary" onClick={() => props.onClose(q.id)}>Close responses</button> : <button type="button" className="secondary" onClick={() => props.onOpen(q.id)} disabled={q.locked}>Open responses</button>) : null}
       </div>
     </div>
   );
@@ -488,7 +529,7 @@ function ParticipantPreview({ question }: { question: QuestionRow | null }) {
 
 function Dashboard(props: {
   readOnly: boolean; ended: boolean; questions: QuestionRow[]; report: Report | null; snapshot: Snapshot | null;
-  onOpen: (id: string) => void; onClose: (id: string) => void;
+  onOpen: (id: string) => void; onClose: (id: string) => void; answerMode: 'facilitator' | 'self_paced';
   expanded: ExpandedText | null; onViewAdditional: (id: string, cursor: string | null) => void; onLoadMore: (id: string) => void; onCloseExpanded: () => void;
 }) {
   const reportById = new Map((props.report?.questions ?? []).map((question) => [question.id, question]));
@@ -511,6 +552,7 @@ function Dashboard(props: {
           expanded={props.expanded?.questionId === question.id ? props.expanded : null}
           readOnly={props.readOnly}
           ended={props.ended}
+          answerMode={props.answerMode}
           onOpen={() => props.onOpen(question.id)}
           onClose={() => props.onClose(question.id)}
           onViewAdditional={() => props.onViewAdditional(question.id, null)}
@@ -524,6 +566,7 @@ function Dashboard(props: {
 
 export function ReportCard(props: {
   question: QuestionRow; aggregate: ReportQuestion | null; expanded: ExpandedText | null; readOnly: boolean; ended: boolean;
+  answerMode: 'facilitator' | 'self_paced';
   onOpen: () => void; onClose: () => void; onViewAdditional: () => void; onLoadMore: () => void; onCloseExpanded: () => void;
 }) {
   const { question, aggregate, expanded } = props;
@@ -538,8 +581,8 @@ export function ReportCard(props: {
           {question.help_text ? <p className="muted">{question.help_text}</p> : null}
         </div>
         <div className="report-status-col">
-          <span className={`phase ${question.receiving ? 'phase-open' : 'phase-ended'}`}>{question.receiving ? 'Open responses' : props.ended ? 'Ended' : 'Closed'}</span>
-          {!props.readOnly && !props.ended ? (
+          <span className={`phase ${props.ended ? 'phase-ended' : 'phase-open'}`}>{props.ended ? 'Ended' : props.answerMode === 'self_paced' ? 'Available' : question.receiving ? 'Open responses' : 'Closed'}</span>
+          {!props.readOnly && !props.ended && props.answerMode === 'facilitator' ? (
             question.receiving
               ? <button type="button" className="secondary" onClick={props.onClose}>Close responses</button>
               : <button type="button" className="secondary" onClick={props.onOpen} disabled={question.locked}>Open responses</button>

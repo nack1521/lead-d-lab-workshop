@@ -163,6 +163,7 @@ function RoomPage() {
   const [drafts, setDrafts] = useState<Record<string, Draft>>({});
   const [metas, setMetas] = useState<Record<string, QuestionMeta>>({});
   const [questionClosed, setQuestionClosed] = useState(false);
+  const [progress, setProgress] = useState<{ answered: number; total: number; completed: boolean; number: number } | null>(null);
   const [grantValid, setGrantValid] = useState(true);
   const [sending, setSending] = useState(false);
   const revisionRef = useRef(-1);
@@ -170,13 +171,23 @@ function RoomPage() {
 
   /** Apply one authoritative question/answer state, scoped strictly to its question id. */
   const applyAuthoritative = (
-    data: { question: Question | null; own_response: OwnResponse | null; session_status: 'active' | 'ended' },
+    data: {
+      question: Question | null;
+      own_response: OwnResponse | null;
+      session_status: 'active' | 'ended';
+      progress?: { answered: number; total: number; completed: boolean; number: number } | null;
+      answer_mode?: 'facilitator' | 'self_paced';
+    },
     revision: number,
   ) => {
     revisionRef.current = revision;
     const activeQuestion = data.question;
     setQuestion(activeQuestion);
-    setQuestionClosed(Boolean(activeQuestion && !activeQuestion.receiving) || data.session_status === 'ended');
+    setProgress(data.progress ?? null);
+    const closed =
+      data.session_status === 'ended' ||
+      (data.answer_mode === 'self_paced' ? false : Boolean(activeQuestion && !activeQuestion.receiving));
+    setQuestionClosed(closed);
     if (!activeQuestion) return;
     activeQuestionIdRef.current = activeQuestion.id;
     const own = data.own_response;
@@ -201,7 +212,13 @@ function RoomPage() {
       // A delayed HTTP response never overwrites newer authoritative state.
       if (isOlderRevision(revisionRef.current, data.session.revision)) return;
       applyAuthoritative(
-        { question: data.question, own_response: data.own_response, session_status: data.session.status },
+        {
+          question: data.question,
+          own_response: data.own_response,
+          session_status: data.session.status,
+          progress: data.progress ?? null,
+          answer_mode: data.session.answer_mode,
+        },
         data.session.revision,
       );
       setGrantValid(true);
@@ -224,6 +241,8 @@ function RoomPage() {
             question: message.question,
             own_response: message.own_response,
             session_status: message.session_status === 'ended' ? 'ended' : 'active',
+            progress: (message as { progress?: { answered: number; total: number; completed: boolean; number: number } | null }).progress ?? null,
+            answer_mode: (message as { answer_mode?: 'facilitator' | 'self_paced' }).answer_mode,
           },
           message.revision,
         );
@@ -281,6 +300,28 @@ function RoomPage() {
       if (classification === 'accepted') {
         const response = (body.response ?? null) as OwnResponse | null;
         const questionId = attempt.payload.questionId;
+        const state = body.participant_state as
+          | {
+              session?: { revision: number; status: 'active' | 'ended'; answer_mode?: 'facilitator' | 'self_paced' };
+              question: Question | null;
+              own_response: OwnResponse | null;
+              progress?: { answered: number; total: number; completed: boolean; number: number } | null;
+            }
+          | undefined;
+        if (state?.session) {
+          // The server already computed the next unanswered question; advance
+          // immediately without another round trip. Never advance on unknown.
+          applyAuthoritative(
+            {
+              question: state.question,
+              own_response: state.own_response,
+              session_status: state.session.status,
+              progress: state.progress ?? null,
+              answer_mode: state.session.answer_mode,
+            },
+            state.session.revision,
+          );
+        }
         if (response) {
           setOwnResponses((previous) => ({ ...previous, [questionId]: response }));
           setDrafts((previous) => ({ ...previous, [questionId]: emptyDraft(response) }));
@@ -373,6 +414,7 @@ function RoomPage() {
       questionClosed={questionClosed || !grantValid}
       canFreshAttempt={canFresh}
       sending={sending}
+      progress={progress}
       onRating={(value) => updateDraft({ rating: value })}
       onOption={(value) => updateDraft({ optionId: value })}
       onComment={(value) => updateDraft({ comment: value })}

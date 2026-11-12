@@ -62,19 +62,23 @@ describe('WORKSHOP-BUILDER-02 admin authoring and real data flow', () => {
   test('rejects invalid input and supports reorder while no answers exist', async () => {
     expect((await call(`/api/admin/rooms/${roomId}/questions`, { method: 'POST', token: admin, body: JSON.stringify({ type: 'rating', label: '', rating_min: 5, rating_max: 1 }) })).status).toBe(422);
     expect((await call(`/api/admin/rooms/${roomId}/questions`, { method: 'POST', token: admin, body: JSON.stringify({ type: 'poll', label: 'x', options: ['one'] }) })).status).toBe(422);
-    const reorder = await call(`/api/admin/rooms/${roomId}/questions/reorder`, { method: 'POST', token: admin, body: JSON.stringify({ order: [textId.value, ratingId.value, pollId.value] }) });
+    const reorder = await call(`/api/admin/rooms/${roomId}/questions/reorder`, { method: 'POST', token: admin, body: JSON.stringify({ order: [ratingId.value, pollId.value, textId.value] }) });
     expect(reorder.status).toBe(200);
     expect((await call(`/api/admin/rooms/${roomId}/questions/reorder`, { method: 'POST', token: admin, body: JSON.stringify({ order: [ratingId.value] }) })).status).toBe(422);
   });
 
   test('participant joins only an open room, answers, gets saved acknowledgement', async () => {
     expect((await call(`/api/admin/rooms/${roomId}/publish`, { method: 'POST', token: admin })).status).toBe(200);
-    expect((await call(`/api/admin/rooms/${roomId}/questions/${ratingId.value}/open`, { method: 'POST', token: admin })).status).toBe(200);
+    // Self-paced rooms: per-question open is not available; all questions are
+    // answerable in seq and the participant starts at Q1.
+    expect((await call(`/api/admin/rooms/${roomId}/questions/${ratingId.value}/open`, { method: 'POST', token: admin })).status).toBe(409);
     const join = await call('/api/join', { method: 'POST', body: JSON.stringify({ join_code: roomCode, join_key: `builder-${crypto.randomUUID()}`, nickname: 'ผู้ร่วมทดสอบ' }) });
     expect(join.status).toBe(201);
+    console.log('DEBUG join', JSON.stringify(join.body.question));
     expect(join.body.question.type).toBe('rating');
     participantGrant = join.body.grant;
     const submit = await call(`/api/questions/${ratingId.value}/submissions`, { method: 'POST', token: participantGrant, body: JSON.stringify({ idempotency_key: crypto.randomUUID(), type: 'rating', rating: 4 }) });
+    console.log('DEBUG submit', submit.status, JSON.stringify(submit.body));
     expect(submit.status).toBe(201);
     expect(submit.body.response.rating).toBe(4);
     const replay = await call(`/api/questions/${ratingId.value}/submissions`, { method: 'POST', token: participantGrant, body: JSON.stringify({ idempotency_key: 'same-key', type: 'rating', rating: 4 }) });
@@ -106,45 +110,49 @@ describe('WORKSHOP-BUILDER-02 admin authoring and real data flow', () => {
     expect(score.joined_base).toBe(1);
   });
 
-  test('answer-after-close is rejected and questions lock after answers', async () => {
-    expect((await call(`/api/admin/rooms/${roomId}/questions/${ratingId.value}/close`, { method: 'POST', token: admin })).status).toBe(200);
-    // An existing responder gets the saved response back (idempotent dedup);
-    // a NEW participant must be rejected after close.
+  test('room-level answering: out-of-sequence rejected and structure locks while open', async () => {
+    // A new participant's first unanswered question is Q1, so Q2 cannot be
+    // submitted first (server-enforced sequence).
     const lateJoin = await call('/api/join', { method: 'POST', body: JSON.stringify({ join_code: roomCode, join_key: `late-${crypto.randomUUID()}` }) });
     expect(lateJoin.status).toBe(201);
-    const afterClose = await call(`/api/questions/${ratingId.value}/submissions`, { method: 'POST', token: lateJoin.body.grant, body: JSON.stringify({ idempotency_key: crypto.randomUUID(), type: 'rating', rating: 5 }) });
-    expect(afterClose.status).toBe(409);
+    const outOfSequence = await call(`/api/questions/${pollId.value}/submissions`, {
+      method: 'POST', token: lateJoin.body.grant, body: JSON.stringify({ idempotency_key: crypto.randomUUID(), type: 'poll', option_id: 'choice-1' }),
+    });
+    expect(outOfSequence.status).toBe(409);
+    expect(outOfSequence.body.code).toBe('OUT_OF_SEQUENCE');
+    // Open rooms lock structure but allow wording edits.
     const locked = await call(`/api/admin/rooms/${roomId}/questions/${ratingId.value}`, { method: 'PATCH', token: admin, body: JSON.stringify({ rating_max: 10 }) });
     expect(locked.status).toBe(409);
-    expect(locked.body.code).toBe('QUESTION_LOCKED');
-    const wording = await call(`/api/admin/rooms/${roomId}/questions/${ratingId.value}`, { method: 'PATCH', token: admin, body: JSON.stringify({ label: 'คะแนน (แก้ถ้อยคํา)' }) });
+    expect(locked.body.code).toBe('ROOM_OPEN_STRUCTURE_LOCKED');
+    const wording = await call(`/api/admin/rooms/${roomId}/questions/${ratingId.value}`, { method: 'PATCH', token: admin, body: JSON.stringify({ label: 'Score question (edited wording)' }) });
     expect(wording.status).toBe(200);
   });
 
-  test('choice and text answers, latest five + stable pagination', async () => {
-    await call(`/api/admin/rooms/${roomId}/questions/${pollId.value}/open`, { method: 'POST', token: admin });
+  test('choice and text answers in sequence, latest three + full pagination', async () => {
+    // Existing participant already answered Q1; the next unanswered is Q2.
     const poll = await call(`/api/questions/${pollId.value}/submissions`, { method: 'POST', token: participantGrant, body: JSON.stringify({ idempotency_key: crypto.randomUUID(), type: 'poll', option_id: 'choice-1' }) });
     expect(poll.status).toBe(201);
-    await call(`/api/admin/rooms/${roomId}/questions/${textId.value}/open`, { method: 'POST', token: admin });
-    for (let index = 0; index < 7; index += 1) {
+    const text = await call(`/api/questions/${textId.value}/submissions`, { method: 'POST', token: participantGrant, body: JSON.stringify({ idempotency_key: crypto.randomUUID(), type: 'text', text: 'คําตอบข้อความ participant 1' }) });
+    expect(text.status).toBe(201);
+    for (let index = 0; index < 6; index += 1) {
       const respondent = await call('/api/join', { method: 'POST', body: JSON.stringify({ join_code: roomCode, join_key: `text-${index}-${crypto.randomUUID()}` }) });
       expect(respondent.status).toBe(201);
-      const text = await call(`/api/questions/${textId.value}/submissions`, { method: 'POST', token: respondent.body.grant, body: JSON.stringify({ idempotency_key: crypto.randomUUID(), type: 'text', text: `คําตอบข้อความ ${index}` }) });
-      expect(text.status).toBe(201);
+      // Each participant independently answers all three questions in seq.
+      expect((await call(`/api/questions/${ratingId.value}/submissions`, { method: 'POST', token: respondent.body.grant, body: JSON.stringify({ idempotency_key: crypto.randomUUID(), type: 'rating', rating: 3 }) })).status).toBe(201);
+      expect((await call(`/api/questions/${pollId.value}/submissions`, { method: 'POST', token: respondent.body.grant, body: JSON.stringify({ idempotency_key: crypto.randomUUID(), type: 'poll', option_id: 'choice-2' }) })).status).toBe(201);
+      expect((await call(`/api/questions/${textId.value}/submissions`, { method: 'POST', token: respondent.body.grant, body: JSON.stringify({ idempotency_key: crypto.randomUUID(), type: 'text', text: `คําตอบข้อความ ${index + 2}` }) })).status).toBe(201);
     }
     const report = await call(`/api/admin/rooms/${roomId}/report`, { token: admin });
     const pollAgg = report.body.questions.find((question: any) => question.id === pollId.value);
-    expect(pollAgg.n).toBe(1);
+    expect(pollAgg.n).toBe(7);
     expect(pollAgg.options.find((option: any) => option.id === 'choice-1').count).toBe(1);
-    expect(pollAgg.options.find((option: any) => option.id === 'choice-1').share).toBe(1);
+    expect(pollAgg.options.find((option: any) => option.id === 'choice-1').share).toBe(0.1429);
     const textAgg = report.body.questions.find((question: any) => question.id === textId.value);
     expect(textAgg.n).toBe(7);
     expect(textAgg.text.latest).toHaveLength(3);
     expect(textAgg.text.has_more).toBe(true);
     const latestIds = new Set(textAgg.text.latest.map((item: any) => item.id));
     expect(latestIds.size).toBe(3);
-    // R04 full view: newest-first pages from the very start, including the
-    // latest three exactly once, with stable cursor pagination and no omissions.
     const seen: string[] = [];
     let cursor: string | null = null;
     let pageCount = 0;
@@ -161,7 +169,6 @@ describe('WORKSHOP-BUILDER-02 admin authoring and real data flow', () => {
     expect(pageCount).toBe(4);
     expect(seen).toHaveLength(7);
     expect(new Set(seen).size).toBe(7);
-    // The newest three appear in the full view exactly once (R04 supersedes older-only detail).
     expect([...latestIds].every((id) => seen.includes(String(id)))).toBe(true);
     expect(seen.filter((id) => latestIds.has(id))).toHaveLength(3);
   });
@@ -179,6 +186,6 @@ describe('WORKSHOP-BUILDER-02 admin authoring and real data flow', () => {
     expect(report.body.room.status).toBe('ended');
     expect((await call(`/api/admin/rooms/${roomId}/questions`, { method: 'POST', token: admin, body: JSON.stringify({ type: 'text', label: 'x' }) })).status).toBe(409);
     const detail = await call(`/api/admin/rooms/${roomId}`, { token: admin });
-    expect(detail.body.questions.find((question: any) => question.id === ratingId.value).response_count).toBe(1);
+    expect(detail.body.questions.find((question: any) => question.id === ratingId.value).response_count).toBe(7);
   });
 });

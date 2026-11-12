@@ -140,10 +140,12 @@ export interface ParticipantSnapshot {
     revision: number;
     active_question_id: string | null;
     ended_at: string | null;
+    answer_mode: 'facilitator' | 'self_paced';
   };
   question: ParticipantQuestion | null;
   own_response: ParticipantOwnResponse | null;
   participant: { id: string; nickname: string | null };
+  progress?: { answered: number; total: number; completed: boolean; number: number };
 }
 
 /**
@@ -165,9 +167,28 @@ export async function buildParticipantView(
       active_question_id: string | null;
       revision: number;
       ended_at: Date | null;
-    }[]>`select id, join_code, status, active_question_id, revision, ended_at from sessions where id = ${sessionId} limit 1`;
+      published: boolean;
+      answer_mode: 'facilitator' | 'self_paced';
+    }[]>`select id, join_code, status, active_question_id, revision, ended_at, published, answer_mode from sessions where id = ${sessionId} limit 1`;
     if (!session) return null;
-    const questions = session.active_question_id
+    let targetQuestionId: string | null = session.active_question_id;
+    let progress: { answered: number; total: number; completed: boolean; number: number } | undefined;
+    if (session.answer_mode === 'self_paced') {
+      const allQuestions = await tx<{ id: string }[]>`
+        select id from questions where session_id = ${sessionId} order by seq asc, created_at asc`;
+      const answeredRows = await tx<{ question_id: string }[]>`
+        select question_id from responses where session_id = ${sessionId} and participant_id = ${participantId}`;
+      const answered = new Set(answeredRows.map((row) => row.question_id));
+      const next = allQuestions.find((question) => !answered.has(question.id)) ?? null;
+      targetQuestionId = session.status === 'active' && session.published ? next?.id ?? null : null;
+      progress = {
+        answered: answered.size,
+        total: allQuestions.length,
+        completed: allQuestions.length > 0 && answered.size >= allQuestions.length,
+        number: next ? allQuestions.findIndex((question) => question.id === next.id) + 1 : allQuestions.length,
+      };
+    }
+    const questions = targetQuestionId
       ? await tx<{
           id: string;
           seq: number;
@@ -180,7 +201,7 @@ export async function buildParticipantView(
           receiving: boolean;
           closed_at: Date | null;
         }[]>`select id, seq, type, label, help_text, options, rating_min, rating_max, receiving, closed_at
-             from questions where id = ${session.active_question_id} limit 1`
+             from questions where id = ${targetQuestionId} limit 1`
       : [];
     const question = questions[0] ?? null;
     const responses = question
@@ -206,6 +227,7 @@ export async function buildParticipantView(
         revision: Number(session.revision),
         active_question_id: session.active_question_id,
         ended_at: session.ended_at ? new Date(session.ended_at).toISOString() : null,
+        answer_mode: session.answer_mode,
       },
       question: question
         ? {
@@ -233,6 +255,7 @@ export async function buildParticipantView(
           }
         : null,
       participant: participant ?? { id: participantId, nickname: null },
+      progress,
     };
   });
 }

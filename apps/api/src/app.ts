@@ -53,6 +53,7 @@ const TERMINAL_REJECTION_STATUS: Record<string, number> = {
   PAYLOAD_TOO_LARGE: 413,
   QUESTION_CLOSED: 409,
   QUESTION_NOT_ACTIVE: 409,
+  OUT_OF_SEQUENCE: 409,
   SESSION_ENDED: 409,
 };
 
@@ -81,6 +82,7 @@ function participantJson(view: ParticipantSnapshot) {
     question: view.question,
     own_response: view.own_response,
     participant: view.participant,
+    progress: view.progress,
     server_limits: { nickname_graphemes: MAX_NICKNAME_GRAPHEMES, comment_graphemes: MAX_COMMENT_GRAPHEMES },
   };
 }
@@ -347,8 +349,8 @@ export function createApp(deps: AppDeps) {
       try {
         outcome = await sql.begin(async (tx): Promise<Outcome> => {
           // Serialise close/submit ordering and per-attempt receipt writes.
-          const [session] = await tx<{ status: 'active' | 'ended'; active_question_id: string | null; revision: number }[]>`
-            select status, active_question_id, revision from sessions where id = ${auth.session.id} for update`;
+          const [session] = await tx<{ status: 'active' | 'ended'; active_question_id: string | null; revision: number; answer_mode: 'facilitator' | 'self_paced'; published: boolean }[]>`
+            select status, active_question_id, revision, answer_mode, published from sessions where id = ${auth.session.id} for update`;
           // Authorization is rechecked inside the mutation transaction, under the
           // same row lock that serialises revoke/expiry against this write.
           const [grant] = await tx<{
@@ -475,10 +477,24 @@ export function createApp(deps: AppDeps) {
           if (session.status !== 'active') {
             return await persistRejection('SESSION_ENDED', 'กิจกรรมนี้จบแล้ว');
           }
-          if (session.active_question_id !== question.id || !live.receiving) {
+          if (session.answer_mode === 'self_paced') {
+            if (!session.published) {
+              return await persistRejection('QUESTION_CLOSED', 'room is not open yet');
+            }
+            const [earlier] = await tx<{ count: number }[]>`
+              select count(*)::int as count from questions q
+              where q.session_id = ${auth.session.id}
+                and q.seq < (select seq from questions where id = ${question.id})
+                and not exists (
+                  select 1 from responses r where r.question_id = q.id and r.participant_id = ${participantId}
+                )`;
+            if (earlier.count > 0) {
+              return await persistRejection('OUT_OF_SEQUENCE', 'answer questions in order');
+            }
+          } else if (session.active_question_id !== question.id || !live.receiving) {
             return await persistRejection(
               live.receiving ? 'QUESTION_NOT_ACTIVE' : 'QUESTION_CLOSED',
-              'คำถามนี้ปิดรับคำตอบแล้ว',
+              'question is closed',
             );
           }
           const rating = live.type === 'rating' ? (body.rating as number) : null;
@@ -518,6 +534,8 @@ export function createApp(deps: AppDeps) {
           ...rejectionExtra(outcome.code, outcome.message),
         });
       }
+      const participantState =
+        outcome.kind === 'accepted' ? await buildParticipantView(sql, auth.session.id, participantId) : null;
       if (outcome.replay || outcome.deduplicated) {
         return json({
           status: 'accepted',
@@ -525,6 +543,7 @@ export function createApp(deps: AppDeps) {
           deduplicated: outcome.deduplicated,
           response: serializeResponse(outcome.response),
           revision: outcome.revision,
+          ...(participantState ? { participant_state: participantState } : {}),
         });
       }
       hub.broadcast(auth.session.id).catch(() => {});
@@ -533,6 +552,7 @@ export function createApp(deps: AppDeps) {
           status: 'accepted',
           replay: false,
           deduplicated: false,
+          ...(participantState ? { participant_state: participantState } : {}),
           response: serializeResponse(outcome.response),
           revision: outcome.revision,
         },

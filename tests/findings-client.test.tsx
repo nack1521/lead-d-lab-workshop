@@ -509,3 +509,54 @@ describe('C1-RV-04 authoritative snapshots and truthful Live', () => {
     expect(text()).not.toContain('คีย์นี้เคยใช้');
   });
 });
+
+describe('R08 self-paced participant mounted transitions', () => {
+  test('accepted save advances to the next question and completion after the final answer', async () => {
+    containers.__setRoomSessionForTest({ participantId: 'p1', grant: 'grant-for-test', participantLabel: 'Synthetic participant' });
+    const q1 = { ...ratingQuestion, id: 'q1', seq: 1 };
+    const q2 = { ...pollQuestion, id: 'q2', seq: 2 };
+    let answerIndex = 0;
+    handler = async (url, init) => {
+      if (url.endsWith('/api/me')) {
+        return json({
+          ...participantBody(q1, null, 3),
+          session: { ...participantBody(q1, null, 3).session, answer_mode: 'self_paced' },
+          progress: { answered: 0, total: 2, completed: false, number: 1 },
+        });
+      }
+      if (url.includes('/submissions') && (init.method ?? 'GET') === 'POST') {
+        answerIndex += 1;
+        if (answerIndex === 1) {
+          return json({
+            status: 'accepted', replay: false, deduplicated: false,
+            response: { id: 'r1', question_id: 'q1', rating: 4, option_id: null, comment: null, text: null, accepted_at: '2026-01-01T00:00:00.000Z' },
+            revision: 4,
+            participant_state: { ...participantBody(q2, null, 4), session: { ...participantBody(q2, null, 4).session, answer_mode: 'self_paced' }, progress: { answered: 1, total: 2, completed: false, number: 2 } },
+          });
+        }
+        return json({
+          status: 'accepted', replay: false, deduplicated: false,
+          response: { id: 'r2', question_id: 'q2', rating: null, option_id: 'time', comment: null, text: null, accepted_at: '2026-01-01T00:01:00.000Z' },
+          revision: 5,
+          participant_state: { ...participantBody(null, null, 5), session: { ...participantBody(null, null, 5).session, answer_mode: 'self_paced' }, progress: { answered: 2, total: 2, completed: true, number: 2 } },
+        });
+      }
+      return json({ status: 'ok' });
+    };
+    await mount('/room');
+    await tick(12);
+    expect(text()).toContain('Question 1 of 2');
+    (document.querySelector('input[type=radio][value="4"]') as HTMLInputElement).click();
+    await tick();
+    clickButton('Submit response');
+    await tick(12);
+    expect(text()).toContain('Question 2 of 2');
+    expect(text()).toContain('Question 02');
+    (document.querySelector('input[type=radio][value="time"]') as HTMLInputElement).click();
+    await tick();
+    clickButton('Submit response');
+    await tick(12);
+    expect(text()).toContain('All questions completed');
+    expect(text()).not.toContain('Question 02');
+  });
+});

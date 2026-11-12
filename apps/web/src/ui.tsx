@@ -83,6 +83,7 @@ export function ParticipantView(props: {
   onReconcile: () => void;
   onFreshAttempt: () => void;
   ownResponse: OwnResponse | null;
+  progress?: { answered: number; total: number; completed: boolean; number: number } | null;
 }) {
   const question = props.question;
   return (
@@ -93,11 +94,21 @@ export function ParticipantView(props: {
       </header>
       {!question ? (
         <section className="card">
-          <p>No question is open right now</p>
+          {props.progress?.completed ? (
+            <>
+              <h2>All questions completed</h2>
+              <p>Your responses have been saved. You can close this page.</p>
+            </>
+          ) : (
+            <p>No question is open right now</p>
+          )}
         </section>
       ) : (
         <section className="card" aria-label="Current question">
-          <p className="eyebrow">Question {String(question.seq).padStart(2, '0')}</p>
+          <p className="eyebrow">
+            Question {String(question.seq).padStart(2, '0')}
+            {props.progress ? ` · Question ${props.progress.number} of ${props.progress.total}` : null}
+          </p>
           <h2>{question.label}</h2>
           {question.help_text ? <p className="hint">{question.help_text}</p> : null}
           {props.questionClosed ? <p className="notice">This question is closed for responses</p> : null}

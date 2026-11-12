@@ -38,12 +38,14 @@ export interface SessionInfo {
   revision: number;
   active_question_id: string | null;
   ended_at: string | null;
+  answer_mode?: 'facilitator' | 'self_paced';
 }
 
 export interface ParticipantViewData {
   session: SessionInfo;
   question: Question | null;
   own_response: OwnResponse | null;
+  progress?: { answered: number; total: number; completed: boolean; number: number } | null;
 }
 
 export interface QuestionAggregate {

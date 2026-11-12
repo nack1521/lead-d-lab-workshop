@@ -1,0 +1,47 @@
+{
+  "sample_size": 5,
+  "first_mutation_seconds": 0.003120,
+  "first_save_seconds": 0.006464,
+  "ready_seconds": [
+    "0.001017",
+    "0.000997",
+    "0.001118"
+  ],
+  "add_question_rpc": {
+    "old_sequence_mutation_plus_workspace_plus_report_seconds": [
+      "0.024336",
+      "0.016906",
+      "0.017226",
+      "0.016095",
+      "0.016877"
+    ],
+    "new_single_mutation_seconds": [
+      "0.003054",
+      "0.003566",
+      "0.002822",
+      "0.002773",
+      "0.002708"
+    ],
+    "old_request_count": 3,
+    "new_request_count": 1
+  },
+  "save_changes_rpc": {
+    "old_sequence_patch_plus_workspace_plus_report_seconds": [
+      "0.014541",
+      "0.014100",
+      "0.016273",
+      "0.015633",
+      "0.016212"
+    ],
+    "new_single_patch_seconds": [
+      "0.003792",
+      "0.003731",
+      "0.003149",
+      "0.003316",
+      "0.003579"
+    ],
+    "old_request_count": 3,
+    "new_request_count": 1
+  },
+  "note": "warm curl TTFB/total on local synthetic room; excludes browser paint/OPTIONS/WS frames; means computed only from these 5 samples"
+}

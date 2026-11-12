@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "task_id": "WORKSHOP-BUILDER-02",
+  "run_id": "R08",
+  "reported_at": "2026-11-12T23:14:22+07:00",
+  "producer": "DeepSeek Harness (sole coding writer)",
+  "authoring_tool": "DeepSeek Harness",
+  "model": "deepseek-v4.1-flash-1017",
+  "source_kind": "direct",
+  "baseline_commit": "09da87a",
+  "observed_head": "09da87a",
+  "branch": "main",
+  "work_kind": "self_paced_and_mobile_fix",
+  "status": "READY_FOR_REVIEW",
+  "summary": "Implemented R08: (A) participant iPhone CSS isolates native radios (20px fixed) from full-width 16px text fields, responsive tappable score/choice labels, safe-area padding and English count unit; source fix only, no iPhone screenshots. (B) additive answer_mode migration keeps existing rooms facilitator-paced while builder rooms are self-paced: room-level Open (empty room refused), per-participant first-unanswered question from persisted DB, server-enforced sequence, progress/completion in /api/me+WS, accepted save returns authoritative participant_state for immediate next-question advance, lost-ack replay preserved, structure locked while open, end/role/session guards intact and legacy compatibility. (C) removed serial workspace/grant/report reloads and WS report fanout, initial reads parallel, returned mutation entities used, busy/pending guard added; warm 5-sample local RPC sequence measured Add 3 requests 16.1-24.3ms -> 1 request 2.7-3.6ms and Save 3 requests 14.1-16.3ms -> 1 request 3.1-3.8ms. Tests: self-paced 6/6, mounted transitions 12/12, full 184 pass/0 skip/0 fail, typecheck 0, default+cloud builds 0, API image builds. Actual iPhone/browser screenshots/geometry and paint timing NOT RUN; no visual PASS.",
+  "detail_path": "docs/results/WORKSHOP-BUILDER-02/R08/result.md",
+  "cases": [
+    {"case_id": "WB2-R08-A", "status": "PARTIAL", "limitations": "CSS/source controls implemented; actual iPhone/Safari screenshots and computed native geometry NOT RUN."},
+    {"case_id": "WB2-R08-B", "status": "PASS", "evidence_paths": ["db/migrations/0005_self_paced.sql", "tests/self-paced.test.ts", "tests/findings-client.test.tsx"]},
+    {"case_id": "WB2-R08-C", "status": "PASS", "evidence_paths": ["docs/results/WORKSHOP-BUILDER-02/R08/evidence/latency-rpc-sequence.json"], "limitations": "RPC sequence measured; browser paint timing NOT RUN."},
+    {"case_id": "WB2-R08-D", "status": "PASS", "evidence_paths": ["docs/results/WORKSHOP-BUILDER-02/R08/evidence/mode-a-regression.log", "docs/results/WORKSHOP-BUILDER-02/R08/evidence/typecheck.log", "docs/results/WORKSHOP-BUILDER-02/R08/evidence/build-cloud.log", "docs/results/WORKSHOP-BUILDER-02/R08/evidence/api-image-build.log"]}
+  ],
+  "commands": [
+    {"command": "bun run migrate", "exit_code": 0, "outcome": "0005_self_paced.sql applied additively"},
+    {"command": "bun test tests/self-paced.test.ts", "exit_code": 0, "outcome": "6 pass / 0 fail"},
+    {"command": "bun test tests/findings-client.test.tsx", "exit_code": 0, "outcome": "12 pass incl mounted self-paced transitions"},
+    {"command": "bun test tests", "exit_code": 0, "outcome": "184 pass / 0 skip / 0 fail"},
+    {"command": "bun x tsc --noEmit", "exit_code": 0, "outcome": "no type errors"},
+    {"command": "bun run build:web / cloud-configured build", "exit_code": 0, "outcome": "both builds succeed"},
+    {"command": "DOCKER_BUILDKIT=0 docker build -f Dockerfile.api", "exit_code": 0, "outcome": "API image built/tagged"},
+    {"command": "warm 5-sample RPC timing", "exit_code": 0, "outcome": "Add/Save 3->1 requests; measured seconds in evidence JSON"}
+  ],
+  "blockers": [],
+  "not_verified": ["actual iPhone/Safari screenshots, native radio/label geometry, keyboard/safe-area, 320/375/390/430 visual checks", "browser click-to-paint timing and authenticated end-to-end", "cloud deployment/browser behaviour", "independent QA/human acceptance"],
+  "next_gate": "User-assisted iPhone and desktop browser verification of layouts and room-level self-paced flow, then independent QA. No push/deploy.",
+  "published": false
+}

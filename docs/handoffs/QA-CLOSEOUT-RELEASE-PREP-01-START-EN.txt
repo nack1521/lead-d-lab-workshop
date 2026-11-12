@@ -1,0 +1,11 @@
+Workspace: /Users/aiink/Nack/Lead+D-Lab
+Read AGENTS.md, docs/CODING-WORKFLOW.md, docs/ANTIGRAVITY-RESULT-PROTOCOL.md and docs/handoffs/QA-CLOSEOUT-RELEASE-PREP-01.md. One user-operated DeepSeek writer; local-only work is authorized.
+
+Finish existing QA and prepare release artifacts, in sequence with separate immutable results:
+1. HR-SUMMARY-01 next unused run (expected R03): singleton poll/share and rendered caveat; compare fresh WS frame buckets with DB; finalize smoke JSON/exit after cleanup and test cleanup failure. Preserve all passing functionality and no-minimum-five policy.
+2. LAN-IPHONE-01 next unused run (expected R05): only the existing verifier possibly-committed/lost-control-ack restoration gap, isolated fixtures only. No broad LAN/C1 rewrite.
+3. RELEASE-PREP-01 expected R01: build/test LOCAL Cloudflare React + Railway Bun/PostgreSQL deployment artifacts and runbook. Fix API image selection (root Dockerfile defaults to web), cloud PORT/bind compatibility, exact origins/HTTPS/WSS, readiness/migrations and safe public Vite variables. Preserve local/Docker-only setup. Audit publication candidates/full history for secrets without printing values; report audit limits and blockers honestly.
+
+Use TDD/controlled evidence and safe regression/typecheck/build/container checks; declare skips. HR local browser usability is already USER_CONFIRMED, so do not repeat that credential-entry gate. Physical Safari/cloud behavior remain unverified until exercised.
+
+Preserve all dirty/untracked/protected work and immutable reports. Owned meaningful local commits only, result.md + result.json for each task/run, INDEX last. No account login, cloud resources, push/deploy/tunnel, paid services, global installs, trust/network changes, resets or provider switch. Stop for publication/account/cost approval after local readiness. Checkpoint before budget exhaustion.

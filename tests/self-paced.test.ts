@@ -1,5 +1,5 @@
 import { afterAll, beforeAll, describe, expect, test } from 'bun:test';
-import { setupCtx, generousRate, type Ctx } from './helpers.ts';
+import { setupCtx, generousRate, openSocket, type Ctx } from './helpers.ts';
 
 /**
  * R08 self-paced authored rooms: every participant independently answers all
@@ -94,6 +94,20 @@ describe('R08 self-paced room-level answering', () => {
     expect(done.body.progress).toMatchObject({ answered: 3, total: 3, completed: true });
     const [dbRows] = await ctx.sql<{ count: number }[]>`select count(*)::int as count from responses where participant_id = ${done.body.participant.id}`;
     expect(dbRows.count).toBe(3);
+  });
+
+  test('real WS state carries answer_mode and progress consistently with HTTP', async () => {
+    const g = await join('ws');
+    const httpView = await me(g);
+    const socket = await openSocket(ctx.wsUrl);
+    socket.send({ type: 'auth', token: g });
+    const frame = await socket.wait((message) => message.type === 'state');
+    expect(frame.answer_mode).toBe('self_paced');
+    expect(frame.progress).toEqual(httpView.body.progress);
+    expect((frame as any).question.id).toBe(httpView.body.question.id);
+    expect((frame as any).question.receiving).toBe(false); // must NOT close self-paced controls
+    expect(frame.revision).toBe(httpView.body.session.revision);
+    socket.ws.close();
   });
 
   test('room end stops every participant and reports stay readable', async () => {

@@ -1,0 +1,22 @@
+bun test v1.4.4 (38afee6c8)
+
+tests/findings-client.test.tsx:
+(pass) C1-RV-03 lost join acknowledgement keeps one logical join > an uncertain join reuses the same operation key on unchanged retry [550.17ms]
+(pass) C1-RV-03 lost join acknowledgement keeps one logical join > a nickname-only change is still the same join; a different room code is a new join [497.78ms]
+(pass) C1-RV-05 outcome and draft state follow the authoritative question > a saved answer does not carry into the next unanswered question [476.27ms]
+(pass) C1-RV-05 outcome and draft state follow the authoritative question > an unresolved earlier attempt stays with the old question during a transition [486.21ms]
+(pass) R02-QA-04 an uncertain join keeps its original payload and shows the stored label > editing the nickname does not change the pending payload or the displayed identity [456.79ms]
+(pass) R02-QA-05 equal-revision reconciliation in the participant container > an equal-revision push carrying the own accepted answer is applied [454.07ms]
+(pass) C1-RV-04 authoritative snapshots and truthful Live > a delayed older HTTP response cannot overwrite newer WebSocket state [464.57ms]
+(pass) C1-RV-04 authoritative snapshots and truthful Live > current /facilitator route renders the English demo login, not the retired token form [426.39ms]
+(pass) C1-RV-04 authoritative snapshots and truthful Live > an unknown room code renders an English API error, never Thai service copy [432.62ms]
+(pass) C1-RV-04 authoritative snapshots and truthful Live > an invalid answer renders the English protocol-code message, not the Thai server message [451.90ms]
+(pass) C1-RV-04 authoritative snapshots and truthful Live > a conflicting response renders the English conflict message [468.07ms]
+(pass) R08 self-paced participant mounted transitions > accepted save advances to the next question and completion after the final answer [481.25ms]
+(pass) R09 actual WS wire and builder delete reconciliation > self-paced WS equal-revision frame keeps controls open and final completion renders [468.21ms]
+(pass) R09 actual WS wire and builder delete reconciliation > mounted builder DELETE removes the question and clears the stale editor target [529.96ms]
+
+ 14 pass
+ 0 fail
+ 59 expect() calls
+Ran 14 tests across 1 file. [7.13s]

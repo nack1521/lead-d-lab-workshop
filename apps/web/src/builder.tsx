@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react';
 import logoUrl from './assets/logo.png';
 import { API_BASE, connectSocket } from './api.ts';
 import { readJsonBody } from './api-base.ts';
+import { createCoalescedTask, type CoalescedTask } from './coalesce.ts';
+import { mergeReportWithSnapshot, reconcileDeletedQuestion } from './report-merge.ts';
 
 /**
  * WORKSHOP-BUILDER-02 R03 admin/HR workspace.
@@ -30,7 +32,7 @@ interface ReportQuestion extends Omit<QuestionRow, 'options'> {
   counts?: Record<string, number>; mean?: number | null;
   options?: (Option & { count: number; share: number | null })[]; text?: TextBlock;
 }
-interface Report { room: RoomRow; joined_base: number; questions: ReportQuestion[]; generated_at: string }
+export interface Report { room: RoomRow; joined_base: number; questions: ReportQuestion[]; generated_at: string }
 interface SnapshotQuestion { question_id: string; seq: number; type: 'rating' | 'poll'; label: string; options: Option[] | null; rating_min: number | null; rating_max: number | null; receiving: boolean; total: number; counts: Record<string, number>; average: number | null }
 interface Snapshot { revision: number; session_status: 'active' | 'ended'; active_question_id: string | null; participant_count: number; questions: SnapshotQuestion[] }
 interface ExpandedText { questionId: string; items: TextItem[]; cursor: string | null; hasMore: boolean; loading: boolean; error: string | null }
@@ -229,6 +231,7 @@ function Workspace({ mode, token, room, onBack }: { mode: 'admin' | 'hr'; token:
   const [ending, setEnding] = useState(false);
   const [expanded, setExpanded] = useState<ExpandedText | null>(null);
   const wsRef = useRef<{ close: () => void } | null>(null);
+  const reportRefreshRef = useRef<CoalescedTask | null>(null);
   const ended = currentRoom.status === 'ended';
   useEffect(() => { if (ended) setTab('dashboard'); }, [ended]);
   const canMutate = !readOnly && !ended;
@@ -244,11 +247,21 @@ function Workspace({ mode, token, room, onBack }: { mode: 'admin' | 'hr'; token:
       setSnapshot(workspace.snapshot);
       setLastUpdated(new Date());
       setReport(reportData);
+      if (!reportRefreshRef.current) {
+        reportRefreshRef.current = createCoalescedTask(async () => {
+          try { setReport(await api<Report>(`/api/admin/rooms/${currentRoom.id}/report`, token)); } catch { /* keep last truthful report */ }
+        }, 150);
+      }
       if (!selectedId && workspace.questions.length > 0) setSelectedId(workspace.questions[0].id);
       if (!wsRef.current) {
         wsRef.current = connectSocket(workspace.realtime_grant, {
           onSnapshot: (incoming) => {
-            setSnapshot(incoming as Snapshot); setLastUpdated(new Date()); setConnected(true);
+            setSnapshot(incoming as Snapshot);
+            setLastUpdated(new Date());
+            setConnected(true);
+            // Charts use the snapshot aggregate immediately; text/detail report
+            // reads are coalesced to at most one per quiet window.
+            reportRefreshRef.current?.schedule();
           },
           onStatus: (value) => setConnected(value === 'open'),
           onError: () => setConnected(false),
@@ -257,7 +270,7 @@ function Workspace({ mode, token, room, onBack }: { mode: 'admin' | 'hr'; token:
     } catch (err) { setStatus(err instanceof Error ? err.message : 'Could not load the room'); }
   };
 
-  useEffect(() => { void refresh(); return () => { wsRef.current?.close(); wsRef.current = null; }; }, [currentRoom.id]);
+  useEffect(() => { void refresh(); return () => { wsRef.current?.close(); wsRef.current = null; reportRefreshRef.current?.cancel(); reportRefreshRef.current = null; }; }, [currentRoom.id]);
 
   const refreshReport = async () => {
     try { setReport(await api<Report>(`/api/admin/rooms/${currentRoom.id}/report`, token)); }
@@ -279,6 +292,13 @@ function Workspace({ mode, token, room, onBack }: { mode: 'admin' | 'hr'; token:
           return next;
         });
         if (path === '/questions') setSelectedId(result.question.id);
+      }
+      if (typeof result?.deleted === 'string') {
+        setQuestions((previous) => {
+          const reconciled = reconcileDeletedQuestion(previous, result.deleted, selectedId);
+          setSelectedId(reconciled.selectedId);
+          return reconciled.questions as QuestionRow[];
+        });
       }
       if (Array.isArray(result?.order)) {
         setQuestions((previous) => {
@@ -380,7 +400,7 @@ function Workspace({ mode, token, room, onBack }: { mode: 'admin' | 'hr'; token:
           />
         ) : (
           <Dashboard
-            readOnly={readOnly} ended={ended} questions={questions} report={report} snapshot={snapshot} answerMode={currentRoom.answer_mode}
+            readOnly={readOnly} ended={ended} questions={questions} report={mergeReportWithSnapshot(report, snapshot)} snapshot={snapshot} answerMode={currentRoom.answer_mode}
             onOpen={(questionId) => void mutate(`/questions/${questionId}/open`)}
             onClose={(questionId) => void mutate(`/questions/${questionId}/close`)}
             expanded={expanded}

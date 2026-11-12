@@ -560,3 +560,78 @@ describe('R08 self-paced participant mounted transitions', () => {
     expect(text()).not.toContain('Question 02');
   });
 });
+
+describe('R09 actual WS wire and builder delete reconciliation', () => {
+  test('self-paced WS equal-revision frame keeps controls open and final completion renders', async () => {
+    containers.__setRoomSessionForTest({ participantId: 'p1', grant: 'grant-for-test', participantLabel: 'Synthetic participant' });
+    const selfQuestion = { ...ratingQuestion, receiving: false };
+    handler = async (url) => {
+      if (url.endsWith('/api/me')) {
+        const base = participantBody(selfQuestion, null, 3);
+        return json({ ...base, session: { ...base.session, answer_mode: 'self_paced' }, progress: { answered: 0, total: 2, completed: false, number: 1 } });
+      }
+      return json({ status: 'ok' });
+    };
+    await mount('/room');
+    await tick(12);
+    const socket = FakeWebSocket.instances.at(-1)!;
+    socket.emit('open');
+    socket.emit('message', {
+      data: JSON.stringify({
+        type: 'state', revision: 3, session_status: 'active', question: selfQuestion, own_response: null,
+        answer_mode: 'self_paced', progress: { answered: 0, total: 2, completed: false, number: 1 },
+      }),
+    });
+    await tick(12);
+    expect(text()).toContain('Question 1 of 2');
+    const radio = document.querySelector('input[type=radio][value="4"]') as HTMLInputElement;
+    expect(radio.disabled).toBe(false);
+    radio.click();
+    await tick();
+    const submit = [...document.querySelectorAll('button')].find((button) => (button.textContent ?? '').includes('Submit response')) as HTMLButtonElement;
+    expect(submit.disabled).toBe(false);
+    socket.emit('message', {
+      data: JSON.stringify({
+        type: 'state', revision: 4, session_status: 'active', question: null, own_response: null,
+        answer_mode: 'self_paced', progress: { answered: 2, total: 2, completed: true, number: 2 },
+      }),
+    });
+    await tick(12);
+    expect(text()).toContain('All questions completed');
+  });
+
+  test('mounted builder DELETE removes the question and clears the stale editor target', async () => {
+    const draftQuestion = {
+      id: 'q1', seq: 1, type: 'text', label: 'Draft question to delete', help_text: null, options: null,
+      rating_min: null, rating_max: null, receiving: false, closed_at: null, response_count: 0, locked: false,
+    };
+    const builderRoom = {
+      id: 'r1', title: 'Synthetic delete room', join_code: 'DEL01', status: 'active', phase: 'draft',
+      published: false, revision: 1, active_question_id: null, answer_mode: 'self_paced',
+      created_at: '2026-01-01T00:00:00.000Z', ended_at: null, counts: { questions: 1, participants: 0, responses: 0 },
+    };
+    const emptySnapshot = { session_id: 'r1', revision: 1, session_status: 'active', active_question_id: null, participant_count: 0, questions: [] };
+    let deleted = false;
+    handler = async (url, init) => {
+      const method = init.method ?? 'GET';
+      if (url.includes('/api/admin/login')) return json({ status: 'ok', admin_token: 'admin-token', scope: 'admin', expires_in_seconds: 1 });
+      if (url.endsWith('/api/admin/rooms') && method === 'GET') return json({ status: 'ok', rooms: [builderRoom] });
+      if (url.endsWith('/api/admin/rooms/r1/workspace')) return json({ status: 'ok', room: builderRoom, questions: deleted ? [] : [draftQuestion], snapshot: emptySnapshot, realtime_grant: 'fac-fixture' });
+      if (url.endsWith('/api/admin/rooms/r1/report')) return json({ status: 'ok', room: builderRoom, joined_base: 0, questions: deleted ? [] : [{ ...draftQuestion, n: 0, joined_base: 0, unanswered: 0, coverage_ratio: null }], generated_at: '2026-01-01T00:00:00.000Z' });
+      if (url.endsWith('/questions/q1') && method === 'DELETE') { requests.push({ url, method, body: null }); deleted = true; return json({ status: 'ok', deleted: 'q1' }); }
+      return json({ status: 'ok' });
+    };
+    await mount('/facilitator');
+    await tick(8);
+    fill('#demo-pass', 'admin');
+    clickButton('Sign in');
+    await tick(12);
+    clickButton('Synthetic delete room');
+    await tick(16);
+    expect(text()).toContain('Draft question to delete');
+    clickButton('Delete');
+    await tick(16);
+    expect(requests.some((request) => request.url.endsWith('/questions/q1') && request.method === 'DELETE')).toBe(true);
+    expect(text()).not.toContain('Draft question to delete');
+  });
+});

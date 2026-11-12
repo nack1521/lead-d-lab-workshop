@@ -1,0 +1,11 @@
+bun test v1.4.4 (38afee6c8)
+
+tests/r09-regressions.test.ts:
+(pass) R09 bounded report refresh and delete reconciliation > bursts of WS frames coalesce to at most one report read [142.57ms]
+(pass) R09 bounded report refresh and delete reconciliation > live snapshot updates charts only when strictly newer; text waits for report [1.41ms]
+(pass) R09 bounded report refresh and delete reconciliation > DELETE result reconciles list and selection without stale editor target [0.40ms]
+
+ 3 pass
+ 0 fail
+ 16 expect() calls
+Ran 3 tests across 1 file. [153.00ms]

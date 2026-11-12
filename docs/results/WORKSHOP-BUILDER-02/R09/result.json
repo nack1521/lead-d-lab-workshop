@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "task_id": "WORKSHOP-BUILDER-02",
+  "run_id": "R09",
+  "reported_at": "2026-11-12T23:29:52+07:00",
+  "producer": "DeepSeek Harness (sole coding writer)",
+  "authoring_tool": "DeepSeek Harness",
+  "model": "deepseek-v4.1-flash-1017",
+  "source_kind": "direct",
+  "baseline_commit": "e895a38",
+  "observed_head": "e895a38",
+  "branch": "main",
+  "work_kind": "r08_regression_fixes",
+  "status": "READY_FOR_REVIEW",
+  "summary": "Fixed R08 coordinator findings: (1) WS stateFor now serializes answer_mode and progress on auth/broadcast/resync, with real-server HTTP-vs-WS parity and mounted equal-revision frame tests (self-paced receiving=false keeps controls open, completion renders); (2) live charts update from strictly-newer WS snapshot aggregates via mergeReportWithSnapshot while report reads are coalesced to at most one per 150ms quiet window (10 frames -> 1 read; equal/older revisions ignored; text waits for real report); (3) DELETE response {deleted:id} now reconciles local questions/selection/editor and a mounted builder delete test asserts the real DELETE request and UI removal, while backend GET/DB readback remains covered. Full suite 190 pass/0 skip/0 fail; typecheck/dev+cloud builds 0; one pre-existing LAN timing test needed a longer non-skip timeout under full load. Mobile screenshots/physical iPhone, browser paint and cloud remain NOT RUN; no visual PASS; no push/deploy.",
+  "detail_path": "docs/results/WORKSHOP-BUILDER-02/R09/result.md",
+  "finding_ids": ["WB2-R08-WS-01", "WB2-R08-REPORT-02", "WB2-R08-DELETE-03"],
+  "cases": [
+    {"case_id": "WB2-R09-01", "status": "PASS", "evidence_paths": ["apps/api/src/ws.ts", "tests/self-paced.test.ts", "docs/results/WORKSHOP-BUILDER-02/R09/evidence/ws-wire-self-paced.log"]},
+    {"case_id": "WB2-R09-02", "status": "PASS", "evidence_paths": ["apps/web/src/coalesce.ts", "apps/web/src/report-merge.ts", "tests/r09-regressions.test.ts", "docs/results/WORKSHOP-BUILDER-02/R09/evidence/coalesce-merge-delete.log"]},
+    {"case_id": "WB2-R09-03", "status": "PASS", "evidence_paths": ["apps/web/src/builder.tsx", "tests/findings-client.test.tsx", "docs/results/WORKSHOP-BUILDER-02/R09/evidence/mounted-ws-delete.log"]},
+    {"case_id": "WB2-R09-04", "status": "PASS", "evidence_paths": ["docs/results/WORKSHOP-BUILDER-02/R09/evidence/mode-a-regression.log", "docs/results/WORKSHOP-BUILDER-02/R09/evidence/typecheck.log", "docs/results/WORKSHOP-BUILDER-02/R09/evidence/build-cloud.log"]},
+    {"case_id": "WB2-R09-05", "status": "NOT RUN", "limitations": "Mobile screenshots/geometry at 320/375/390/430 and physical iPhone; no browser/iPhone automation."}
+  ],
+  "commands": [
+    {"command": "bun test tests/self-paced.test.ts", "exit_code": 0, "outcome": "7 pass / 0 fail incl real WS parity"},
+    {"command": "bun test tests/findings-client.test.tsx", "exit_code": 0, "outcome": "14 pass incl mounted equal-revision WS and DELETE"},
+    {"command": "bun test tests/r09-regressions.test.ts", "exit_code": 0, "outcome": "3 pass incl 10-frame->1-read coalescing"},
+    {"command": "bun test tests", "exit_code": 0, "outcome": "190 pass / 0 skip / 0 fail"},
+    {"command": "bun x tsc --noEmit", "exit_code": 0, "outcome": "no type errors"},
+    {"command": "bun run build:web / cloud-configured build", "exit_code": 0, "outcome": "both builds succeed"}
+  ],
+  "blockers": [],
+  "not_verified": ["mobile screenshots/geometry at 320/375/390/430, physical iPhone", "browser live-report paint and click-flow", "cloud deployment", "independent QA/human acceptance"],
+  "next_gate": "Coordinator retest, user-assisted mobile rendering, then cloud verification; no publication before independent review.",
+  "published": false
+}

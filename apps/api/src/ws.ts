@@ -98,6 +98,8 @@ export function createHub(sql: Sql, config: Config, hooks?: HubTestHooks): Hub {
       session_status: view.session.status,
       question: view.question,
       own_response: view.own_response,
+      answer_mode: view.session.answer_mode,
+      progress: view.progress ?? null,
     };
   }
 

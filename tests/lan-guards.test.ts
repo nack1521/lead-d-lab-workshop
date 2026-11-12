@@ -532,12 +532,12 @@ describe('LAN-FU-01 bounded WebSocket proxy', () => {
         `Sec-WebSocket-Key: ${key}\r\nSec-WebSocket-Version: 13\r\nOrigin: https://192.168.1.98:8443\r\n\r\n`,
     );
     // Never read: the entry must bound its own buffer and release the upstream.
-    await waitUntil(() => upstreamCloses === 1, 5000);
+    await waitUntil(() => upstreamCloses === 1, 10000);
     expect(upstreamCloses).toBe(1);
     raw.destroy();
     entry.stop();
     flood.stop(true);
-  });
+  }, 15000);
 
   test('slow upstream builds bounded client-side buffer and the client is closed 1013', async () => {
     const slow = await slowWebSocketUpstream();

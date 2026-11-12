@@ -1,0 +1,15 @@
+bun test v1.4.4 (38afee6c8)
+
+tests/self-paced.test.ts:
+(pass) R08 self-paced room-level answering > different participants progress independently from their own first unanswered [45.56ms]
+(pass) R08 self-paced room-level answering > invalid and out-of-sequence attempts do not count [17.96ms]
+(pass) R08 self-paced room-level answering > lost acknowledgement retry replays exactly once and then advances [216.77ms]
+(pass) R08 self-paced room-level answering > accepted saves complete all three types and finish with completion state [59.54ms]
+(pass) R08 self-paced room-level answering > real WS state carries answer_mode and progress consistently with HTTP [84.27ms]
+(pass) R08 self-paced room-level answering > room end stops every participant and reports stay readable [72.18ms]
+(pass) R08 self-paced room-level answering > legacy facilitator rooms keep active-question behavior [119.00ms]
+
+ 7 pass
+ 0 fail
+ 44 expect() calls
+Ran 7 tests across 1 file. [996.00ms]

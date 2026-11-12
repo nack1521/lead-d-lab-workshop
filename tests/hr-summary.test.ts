@@ -223,6 +223,62 @@ describe('HR-QA-02 actual singleton n=1 accepted-response case', () => {
   });
 });
 
+describe('HR-QA-02 actual singleton poll response (rating unanswered counterpart)', () => {
+  test('one accepted poll response yields exact option count/share and rating remains empty', async () => {
+    const session = await seedSession(ctx.sql, ctx.config, `HR-POLL-${Math.random().toString(36).slice(2, 7)}`);
+    const openPoll = await ctx.http(
+      `/api/facilitator/sessions/${session.sessionId}/questions/${session.pollQuestionId}/open`,
+      { method: 'POST', token: session.facilitatorToken },
+    );
+    expect(openPoll.status).toBe(200);
+    const participant = await joinTo(ctx, session.joinCode);
+    const poll = await submitPoll(ctx, participant.grant, session.pollQuestionId, 'time', '   ');
+    expect(poll.status).toBe(201);
+    const end = await ctx.http(`/api/facilitator/sessions/${session.sessionId}/end`, {
+      method: 'POST',
+      token: session.facilitatorToken,
+    });
+    expect(end.status).toBe(200);
+
+    const response = await summary(ctx, session.sessionId, await hrToken(ctx, session.sessionId));
+    expect(response.status).toBe(200);
+    const body = (await response.json()) as { summary: HrSummary };
+    const [ratingSummary, pollSummary] = body.summary.questions;
+
+    expect(ratingSummary.n).toBe(0);
+    expect(ratingSummary.joined_base).toBe(1);
+    expect(ratingSummary.unanswered).toBe(1);
+    expect(ratingSummary.coverage_ratio).toBe(0);
+    expect(ratingSummary.mean).toBeNull();
+    expect(ratingSummary.counts).toEqual({});
+
+    expect(pollSummary.n).toBe(1);
+    expect(pollSummary.joined_base).toBe(1);
+    expect(pollSummary.unanswered).toBe(0);
+    expect(pollSummary.coverage_ratio).toBe(1);
+    expect(pollSummary.counts).toEqual({ time: 1 });
+    expect(pollSummary.mean).toBeNull();
+    expect(pollSummary.comment_count).toBe(0); // blank comment is absent
+
+    const blockers = body.summary.insights.reported_blockers;
+    const time = blockers.find((blocker) => blocker.option_id === 'time');
+    expect(time?.count).toBe(1);
+    expect(time?.share).toBe(1);
+    expect(blockers.filter((blocker) => blocker.count === 1)).toHaveLength(1);
+    expect(body.summary.insights.feedback_confidence).toBeNull();
+    expect(body.summary.caveats.join(' ')).toContain('n < 5');
+
+    const [dbPoll] = await ctx.sql<{ count: number; comments: number }[]>`
+      select count(*)::int as count, count(comment)::int as comments
+      from responses where question_id = ${session.pollQuestionId}`;
+    const [dbRating] = await ctx.sql<{ count: number }[]>`
+      select count(*)::int as count from responses where question_id = ${session.ratingQuestionId}`;
+    expect(dbPoll.count).toBe(1);
+    expect(dbPoll.comments).toBe(0);
+    expect(dbRating.count).toBe(0);
+  });
+});
+
 describe('HR-01 persisted summary after facilitator control, answers and end', () => {
   test('HR summary equals independent DB counts and survives reload', async () => {
     const session = await seedSession(ctx.sql, ctx.config, 'HR-READY-1');

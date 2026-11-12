@@ -23,6 +23,7 @@ import { join } from 'node:path';
 import { createSql } from '../apps/api/src/db.ts';
 import { loadConfig } from '../apps/api/src/env.ts';
 import { issueGrant } from '../apps/api/src/grants.ts';
+import { finalizeRun, type CleanupResult } from './hr-smoke-support.ts';
 
 const API = process.env.SMOKE_API ?? 'http://127.0.0.1:3000';
 const WS_URL = process.env.SMOKE_WS ?? 'ws://127.0.0.1:3000/ws';
@@ -44,6 +45,13 @@ const startedAt = Date.now();
 const sockets: WebSocket[] = [];
 const closedPromises: Promise<number>[] = [];
 
+function sameCounts(actual: unknown, expected: Record<string, number>): boolean {
+  if (!actual || typeof actual !== 'object') return false;
+  const actualEntries = Object.entries(actual as Record<string, number>).sort(([a], [b]) => a.localeCompare(b));
+  const expectedEntries = Object.entries(expected).sort(([a], [b]) => a.localeCompare(b));
+  return JSON.stringify(actualEntries) === JSON.stringify(expectedEntries);
+}
+
 function check(name: string, condition: boolean, detail?: unknown): void {
   if (!condition) failures.push(name);
   checks[name] = condition ? true : { ok: false, detail };
@@ -51,10 +59,11 @@ function check(name: string, condition: boolean, detail?: unknown): void {
 
 interface PhaseStats {
   phase: string;
-  attempted: number;
-  admitted: number;
+  client_launched: number;
+  server_responded: number;
   succeeded: number;
   failed: number;
+  exceptions: number;
   statuses: Record<string, number>;
   max_in_flight: number;
   duration_ms: number;
@@ -97,16 +106,16 @@ async function runPhase<T>(
   const results: { index: number; status: number; body: any }[] = [];
   const statuses: Record<string, number> = {};
   let attempted = 0;
-  let admitted = 0;
+  let serverResponded = 0;
   for (let start = 0; start < items.length; start += WINDOW) {
     const wave = items.slice(start, start + WINDOW).map((item, offset) => {
       const index = start + offset;
       attempted += 1;
-      admitted += 1;
       inFlight.value += 1;
       inFlight.max = Math.max(inFlight.max, inFlight.value);
       return worker(item, index)
         .then((result) => {
+          serverResponded += 1;
           statuses[result.status] = (statuses[result.status] ?? 0) + 1;
           results.push({ index, ...result });
           return result;
@@ -124,24 +133,29 @@ async function runPhase<T>(
     if (start + WINDOW < items.length) await new Promise((resolve) => setTimeout(resolve, WAVE_DELAY_MS));
   }
   const succeeded = results.filter((result) => result.status === expectedStatus).length;
+  const exceptions = results.filter((result) => result.status === -1).length;
   const stats: PhaseStats = {
     phase,
-    attempted,
-    admitted,
+    client_launched: attempted,
+    server_responded: serverResponded,
     succeeded,
     failed: attempted - succeeded,
+    exceptions,
     statuses,
     max_in_flight: inFlight.max,
     duration_ms: Date.now() - phaseStart,
     wave_pause_ms: WAVE_DELAY_MS,
   };
-  check(`${phase}_attempted_matches_target`, attempted === items.length, stats);
+  check(`${phase}_client_launched_matches_target`, attempted === items.length, stats);
+  check(`${phase}_server_responded_all`, serverResponded === items.length, stats);
   check(`${phase}_all_succeeded`, succeeded === items.length, stats);
   check(`${phase}_observed_overlap`, inFlight.max > 1, stats);
   return { stats, results };
 }
 
 const phaseStats: PhaseStats[] = [];
+let reportBase: Record<string, unknown> | null = null;
+let caughtError: string | null = null;
 
 function openFacilitatorSocket(token: string): Promise<{ messages: any[]; baselineRevision: number; closed: Promise<number> }> {
   return new Promise((resolve, reject) => {
@@ -317,6 +331,23 @@ try {
     select
       (select count(*)::int from responses where question_id = ${fixture.rating_question_id} and comment is not null) as rating_comments,
       (select count(*)::int from responses where question_id = ${fixture.poll_question_id} and comment is not null) as poll_comments`;
+  // The correlated frame must carry the frame's own expected aggregate buckets,
+  // not merely the right revision.
+  const frameRating = correlated?.questions?.find((question: any) => question.question_id === fixture.rating_question_id);
+  const framePoll = correlated?.questions?.find((question: any) => question.question_id === fixture.poll_question_id);
+  check(
+    'fresh_frame_rating_buckets_match_db',
+    Boolean(frameRating) && sameCounts(frameRating?.counts, ratingBuckets),
+    { frame: frameRating?.counts, db: ratingBuckets },
+  );
+  check(
+    'fresh_frame_poll_buckets_match_db',
+    Boolean(framePoll) && sameCounts(framePoll?.counts, pollBuckets),
+    { frame: framePoll?.counts, db: pollBuckets },
+  );
+  check('fresh_frame_rating_total_matches_db', frameRating?.total === targetRatings, frameRating?.total);
+  check('fresh_frame_poll_total_matches_db', framePoll?.total === targetPolls, framePoll?.total);
+  check('fresh_frame_question_matches_committed_active', correlated?.active_question_id === fixture.poll_question_id, correlated?.active_question_id);
   const [joinedCount] = await sql<{ count: number }[]>`
     select count(*)::int as count from participants where session_id = ${fixture.session_id}`;
   check('db_joined_count_matches', joinedCount.count === targetParticipants, joinedCount.count);
@@ -375,10 +406,7 @@ try {
   );
 
   const durationMs = Date.now() - startedAt;
-  const report = {
-    ok: failures.length === 0,
-    failures,
-    checks,
+  reportBase = {
     session: { join_code: fixture.join_code, session_id: fixture.session_id },
     targets: { participants: targetParticipants, ratings: targetRatings, polls: targetPolls },
     phases: phaseStats,
@@ -390,22 +418,21 @@ try {
       ws_snapshot_frames: observer.messages.filter((frame) => frame.type === 'snapshot').length,
       pacing: `concurrency window ${WINDOW}, ${WAVE_DELAY_MS} ms between waves`,
       duration_ms: durationMs,
+      semantics: 'client_launched counts client requests started; server_responded counts any HTTP response received',
     },
     db: { joined: joinedCount.count, ratingBuckets, pollBuckets, comments: commentCounts },
     summary: {
       joined_base: summary?.session?.joined_base,
       rating: { n: ratingSummary?.n, mean: ratingSummary?.mean, counts: ratingSummary?.counts, comments: ratingSummary?.comment_count },
-      poll: { n: pollSummary?.n, unanswered: pollSummary?.unanswered, counts: pollSummary?.counts, options: pollSummary?.options },
+      poll: { n: pollSummary?.n, unanswered: pollSummary?.unanswered, counts: pollSummary?.counts, options: summary?.insights?.reported_blockers },
       caveats: summary?.caveats,
     },
     private_grant_file: grantPath,
     limitations: ['single-machine synthetic run with paced bounded concurrency; not 30 phones and not an SLA'],
   };
-  console.log(JSON.stringify(report, null, 2));
-  if (failures.length > 0) process.exitCode = 1;
 } catch (error) {
-  console.error(JSON.stringify({ ok: false, error: error instanceof Error ? error.message : String(error), checks, failures }));
-  process.exitCode = 1;
+  caughtError = error instanceof Error ? error.message : String(error);
+  failures.push('exception');
 } finally {
   for (const ws of sockets) {
     try {
@@ -417,12 +444,17 @@ try {
   const closeCodes = await Promise.all(
     closedPromises.map((closed) => Promise.race([closed, new Promise<number>((resolve) => setTimeout(() => resolve(-1), 1500))])),
   );
-  check('all_sockets_settled', closeCodes.every((code) => code !== -1), closeCodes);
-  if (failures.length > 0) {
-    console.error(JSON.stringify({ settled: closeCodes, failures, checks }));
-  }
+  const cleanup: CleanupResult = { settled: closeCodes.every((code) => code !== -1), closeCodes };
+  const final = finalizeRun({ checks, failures, cleanup });
   await sql.end({ timeout: 5 });
-  process.exit(process.exitCode ?? 0);
+  const output = {
+    ok: final.ok,
+    failures: final.failures,
+    checks: final.checks,
+    cleanup: final.cleanup,
+    ...(caughtError ? { error: caughtError } : {}),
+    ...(reportBase ?? {}),
+  };
+  console.log(JSON.stringify(output, null, 2));
+  process.exit(final.ok ? 0 : 1);
 }
-
-void spawnSync;

@@ -13,7 +13,8 @@
 import { readFileSync } from 'node:fs';
 import { createSql } from '../apps/api/src/db.ts';
 import { issueGrant } from '../apps/api/src/grants.ts';
-import { createSocketTracker, evaluateFixtureState, type FixtureSnapshot } from './verify-support.ts';
+import { createSocketTracker, evaluateFixtureState } from './verify-support.ts';
+import { needsRestoration, readLifecycle, sameLifecycle, type LifecycleSnapshot } from './lifecycle-support.ts';
 
 const LAN_ORIGIN = process.env.LAN_ORIGIN ?? 'https://192.168.1.98:8443';
 const LAN_WS = process.env.LAN_WS ?? 'wss://192.168.1.98:8443/ws';
@@ -35,6 +36,7 @@ const checks: Record<string, unknown> = {};
 const failures: string[] = [];
 const tracker = createSocketTracker(1500);
 let lifecycleMutationPerformed = false;
+let dispatchedControls = 0;
 
 function check(name: string, condition: boolean, detail?: unknown): void {
   if (!condition) failures.push(name);
@@ -104,18 +106,11 @@ async function waitFor(messages: JsonRecord[], predicate: (m: JsonRecord) => boo
 
 const snapshotRevision = (message: JsonRecord): number => Number((message.snapshot as { revision?: number } | undefined)?.revision ?? -1);
 
-let prior: FixtureSnapshot | null = null;
+let prior: LifecycleSnapshot | null = null;
 let priorRestorable = false;
 try {
-  const [sessionRow] = await sql<{ status: string; active_question_id: string | null }[]>`
-    select status, active_question_id from sessions where id = ${room.session_id}`;
-  const questionRows = await sql<{ id: string; receiving: boolean; closed_at: Date | null }[]>`
-    select id, receiving, closed_at from questions where session_id = ${room.session_id} order by seq`;
-  prior = {
-    status: sessionRow?.status ?? 'unknown',
-    activeQuestionId: sessionRow?.active_question_id ?? null,
-    questions: questionRows.map((q) => ({ id: q.id, receiving: q.receiving, closedAt: q.closed_at ? q.closed_at.toISOString() : null })),
-  };
+  prior = await readLifecycle(sql, room.session_id);
+  if (!prior) throw new Error('fixture session was not found; refusing to mutate or restore blindly');
   // Pure preflight decision: unsupported/ambiguous/ended states are refused
   // before any grant creation, control call or data mutation.
   const evaluation = evaluateFixtureState(prior);
@@ -189,6 +184,7 @@ try {
   );
   results.own_view = { status: me.status, revision: (me.body.session as { revision?: number } | undefined)?.revision ?? null };
 
+  dispatchedControls += 1;
   const openPoll = await call(`/api/facilitator/sessions/${room.session_id}/questions/${room.poll_question_id}/open`, {
     method: 'POST',
     token: facilitatorGrant,
@@ -243,6 +239,7 @@ try {
   // Question control: reopen the rating question. This is a control action, not a
   // new participant answer; the fresh pushed snapshot must match the control's
   // exact returned revision, not merely exceed the cached initial frame.
+  dispatchedControls += 1;
   const openRating = await call(`/api/facilitator/sessions/${room.session_id}/questions/${room.rating_question_id}/open`, {
     method: 'POST',
     token: facilitatorGrant,
@@ -315,40 +312,44 @@ try {
   check('all_socket_attempts_settled', cleanup.attempts > 0 ? !cleanup.incomplete : true, cleanup);
   results.socket_cleanup = cleanup;
 
+  // Reconcile authoritative state instead of trusting an acknowledgement: a
+  // control may have committed while its response was lost or unparseable.
+  const current = await readLifecycle(sql, room.session_id);
+  const divergence =
+    prior && current
+      ? needsRestoration(prior, current)
+      : { needed: true, reason: 'lifecycle state unavailable for reconciliation' };
+  results.dispatched_controls = dispatchedControls;
+  results.lifecycle_divergence = divergence;
+
   let restored = false;
   let restoredExact = false;
-  const snapshot = prior;
-  if (snapshot && priorRestorable && lifecycleMutationPerformed) {
-    try {
-      const restore = await call(`/api/facilitator/sessions/${room.session_id}/questions/${snapshot.activeQuestionId}/open`, {
-        method: 'POST',
-        token: facilitatorGrant,
-      });
-      restored = restore.status === 200;
-      if (restored) {
-        const [sessionRow] = await sql<{ status: string; active_question_id: string | null }[]>`
-          select status, active_question_id from sessions where id = ${room.session_id}`;
-        const questionRows = await sql<{ id: string; receiving: boolean; closed_at: Date | null }[]>`
-          select id, receiving, closed_at from questions where session_id = ${room.session_id} order by seq`;
-        restoredExact =
-          sessionRow?.status === snapshot.status &&
-          sessionRow?.active_question_id === snapshot.activeQuestionId &&
-          questionRows.length === snapshot.questions.length &&
-          questionRows.every(
-            (q, index) =>
-              q.id === snapshot.questions[index].id &&
-              q.receiving === snapshot.questions[index].receiving &&
-              (q.closed_at ? q.closed_at.toISOString() : null) === snapshot.questions[index].closedAt,
-          );
+  if (divergence.needed) {
+    check('lifecycle_divergence_detected', true, divergence);
+    if (prior && priorRestorable) {
+      try {
+        const restore = await call(`/api/facilitator/sessions/${room.session_id}/questions/${prior.activeQuestionId}/open`, {
+          method: 'POST',
+          token: facilitatorGrant,
+        });
+        restored = restore.status === 200;
+        if (restored) {
+          const after = await readLifecycle(sql, room.session_id);
+          restoredExact = Boolean(after) && sameLifecycle(prior, after as LifecycleSnapshot);
+        }
+      } catch {
+        restored = false;
       }
-    } catch {
-      restored = false;
+    } else {
+      check('lifecycle_restorable_state_supported', false, divergence);
     }
-  } else if (snapshot && priorRestorable) {
-    // No lifecycle mutation happened; restoring would itself reopen an unchanged
-    // question and advance the revision, so the no-op lifecycle is reported as-is.
+  } else {
+    // A genuinely unchanged fixture must not be reopened: doing so would advance
+    // the revision and mutate the very state an early failure promised to keep.
     check('fixture_restore_not_needed_no_lifecycle_mutation', true);
     results.fixture_restore_skipped_no_lifecycle_mutation = true;
+    restored = true;
+    restoredExact = true;
   }
   check('fixture_restored_prior_active_question', restored);
   check('fixture_restored_exactly', restoredExact);
@@ -360,6 +361,5 @@ results.ok = failures.length === 0;
 results.failures = failures;
 if (failures.length > 0) process.exitCode = 1;
 console.log(JSON.stringify(results, null, 2));
-// Explicit exit so lingering client handles cannot keep a failed or successful
-// verifier alive; the exit code is part of the required contract.
+// Explicit exit so lingering handles cannot keep a failed/successful verifier alive.
 process.exit(process.exitCode ?? 0);

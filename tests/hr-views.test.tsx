@@ -208,3 +208,66 @@ describe('HR-QA-01/02 known-zero copy and actual n=1 view', () => {
     expect(html).toContain('4');
   });
 });
+
+
+describe('HR-QA-02 singleton poll view and rendered small-sample caveat', () => {
+  test('n=1 poll shows its 100% share and the rendered caveat is asserted', () => {
+    const summary: HrSummary = {
+      session: { id: 's1', status: 'ended', ended_at: null, revision: 3, joined_base: 1, question_count: 2 },
+      questions: [
+        {
+          id: 'q1',
+          seq: 1,
+          type: 'rating',
+          label: 'คุณมั่นใจในการให้ feedback ที่ช่วยให้ทีมพัฒนาได้เพียงใด?',
+          help_text: null,
+          options: null,
+          rating_min: 1,
+          rating_max: 5,
+          n: 0,
+          joined_base: 1,
+          unanswered: 1,
+          coverage_ratio: 0,
+          counts: {},
+          mean: null,
+          comment_count: 0,
+        },
+        {
+          id: 'q2',
+          seq: 2,
+          type: 'poll',
+          label: 'อุปสรรคสำคัญที่สุดในการให้ feedback ต่อทีมคืออะไร?',
+          help_text: null,
+          options: [{ id: 'time', label: 'เวลาสำหรับดูแลทีมไม่พอ' }],
+          rating_min: null,
+          rating_max: null,
+          n: 1,
+          joined_base: 1,
+          unanswered: 0,
+          coverage_ratio: 1,
+          counts: { time: 1 },
+          mean: null,
+          comment_count: 0,
+        },
+      ],
+      insights: {
+        feedback_confidence: null,
+        reported_blockers: [{ option_id: 'time', label: 'เวลาสำหรับดูแลทีมไม่พอ', count: 1, share: 1 }],
+      },
+      caveats: [
+        'ข้อมูลนี้เป็น self-report จากผู้เข้าร่วม ไม่ใช่การวินิจฉัยพนักงานหรือการประเมินผลการทำงาน',
+        'มีบางข้อที่มีคำตอบน้อย (n < 5) ควรตีความอย่างระมัดระวัง',
+      ],
+      generated_at: '2026-11-12T01:00:00.000Z',
+    };
+    const html = render({ hasToken: true, state: 'ready', summary });
+    expect(html).toContain('ตอบ 1 จาก 1 คน');
+    expect(html).toContain('n=1');
+    expect(html).toContain('100%');
+    expect(html).toContain('เวลาสำหรับดูแลทีมไม่พอ — 1 คน');
+    expect(html).toContain('100% ของผู้ตอบ n=1');
+    // The rendered caveat itself is asserted, not just the test title.
+    expect(html).toContain('มีบางข้อที่มีคำตอบน้อย (n &lt; 5) ควรตีความอย่างระมัดระวัง');
+    expect(html).toContain('ยังไม่มีคำตอบสำหรับข้อนี้');
+  });
+});

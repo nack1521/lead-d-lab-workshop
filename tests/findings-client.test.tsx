@@ -635,3 +635,60 @@ describe('R09 actual WS wire and builder delete reconciliation', () => {
     expect(text()).not.toContain('Draft question to delete');
   });
 });
+
+describe('R10 coalesced final text update mounted workspace', () => {
+  test('invalidation during an in-flight report read yields one trailing read with final text', async () => {
+    const textQuestion = {
+      id: 'q1', seq: 1, type: 'text', label: 'Final text question', help_text: null, options: null,
+      rating_min: null, rating_max: null, receiving: false, closed_at: null, response_count: 0, locked: true,
+    };
+    const builderRoom = {
+      id: 'r1', title: 'Synthetic final text room', join_code: 'TXT01', status: 'active', phase: 'open',
+      published: true, revision: 5, active_question_id: null, answer_mode: 'self_paced',
+      created_at: '2026-01-01T00:00:00.000Z', ended_at: null, counts: { questions: 1, participants: 1, responses: 1 },
+    };
+    const snapshot = (revision: number) => ({ session_id: 'r1', revision, session_status: 'active', active_question_id: null, participant_count: 1, questions: [] });
+    const report = (revision: number, latest: string) => ({
+      status: 'ok', room: { ...builderRoom, revision }, joined_base: 1,
+      questions: [{ ...textQuestion, n: 1, joined_base: 1, unanswered: 0, coverage_ratio: 1, text: { total: 1, latest: [{ id: `t-${revision}`, text: latest, created_at: '2026-01-01T00:00:00.000Z' }], page: 1, limit: 3, has_more: false, next_cursor: null } }],
+      generated_at: '2026-01-01T00:00:00.000Z',
+    });
+    let reportReads = 0;
+    handler = async (url, init) => {
+      const method = init.method ?? 'GET';
+      if (url.includes('/api/admin/login')) return json({ status: 'ok', admin_token: 'admin-token', scope: 'admin', expires_in_seconds: 1 });
+      if (url.endsWith('/api/admin/rooms') && method === 'GET') return json({ status: 'ok', rooms: [builderRoom] });
+      if (url.endsWith('/api/admin/rooms/r1/workspace')) return json({ status: 'ok', room: builderRoom, questions: [textQuestion], snapshot: snapshot(5), realtime_grant: 'fac-fixture' });
+      if (url.endsWith('/api/admin/rooms/r1/report')) {
+        reportReads += 1;
+        if (reportReads === 1) return json(report(5, 'Initial text'));
+        if (reportReads === 2) {
+          await new Promise((resolve) => setTimeout(resolve, 80));
+          return json(report(6, 'Stale in-flight text'));
+        }
+        return json(report(7, 'Latest final text'));
+      }
+      return json({ status: 'ok' });
+    };
+    await mount('/facilitator');
+    await tick(8);
+    fill('#demo-pass', 'admin');
+    clickButton('Sign in');
+    await tick(12);
+    clickButton('Synthetic final text room');
+    await tick(16);
+    clickButton('Dashboard');
+    await tick(12);
+    expect(text()).toContain('Initial text');
+    const socket = FakeWebSocket.instances.at(-1)!;
+    expect(socket).toBeDefined();
+    socket.emit('open');
+    socket.emit('message', { data: JSON.stringify({ type: 'snapshot', snapshot: snapshot(6) }) });
+    await tick(170); // coalesced read 2 has started and is delayed
+    socket.emit('message', { data: JSON.stringify({ type: 'snapshot', snapshot: snapshot(7) }) });
+    await tick(320); // trailing read 3 completes with final text
+    expect(text()).toContain('Latest final text');
+    expect(text()).not.toContain('Stale in-flight text');
+    expect(reportReads).toBeLessThanOrEqual(4);
+  });
+});

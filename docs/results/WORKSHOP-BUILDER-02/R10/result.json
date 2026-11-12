@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "task_id": "WORKSHOP-BUILDER-02",
+  "run_id": "R10",
+  "reported_at": "2026-11-12T23:37:36+07:00",
+  "producer": "DeepSeek Harness (sole coding writer)",
+  "authoring_tool": "DeepSeek Harness",
+  "model": "deepseek-v4.1-flash-1017",
+  "source_kind": "direct",
+  "baseline_commit": "92d2508",
+  "observed_head": "92d2508",
+  "branch": "main",
+  "work_kind": "coalesce_trailing_latch",
+  "status": "READY_FOR_REVIEW",
+  "summary": "Fixed WB2-R09-COALESCE-01: createCoalescedTask now keeps max one in-flight read but latches dirty/trailing work when a timer fires during a read, running one bounded follow-up after settlement (10 updates during run1 -> exactly 2 runs with final state); cancel/unmount clears pending/trailing work and builder checks mounted/room identity before applying late reports; rejections are swallowed with no unhandled promise or retry loop. Fail-first deferred-read RED captured, GREEN with three scheduler cases plus a mounted BuilderApp final-text test where stale revision-6 text arrives during frame revision 7 and a trailing read yields only 'Latest final text'. Full suite 194 pass/0 skip/0 fail; typecheck 0; default and cloud-configured builds 0; API image builds. Mobile screenshots/physical iPhone/cloud paint remain NOT RUN; no visual PASS; no push/deploy.",
+  "detail_path": "docs/results/WORKSHOP-BUILDER-02/R10/result.md",
+  "finding_ids": ["WB2-R09-COALESCE-01"],
+  "cases": [
+    {"case_id": "WB2-R10-01", "status": "PASS", "evidence_paths": ["apps/web/src/coalesce.ts", "tests/r10-coalesce.test.ts", "docs/results/WORKSHOP-BUILDER-02/R10/evidence/coalesce-red.log", "docs/results/WORKSHOP-BUILDER-02/R10/evidence/coalesce-green.log"]},
+    {"case_id": "WB2-R10-02", "status": "PASS", "evidence_paths": ["tests/findings-client.test.tsx", "docs/results/WORKSHOP-BUILDER-02/R10/evidence/mounted-final-text.log"]},
+    {"case_id": "WB2-R10-03", "status": "PASS", "evidence_paths": ["apps/web/src/builder.tsx"]},
+    {"case_id": "WB2-R10-04", "status": "PASS", "evidence_paths": ["docs/results/WORKSHOP-BUILDER-02/R10/evidence/mode-a-regression.log", "docs/results/WORKSHOP-BUILDER-02/R10/evidence/typecheck.log", "docs/results/WORKSHOP-BUILDER-02/R10/evidence/build-cloud.log", "docs/results/WORKSHOP-BUILDER-02/R10/evidence/api-image-build.log"]},
+    {"case_id": "WB2-R10-05", "status": "NOT RUN", "limitations": "Mobile screenshots/geometry and physical iPhone; no browser/iPhone automation."}
+  ],
+  "commands": [
+    {"command": "bun test tests/r10-coalesce.test.ts (pre-fix)", "exit_code": 1, "outcome": "RED: trailing invalidation lost + unhandled rejection"},
+    {"command": "bun test tests/r10-coalesce.test.ts", "exit_code": 0, "outcome": "3 pass including 10 updates -> 2 bounded runs"},
+    {"command": "bun test tests/findings-client.test.tsx", "exit_code": 0, "outcome": "15 pass incl mounted stale in-flight final-text"},
+    {"command": "bun test tests", "exit_code": 0, "outcome": "194 pass / 0 skip / 0 fail"},
+    {"command": "bun x tsc --noEmit", "exit_code": 0, "outcome": "no type errors"},
+    {"command": "bun run build:web / cloud-configured build", "exit_code": 0, "outcome": "both builds succeed"},
+    {"command": "DOCKER_BUILDKIT=0 docker build -f Dockerfile.api", "exit_code": 0, "outcome": "API image built/tagged"}
+  ],
+  "blockers": [],
+  "not_verified": ["mobile screenshots/geometry at 320/375/390/430 and physical iPhone", "cloud Add/Save paint timing", "cloud deployment/browser end-to-end", "independent QA/human acceptance"],
+  "next_gate": "Coordinator retest of trailing latch/cancel/old-room guard, then user-assisted mobile/cloud verification; no publication before independent retest.",
+  "published": false
+}

@@ -1,0 +1,46 @@
+DEPRECATED: The legacy builder is deprecated and will be removed in a future release.
+            BuildKit is currently disabled; enable it by removing the DOCKER_BUILDKIT=0
+            environment-variable.
+
+Sending build context to Docker daemon  2.708MB
+Step 1/13 : FROM oven/bun:1.4.4-alpine@sha256:4cf82f5686b196504fe119db3fcd9185b191f82ece82c40680e597228ec6070a
+ ---> 4cf82f5686b1
+Step 2/13 : WORKDIR /app
+ ---> Using cache
+ ---> cae41de44c82
+Step 3/13 : COPY package.json bun.lock ./
+ ---> Using cache
+ ---> 9e2fdf11d3bd
+Step 4/13 : COPY apps/api/package.json apps/api/package.json
+ ---> Using cache
+ ---> e4b66962519d
+Step 5/13 : COPY apps/web/package.json apps/web/package.json
+ ---> Using cache
+ ---> 6004ee566a57
+Step 6/13 : RUN bun install --frozen-lockfile --production
+ ---> Using cache
+ ---> a084aabf7043
+Step 7/13 : COPY apps/api ./apps/api
+ ---> a47ee470c55b
+Step 8/13 : COPY db ./db
+ ---> 0d0c3a5fe17f
+Step 9/13 : COPY docker/start-api.sh ./docker/start-api.sh
+ ---> c7c67c9dc19e
+Step 10/13 : RUN chmod 755 docker/start-api.sh  && chmod -R a+rX /app/apps /app/db /app/docker
+ ---> Running in 5acda04b1179
+ ---> Removed intermediate container 5acda04b1179
+ ---> 172cc5166acd
+Step 11/13 : USER bun
+ ---> Running in a5add01830e2
+ ---> Removed intermediate container a5add01830e2
+ ---> 4ab09f94dc7b
+Step 12/13 : EXPOSE 3000
+ ---> Running in 5f0dada0a738
+ ---> Removed intermediate container 5f0dada0a738
+ ---> 8c74319b4ff4
+Step 13/13 : CMD ["sh", "docker/start-api.sh"]
+ ---> Running in a8cb77d0bc11
+ ---> Removed intermediate container a8cb77d0bc11
+ ---> 5ae685cb5246
+Successfully built 5ae685cb5246
+Successfully tagged lead-d-lab-api:r10

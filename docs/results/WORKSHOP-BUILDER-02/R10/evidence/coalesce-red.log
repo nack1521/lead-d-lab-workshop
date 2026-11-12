@@ -1,0 +1,46 @@
+bun test v1.4.4 (38afee6c8)
+
+tests/r10-coalesce.test.ts:
+18 |     expect(reads).toEqual([1]);
+19 |     task.schedule(); // event version 2 arrives during in-flight run1
+20 |     await tick(35); // its timer fires while run1 is still blocked
+21 |     release();
+22 |     await tick(60);
+23 |     expect(reads.length).toBe(2);
+                              ^
+error: expect(received).toBe(expected)
+
+Expected: 2
+Received: 1
+
+      at <anonymous> (/Users/aiink/Nack/Lead+D-Lab/tests/r10-coalesce.test.ts:23:26)
+(fail) R10 coalesced task trailing latch (WB2-R09-COALESCE-01) > invalidation arriving while run1 is in flight is not lost and runs once afterwards [139.92ms]
+37 |     await tick(40);
+38 |     for (let version = 2; version <= 10; version += 1) { latest = version; task.schedule(); }
+39 |     await tick(35);
+40 |     release();
+41 |     await tick(80);
+42 |     expect(runs).toBe(2);
+                      ^
+error: expect(received).toBe(expected)
+
+Expected: 2
+Received: 1
+
+      at <anonymous> (/Users/aiink/Nack/Lead+D-Lab/tests/r10-coalesce.test.ts:42:18)
+(fail) R10 coalesced task trailing latch (WB2-R09-COALESCE-01) > ten updates during run1 coalesce into one bounded trailing run with final state [157.07ms]
+46 | 
+47 |   test('cancel prevents trailing reads and rejection does not retry forever', async () => {
+48 |     let runs = 0;
+49 |     let release!: () => void;
+50 |     const gate = new Promise<void>((resolve) => { release = resolve; });
+51 |     const task = createCoalescedTask(async () => { runs += 1; await gate; throw new Error('downstream failed'); }, 20);
+                                                                                         ^
+error: downstream failed
+      at <anonymous> (/Users/aiink/Nack/Lead+D-Lab/tests/r10-coalesce.test.ts:51:85)
+(fail) R10 coalesced task trailing latch (WB2-R09-COALESCE-01) > cancel prevents trailing reads and rejection does not retry forever [44.95ms]
+
+ 0 pass
+ 3 fail
+ 3 expect() calls
+Ran 3 tests across 1 file. [352.00ms]

@@ -1,0 +1,11 @@
+bun test v1.4.4 (38afee6c8)
+
+tests/r10-coalesce.test.ts:
+(pass) R10 coalesced task trailing latch (WB2-R09-COALESCE-01) > invalidation arriving while run1 is in flight is not lost and runs once afterwards [138.56ms]
+(pass) R10 coalesced task trailing latch (WB2-R09-COALESCE-01) > ten updates during run1 coalesce into one bounded trailing run with final state [158.16ms]
+(pass) R10 coalesced task trailing latch (WB2-R09-COALESCE-01) > cancel prevents trailing reads and rejection does not retry forever [102.56ms]
+
+ 3 pass
+ 0 fail
+ 8 expect() calls
+Ran 3 tests across 1 file. [422.00ms]

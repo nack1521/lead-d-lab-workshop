@@ -232,6 +232,7 @@ function Workspace({ mode, token, room, onBack }: { mode: 'admin' | 'hr'; token:
   const [expanded, setExpanded] = useState<ExpandedText | null>(null);
   const wsRef = useRef<{ close: () => void } | null>(null);
   const reportRefreshRef = useRef<CoalescedTask | null>(null);
+  const mountedRef = useRef(true);
   const ended = currentRoom.status === 'ended';
   useEffect(() => { if (ended) setTab('dashboard'); }, [ended]);
   const canMutate = !readOnly && !ended;
@@ -248,8 +249,14 @@ function Workspace({ mode, token, room, onBack }: { mode: 'admin' | 'hr'; token:
       setLastUpdated(new Date());
       setReport(reportData);
       if (!reportRefreshRef.current) {
+        const roomIdAtCreation = currentRoom.id;
         reportRefreshRef.current = createCoalescedTask(async () => {
-          try { setReport(await api<Report>(`/api/admin/rooms/${currentRoom.id}/report`, token)); } catch { /* keep last truthful report */ }
+          try {
+            const next = await api<Report>(`/api/admin/rooms/${roomIdAtCreation}/report`, token);
+            // Never apply a late result after unmount or a room change.
+            if (!mountedRef.current || currentRoom.id !== roomIdAtCreation) return;
+            setReport(next);
+          } catch { /* keep last truthful report; no retry loop */ }
         }, 150);
       }
       if (!selectedId && workspace.questions.length > 0) setSelectedId(workspace.questions[0].id);
@@ -270,7 +277,15 @@ function Workspace({ mode, token, room, onBack }: { mode: 'admin' | 'hr'; token:
     } catch (err) { setStatus(err instanceof Error ? err.message : 'Could not load the room'); }
   };
 
-  useEffect(() => { void refresh(); return () => { wsRef.current?.close(); wsRef.current = null; reportRefreshRef.current?.cancel(); reportRefreshRef.current = null; }; }, [currentRoom.id]);
+  useEffect(() => {
+    mountedRef.current = true;
+    void refresh();
+    return () => {
+      mountedRef.current = false;
+      wsRef.current?.close(); wsRef.current = null;
+      reportRefreshRef.current?.cancel(); reportRefreshRef.current = null;
+    };
+  }, [currentRoom.id]);
 
   const refreshReport = async () => {
     try { setReport(await api<Report>(`/api/admin/rooms/${currentRoom.id}/report`, token)); }

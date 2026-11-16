@@ -106,6 +106,7 @@ export function BuilderApp({ mode }: { mode: 'admin' | 'hr' }) {
   const [roomsError, setRoomsError] = useState<string | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
   const [creating, setCreating] = useState(false);
+  const loadedTokenRef = useRef<string | null>(null);
 
   const login = async (passphrase: string) => {
     setLoginPending(true); setLoginError(null);
@@ -126,7 +127,11 @@ export function BuilderApp({ mode }: { mode: 'admin' | 'hr' }) {
     finally { setRoomsLoading(false); }
   };
 
-  useEffect(() => { if (token) void loadRooms(token); }, [token]);
+  useEffect(() => {
+    if (!token || loadedTokenRef.current === token) return;
+    loadedTokenRef.current = token;
+    void loadRooms(token);
+  }, [token]);
 
   const createRoom = async (title: string) => {
     if (!token || creating) return;
@@ -221,6 +226,8 @@ function Workspace({ mode, token, room, onBack }: { mode: 'admin' | 'hr'; token:
   const [tab, setTab] = useState<'questions' | 'dashboard'>(readOnly ? 'dashboard' : 'questions');
   const [questions, setQuestions] = useState<QuestionRow[]>([]);
   const [report, setReport] = useState<Report | null>(null);
+  const [reportState, setReportState] = useState<'idle' | 'loading' | 'ready' | 'error'>('idle');
+  const [reportError, setReportError] = useState<string | null>(null);
   const [snapshot, setSnapshot] = useState<Snapshot | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [status, setStatus] = useState<string | null>(null);
@@ -233,49 +240,76 @@ function Workspace({ mode, token, room, onBack }: { mode: 'admin' | 'hr'; token:
   const wsRef = useRef<{ close: () => void } | null>(null);
   const reportRefreshRef = useRef<CoalescedTask | null>(null);
   const mountedRef = useRef(true);
+  const reportRevisionRef = useRef(-1);
+  const tabRef = useRef(tab);
+  tabRef.current = tab;
   const ended = currentRoom.status === 'ended';
+  const resultsVisibleRef = useRef(readOnly || tab === 'dashboard' || ended);
+  resultsVisibleRef.current = readOnly || tab === 'dashboard' || ended;
   useEffect(() => { if (ended) setTab('dashboard'); }, [ended]);
   const canMutate = !readOnly && !ended;
 
+  const scheduleReport = () => {
+    if (!reportRefreshRef.current) return;
+    setReportState((previous) => (previous === 'ready' ? 'ready' : 'loading'));
+    setReportError(null);
+    reportRefreshRef.current.schedule();
+  };
+
   const refresh = async () => {
     try {
-      const [workspace, reportData] = await Promise.all([
-        api<{ room: RoomRow; questions: QuestionRow[]; snapshot: Snapshot; realtime_grant: string }>(`/api/admin/rooms/${currentRoom.id}/workspace`, token),
-        api<Report>(`/api/admin/rooms/${currentRoom.id}/report`, token),
-      ]);
+      // Editor readiness must not wait for the full report. Apply the workspace
+      // as soon as it arrives, then load results only when they are visible.
+      const workspace = await api<{ room: RoomRow; questions: QuestionRow[]; snapshot: Snapshot; realtime_grant: string }>(`/api/admin/rooms/${currentRoom.id}/workspace`, token);
+      if (!mountedRef.current) return;
       setCurrentRoom(workspace.room);
       setQuestions(workspace.questions);
       setSnapshot(workspace.snapshot);
       setLastUpdated(new Date());
-      setReport(reportData);
+      if (!selectedId && workspace.questions.length > 0) setSelectedId(workspace.questions[0].id);
       if (!reportRefreshRef.current) {
         const roomIdAtCreation = currentRoom.id;
         reportRefreshRef.current = createCoalescedTask(async () => {
           try {
             const next = await api<Report>(`/api/admin/rooms/${roomIdAtCreation}/report`, token);
-            // Never apply a late result after unmount or a room change.
+            // Never apply a late result after unmount, a room change, or an
+            // older report over a newer one already applied.
             if (!mountedRef.current || currentRoom.id !== roomIdAtCreation) return;
+            if (next.room.revision < reportRevisionRef.current) return;
+            reportRevisionRef.current = next.room.revision;
             setReport(next);
-          } catch { /* keep last truthful report; no retry loop */ }
+            setReportState('ready');
+            setReportError(null);
+          } catch (err) {
+            if (!mountedRef.current) return;
+            setReportState('error');
+            setReportError(err instanceof Error ? err.message : 'Could not refresh results');
+          }
         }, 150);
       }
-      if (!selectedId && workspace.questions.length > 0) setSelectedId(workspace.questions[0].id);
       if (!wsRef.current) {
         wsRef.current = connectSocket(workspace.realtime_grant, {
           onSnapshot: (incoming) => {
-            setSnapshot(incoming as Snapshot);
+            const nextSnapshot = incoming as Snapshot;
+            setSnapshot(nextSnapshot);
             setLastUpdated(new Date());
             setConnected(true);
-            // Charts use the snapshot aggregate immediately; text/detail report
-            // reads are coalesced to at most one per quiet window.
-            reportRefreshRef.current?.schedule();
+            // While editing, do not fetch reports; mark them stale and load when
+            // results become visible. When visible, use the bounded coalescer.
+            if (resultsVisibleRef.current) scheduleReport();
           },
           onStatus: (value) => setConnected(value === 'open'),
           onError: () => setConnected(false),
         });
       }
+      if (resultsVisibleRef.current) scheduleReport();
     } catch (err) { setStatus(err instanceof Error ? err.message : 'Could not load the room'); }
   };
+
+  useEffect(() => {
+    if (!(readOnly || tab === 'dashboard' || ended)) return;
+    scheduleReport();
+  }, [tab, readOnly, ended]);
 
   useEffect(() => {
     mountedRef.current = true;
@@ -287,10 +321,7 @@ function Workspace({ mode, token, room, onBack }: { mode: 'admin' | 'hr'; token:
     };
   }, [currentRoom.id]);
 
-  const refreshReport = async () => {
-    try { setReport(await api<Report>(`/api/admin/rooms/${currentRoom.id}/report`, token)); }
-    catch (err) { setStatus(err instanceof Error ? err.message : 'Could not refresh results'); }
-  };
+  const refreshReport = () => scheduleReport();
 
   const mutate = async (path: string, body?: unknown, method = 'POST') => {
     if (!canMutate || busy) return;
@@ -325,7 +356,7 @@ function Workspace({ mode, token, room, onBack }: { mode: 'admin' | 'hr'; token:
         if (result?.room) setCurrentRoom(result.room);
         if (path === '/end') setTab('dashboard');
       }
-      if (tab === 'dashboard') await refreshReport();
+      if (tab === 'dashboard') refreshReport();
     } catch (err) { setStatus(err instanceof Error ? err.message : 'That action failed'); }
     finally { setBusy(null); }
   };
@@ -415,7 +446,7 @@ function Workspace({ mode, token, room, onBack }: { mode: 'admin' | 'hr'; token:
           />
         ) : (
           <Dashboard
-            readOnly={readOnly} ended={ended} questions={questions} report={mergeReportWithSnapshot(report, snapshot)} snapshot={snapshot} answerMode={currentRoom.answer_mode}
+            readOnly={readOnly} ended={ended} questions={questions} report={mergeReportWithSnapshot(report, snapshot)} snapshot={snapshot} answerMode={currentRoom.answer_mode} reportLoading={reportState === 'loading' || (report !== null && snapshot !== null && snapshot.revision > report.room.revision)} reportError={reportState === 'error' ? reportError : null} onRetryReport={scheduleReport}
             onOpen={(questionId) => void mutate(`/questions/${questionId}/open`)}
             onClose={(questionId) => void mutate(`/questions/${questionId}/close`)}
             expanded={expanded}
@@ -564,6 +595,7 @@ function ParticipantPreview({ question }: { question: QuestionRow | null }) {
 
 function Dashboard(props: {
   readOnly: boolean; ended: boolean; questions: QuestionRow[]; report: Report | null; snapshot: Snapshot | null;
+  reportLoading?: boolean; reportError?: string | null; onRetryReport?: () => void;
   onOpen: (id: string) => void; onClose: (id: string) => void; answerMode: 'facilitator' | 'self_paced';
   expanded: ExpandedText | null; onViewAdditional: (id: string, cursor: string | null) => void; onLoadMore: (id: string) => void; onCloseExpanded: () => void;
 }) {
@@ -571,15 +603,23 @@ function Dashboard(props: {
   return (
     <section className="dashboard">
       {props.ended ? <p className="report-status" role="status">Session ended — showing saved results without changing any data.</p> : null}
-      {props.questions.length > 0 ? (
+      {props.reportLoading && props.report ? <p className="muted" role="status">Updating results…</p> : null}
+      {!props.report && props.reportLoading ? <p className="empty-note" role="status">Loading results…</p> : null}
+      {!props.report && !props.reportLoading && props.reportError ? (
+        <div role="alert" className="inline-error">
+          <p>{props.reportError}</p>
+          {props.onRetryReport ? <button type="button" className="secondary" onClick={props.onRetryReport}>Retry results</button> : null}
+        </div>
+      ) : null}
+      {props.questions.length > 0 && (props.report || (!props.reportLoading && !props.reportError)) ? (
         <nav className="report-nav" aria-label="Jump to question results">
           <span className="muted">Results:</span>
           {props.questions.map((question) => (
             <button key={question.id} type="button" className="ghost" onClick={() => document.getElementById(`report-${question.id}`)?.scrollIntoView({ block: 'start', behavior: 'smooth' })}>Q{String(question.seq).padStart(2, '0')}</button>
           ))}
         </nav>
-      ) : <p className="empty-note">No questions yet — add questions before opening responses.</p>}
-      {props.questions.map((question) => (
+      ) : props.questions.length === 0 ? <p className="empty-note">No questions yet — add questions before opening responses.</p> : null}
+      {(props.report || (!props.reportLoading && !props.reportError)) ? props.questions.map((question) => (
         <ReportCard
           key={question.id}
           question={question}
@@ -594,7 +634,7 @@ function Dashboard(props: {
           onLoadMore={() => props.onLoadMore(question.id)}
           onCloseExpanded={props.onCloseExpanded}
         />
-      ))}
+      )) : null}
     </section>
   );
 }

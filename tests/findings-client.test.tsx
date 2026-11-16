@@ -664,6 +664,8 @@ describe('R10 coalesced final text update mounted workspace', () => {
       generated_at: '2026-01-01T00:00:00.000Z',
     });
     let reportReads = 0;
+    let releaseInFlight!: () => void;
+    const inflightGate = new Promise<void>((resolve) => { releaseInFlight = resolve; });
     handler = async (url, init) => {
       const method = init.method ?? 'GET';
       if (url.includes('/api/admin/login')) return json({ status: 'ok', admin_token: 'admin-token', scope: 'admin', expires_in_seconds: 1 });
@@ -673,7 +675,8 @@ describe('R10 coalesced final text update mounted workspace', () => {
         reportReads += 1;
         if (reportReads === 1) return json(report(5, 'Initial text'));
         if (reportReads === 2) {
-          await new Promise((resolve) => setTimeout(resolve, 80));
+          // Deterministic A in-flight gate controlled by the test, not a fixed delay.
+          await inflightGate;
           return json(report(6, 'Stale in-flight text'));
         }
         return json(report(7, 'Latest final text'));
@@ -698,6 +701,7 @@ describe('R10 coalesced final text update mounted workspace', () => {
     await waitFor(() => reportReads >= 2);
     expect(text()).toContain('Refreshing results...');
     socket.emit('message', { data: JSON.stringify({ type: 'snapshot', snapshot: snapshot(7) }) });
+    releaseInFlight();
     await waitFor(() => text().includes('Latest final text'));
     expect(text()).not.toContain('Stale in-flight text');
     expect(reportReads).toBeLessThanOrEqual(4);
@@ -763,27 +767,42 @@ describe('R04 mounted report pending/error and editor inactivity', () => {
     expect(reportReads).toBe(2);
   });
 
-  test('cached failure shows error+Retry with error precedence over pending/stale copy and keeps cached cards', async () => {
+  test('cached A rejection with B latched keeps error+Retry while B pending; B rejection settles; manual retry bounded', async () => {
     reportReads = 0;
-    let failNext = true;
-    handler = (url, init) => baseHandler(url, init, (read) => {
+    let releaseA!: () => void;
+    let releaseB!: () => void;
+    const gateA = new Promise<void>((resolve) => { releaseA = resolve; });
+    const gateB = new Promise<void>((resolve) => { releaseB = resolve; });
+    handler = (url, init) => baseHandler(url, init, async (read) => {
       reportReads += 1;
       if (read === 1) return json(r04Report(5, 'Initial cached text'));
-      if (read === 2 && failNext) { failNext = false; throw new Error('synthetic report failure'); }
+      if (read === 2) { await gateA; throw new Error('A refresh failed'); }
+      if (read === 3) { await gateB; throw new Error('B refresh failed'); }
       return json(r04Report(6, 'Recovered text'));
     });
     const socket = await openRoomForReport();
     clickButton('Dashboard');
     await waitFor(() => text().includes('Initial cached text'));
     socket.emit('message', { data: JSON.stringify({ type: 'snapshot', snapshot: r04Snapshot(6) }) });
-    await waitFor(() => text().includes('synthetic report failure'));
+    await waitFor(() => reportReads >= 2); // A in flight
+    socket.emit('message', { data: JSON.stringify({ type: 'snapshot', snapshot: r04Snapshot(7) }) }); // dirty B latch
+    releaseA(); // A rejects
+    await waitFor(() => reportReads >= 3); // B starts after A settles while error remains
+    expect(text()).toContain('A refresh failed');
     expect(text()).toContain('Retry results');
     expect(text()).toContain('Initial cached text');
     expect(text()).not.toContain('Refreshing results...');
     expect(text()).not.toContain('Results may be out of date.');
+    releaseB(); // B rejects; error remains until manual retry
+    await waitFor(() => text().includes('B refresh failed'));
+    expect(text()).toContain('Retry results');
     clickButton('Retry results');
     await waitFor(() => text().includes('Recovered text'));
-    expect(text()).not.toContain('synthetic report failure');
+    expect(text()).not.toContain('B refresh failed');
+    const readsAfterRecovery = reportReads;
+    await new Promise((resolve) => setTimeout(resolve, 200)); // bounded post-settlement observation
+    expect(reportReads).toBe(readsAfterRecovery); // no extra retry loop
+    expect(reportReads).toBe(4);
   });
 
   test('uncached initial failure shows error+Retry and manual retry recovers', async () => {

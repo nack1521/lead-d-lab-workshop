@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "task_id": "WORKSHOP-PERF-01",
+  "run_id": "R04",
+  "reported_at": "2026-11-16T15:38:49+07:00",
+  "producer": "DeepSeek Harness (sole user-operated coding writer)",
+  "authoring_tool": "DeepSeek Harness",
+  "model": "deepseek-v4.1-flash-1017",
+  "model_provenance": "runtime-reported/unverified",
+  "source_kind": "direct",
+  "baseline_commit": "940a286",
+  "source_commit": "8f5ed0f",
+  "observed_head": "45c7f89",
+  "branch": "main",
+  "work_kind": "tests_only_focused_runtime",
+  "status": "READY_FOR_REVIEW",
+  "summary": "Test-only R04 under focused local runtime approval. Fixed the existing mounted final-text test synchronization with a bounded condition-based waitFor instead of fixed zero-turn waits, retained final/trailing assertions and added an in-flight 'Refreshing results...' assertion. Added tests for coalescer onBusyChange A success/failure with latched B queued/running, final settlement, max one in-flight, rejection swallowing/no retry loop and cancel; added mounted tests for cached equal-revision pending, cached failure error+Retry precedence with cached cards retained, uncached initial failure+manual retry, and no full-report request for WS frames while editing (Dashboard loads one). Focused isolated executions: 10 pass (lifecycle/r10/r09), 19 pass (findings-client), 23 pass (builder/self-paced/builder-views), total 52 pass/0 fail/0 skip, plus typecheck exit 0 (compile only). No app/API/coalescer/migration/config changes. Whole suite/browser/HR-ended/room-switch/load/cloud NOT RUN; no speedup or whole-app PASS claim. QA observed RED before the synchronization fix; corrected tests GREEN.",
+  "detail_path": "docs/results/WORKSHOP-PERF-01/R04/result.md",
+  "commands": [
+    {"command": "API_HOST=127.0.0.1 bun test tests/r04-coalesce-lifecycle.test.ts tests/r10-coalesce.test.ts tests/r09-regressions.test.ts", "exit_code": 0, "result": "10 pass / 0 fail / 0 skip, 38 expects, 3 files"},
+    {"command": "API_HOST=127.0.0.1 bun test tests/findings-client.test.tsx", "exit_code": 0, "result": "19 pass / 0 fail / 0 skip, 76 expects, 1 file"},
+    {"command": "API_HOST=127.0.0.1 bun test tests/builder.test.ts tests/self-paced.test.ts tests/builder-views-r03.test.tsx", "exit_code": 0, "result": "23 pass / 0 fail / 0 skip, 167 expects, 3 files"},
+    {"command": "bun run typecheck", "exit_code": 0, "result": "compile/typecheck only, not runtime evidence"}
+  ],
+  "case_mapping": [
+    {"assertion": "A success + latched B busy true through B queued/running, one busy transition pair, max one in flight", "source": "apps/web/src/coalesce.ts schedule/fire/finally onBusyChange"},
+    {"assertion": "A failure + B runs bounded; rejection swallowed/no retry loop; B failure clears busy; cancel prevents trailing", "source": "coalesce.ts rejection/cancel/finally branches"},
+    {"assertion": "cached equal-revision report shows Refreshing results during delayed in-flight read; final text applied", "source": "builder.tsx reportPending observer + Dashboard pending branch"},
+    {"assertion": "cached failure shows error+Retry, error precedence, cached cards retained; manual retry succeeds", "source": "builder.tsx reportState/error + Dashboard error branch/retryReport"},
+    {"assertion": "uncached initial failure shows error+Retry and retry recovers", "source": "builder.tsx initial report pending/error + Dashboard branches"},
+    {"assertion": "WS frames while editing issues no report request; Dashboard loads one", "source": "builder.tsx workspace-first refresh/resultsVisibleRef/onSnapshot gating"}
+  ],
+  "red_green": {"red": "QA observed existing mounted test fail at Initial text while Loading results (before trailing assertions); writer reproduced timing-sensitive failure before synchronization fix", "green": "corrected condition-based mounted final-text test and focused groups pass as listed", "app_logic_changed": false},
+  "environment": {"db_loopback": true, "db_url_host": "127.0.0.1:5433", "api_host": "127.0.0.1", "test_db_pattern": "unique c1_test_* created/migrated/closed by existing helpers", "production_data_calls": false, "db_reset": false, "cleanup_limit": "individual test DB absence not catalog-verified; original DB container/volume left running"},
+  "not_run": ["whole/full test suite", "browser/physical device screenshots", "HR and ended surface variants", "room-switch/unmount mounted cases", "initial workspace recovery and draft navigation", "load/benchmarks/action timing", "cloud/deploy"],
+  "changed_paths": ["tests/findings-client.test.tsx", "tests/r04-coalesce-lifecycle.test.ts", "docs/results/WORKSHOP-PERF-01/R04/result.md", "docs/results/WORKSHOP-PERF-01/R04/result.json", "docs/results/INDEX.md"],
+  "code_changes": false,
+  "limitations": ["focused scope only", "no whole-app runtime PASS", "no speedup claim", "independent fresh rerun still required"],
+  "next_gate": "Coordinator requests independent fresh rerun; user owns acceptance/release decisions. No push/deploy.",
+  "published": false
+}

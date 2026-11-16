@@ -1,0 +1,4 @@
+command log summary (test-owned, sanitized aggregate only)
+ 19 pass
+ 0 fail
+Ran 19 tests across 1 file. [10.92s]

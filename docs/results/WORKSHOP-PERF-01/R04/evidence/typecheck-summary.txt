@@ -1,0 +1,2 @@
+command log summary (test-owned, sanitized aggregate only)
+$ bun x tsc --noEmit -p tsconfig.json

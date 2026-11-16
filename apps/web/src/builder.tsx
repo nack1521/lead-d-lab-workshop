@@ -226,7 +226,8 @@ function Workspace({ mode, token, room, onBack }: { mode: 'admin' | 'hr'; token:
   const [tab, setTab] = useState<'questions' | 'dashboard'>(readOnly ? 'dashboard' : 'questions');
   const [questions, setQuestions] = useState<QuestionRow[]>([]);
   const [report, setReport] = useState<Report | null>(null);
-  const [reportState, setReportState] = useState<'idle' | 'loading' | 'ready' | 'error'>('idle');
+  const [reportState, setReportState] = useState<'idle' | 'ready' | 'error'>('idle');
+  const [reportPending, setReportPending] = useState(false);
   const [reportError, setReportError] = useState<string | null>(null);
   const [snapshot, setSnapshot] = useState<Snapshot | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -251,11 +252,18 @@ function Workspace({ mode, token, room, onBack }: { mode: 'admin' | 'hr'; token:
 
   const scheduleReport = () => {
     if (!reportRefreshRef.current) return;
-    // A cached report still shows truthful pending feedback while a queued or
-    // in-flight read is outstanding, even at an equal snapshot revision.
-    setReportState('loading');
-    setReportError(null);
+    // Pending feedback comes from the coalescer's real queued/in-flight/
+    // trailing lifecycle (including the follow-up it starts itself), not from
+    // a revision comparison or a loading setter inside the run.
     reportRefreshRef.current.schedule();
+  };
+
+  const retryReport = () => {
+    // Manual retry only: clear the previous failure so pending feedback is
+    // visible; automatic coalesced follow-ups never clear an error by themselves.
+    setReportError(null);
+    setReportState(report ? 'ready' : 'idle');
+    scheduleReport();
   };
 
   const refresh = async () => {
@@ -287,7 +295,11 @@ function Workspace({ mode, token, room, onBack }: { mode: 'admin' | 'hr'; token:
             setReportState('error');
             setReportError(err instanceof Error ? err.message : 'Could not refresh results');
           }
-        }, 150);
+        }, 150, {
+          onBusyChange: (busy) => {
+            if (mountedRef.current) setReportPending(busy);
+          },
+        });
       }
       if (!wsRef.current) {
         wsRef.current = connectSocket(workspace.realtime_grant, {
@@ -448,7 +460,7 @@ function Workspace({ mode, token, room, onBack }: { mode: 'admin' | 'hr'; token:
           />
         ) : (
           <Dashboard
-            readOnly={readOnly} ended={ended} questions={questions} report={mergeReportWithSnapshot(report, snapshot)} snapshot={snapshot} answerMode={currentRoom.answer_mode} reportFetching={reportState === 'loading'} reportStale={report !== null && snapshot !== null && snapshot.revision > report.room.revision} reportError={reportState === 'error' ? reportError : null} onRetryReport={scheduleReport}
+            readOnly={readOnly} ended={ended} questions={questions} report={mergeReportWithSnapshot(report, snapshot)} snapshot={snapshot} answerMode={currentRoom.answer_mode} reportPending={reportPending} reportStale={report !== null && snapshot !== null && snapshot.revision > report.room.revision} reportError={reportState === 'error' ? reportError : null} onRetryReport={retryReport}
             onOpen={(questionId) => void mutate(`/questions/${questionId}/open`)}
             onClose={(questionId) => void mutate(`/questions/${questionId}/close`)}
             expanded={expanded}
@@ -597,7 +609,7 @@ function ParticipantPreview({ question }: { question: QuestionRow | null }) {
 
 function Dashboard(props: {
   readOnly: boolean; ended: boolean; questions: QuestionRow[]; report: Report | null; snapshot: Snapshot | null;
-  reportFetching?: boolean; reportStale?: boolean; reportError?: string | null; onRetryReport?: () => void;
+  reportPending?: boolean; reportStale?: boolean; reportError?: string | null; onRetryReport?: () => void;
   onOpen: (id: string) => void; onClose: (id: string) => void; answerMode: 'facilitator' | 'self_paced';
   expanded: ExpandedText | null; onViewAdditional: (id: string, cursor: string | null) => void; onLoadMore: (id: string) => void; onCloseExpanded: () => void;
 }) {
@@ -610,9 +622,9 @@ function Dashboard(props: {
           <p>{props.reportError}{props.report ? ' Showing the last loaded results.' : ''}</p>
           {props.onRetryReport ? <button type="button" className="secondary" onClick={props.onRetryReport}>Retry results</button> : null}
         </div>
-      ) : !props.report && props.reportFetching ? (
+      ) : !props.report && props.reportPending ? (
         <p className="empty-note" role="status">Loading results...</p>
-      ) : props.report && props.reportFetching ? (
+      ) : props.report && props.reportPending ? (
         <p className="muted" role="status">Refreshing results...</p>
       ) : props.report && props.reportStale ? (
         <p className="muted" role="status">
@@ -620,7 +632,7 @@ function Dashboard(props: {
           {props.onRetryReport ? <button type="button" className="ghost" onClick={props.onRetryReport}>Refresh results</button> : null}
         </p>
       ) : null}
-      {props.questions.length > 0 && (props.report || (!props.reportFetching && !props.reportError)) ? (
+      {props.questions.length > 0 && (props.report || (!props.reportPending && !props.reportError)) ? (
         <nav className="report-nav" aria-label="Jump to question results">
           <span className="muted">Results:</span>
           {props.questions.map((question) => (
@@ -628,7 +640,7 @@ function Dashboard(props: {
           ))}
         </nav>
       ) : props.questions.length === 0 ? <p className="empty-note">No questions yet — add questions before opening responses.</p> : null}
-      {(props.report || (!props.reportFetching && !props.reportError)) ? props.questions.map((question) => (
+      {(props.report || (!props.reportPending && !props.reportError)) ? props.questions.map((question) => (
         <ReportCard
           key={question.id}
           question={question}

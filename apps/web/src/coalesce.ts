@@ -11,11 +11,30 @@ export interface CoalescedTask {
   pending(): boolean;
 }
 
-export function createCoalescedTask(run: () => void | Promise<void>, delayMs = 150): CoalescedTask {
+export interface CoalescedTaskOptions {
+  /** Notifies only on idle<->busy transitions of the whole lifecycle: queued
+   * timer, in-flight read, dirty latch and the trailing follow-up. */
+  onBusyChange?: (busy: boolean) => void;
+}
+
+export function createCoalescedTask(
+  run: () => void | Promise<void>,
+  delayMs = 150,
+  options: CoalescedTaskOptions = {},
+): CoalescedTask {
   let timer: ReturnType<typeof setTimeout> | null = null;
   let inFlight = false;
   let dirty = false;
   let cancelled = false;
+  let lastBusy: boolean | null = null;
+
+  const isBusy = () => timer !== null || inFlight || dirty;
+  const notifyBusy = () => {
+    const busy = isBusy();
+    if (busy === lastBusy) return;
+    lastBusy = busy;
+    options.onBusyChange?.(busy);
+  };
 
   const clear = () => {
     if (timer !== null) clearTimeout(timer);
@@ -24,9 +43,13 @@ export function createCoalescedTask(run: () => void | Promise<void>, delayMs = 1
 
   const fire = () => {
     timer = null;
-    if (cancelled || inFlight || !dirty) return;
+    if (cancelled || inFlight || !dirty) {
+      notifyBusy();
+      return;
+    }
     dirty = false;
     inFlight = true;
+    notifyBusy();
     void Promise.resolve()
       .then(run)
       .catch(() => {
@@ -35,12 +58,17 @@ export function createCoalescedTask(run: () => void | Promise<void>, delayMs = 1
       })
       .finally(() => {
         inFlight = false;
-        if (cancelled) return;
+        if (cancelled) {
+          notifyBusy();
+          return;
+        }
         if (dirty) {
-          // Trailing latch: one more read, after the current one settles.
+          // Trailing latch: one more read, after the current one settles. The
+          // busy notification stays true across the queued interval before it.
           clear();
           timer = setTimeout(fire, 0);
         }
+        notifyBusy();
       });
   };
 
@@ -50,11 +78,13 @@ export function createCoalescedTask(run: () => void | Promise<void>, delayMs = 1
       dirty = true;
       clear();
       timer = setTimeout(fire, delayMs);
+      notifyBusy();
     },
     cancel: () => {
       cancelled = true;
       dirty = false;
       clear();
+      notifyBusy();
     },
     pending: () => timer !== null || inFlight || dirty,
   };

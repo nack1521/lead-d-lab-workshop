@@ -1,0 +1,34 @@
+{
+  "schema_version": 1,
+  "task_id": "WORKSHOP-PERF-01",
+  "run_id": "R02",
+  "reported_at": "2026-11-16T13:40:53+07:00",
+  "producer": "DeepSeek Harness (sole user-operated coding writer)",
+  "authoring_tool": "DeepSeek Harness",
+  "model": "deepseek-v4.1-flash-1017",
+  "model_provenance": "runtime-reported/unverified",
+  "source_kind": "direct",
+  "baseline_commit": "dda4f4f",
+  "observed_head": "f887449",
+  "branch": "main",
+  "work_kind": "perf_r01_ui_fix",
+  "status": "READY_FOR_REVIEW",
+  "summary": "Fixed only PERF-R01-UI-01 in builder.tsx: split reportFetching (queued/in-flight) from reportStale (cached report older than snapshot revision); scheduleReport marks loading even with cached data so equal-revision pending feedback is truthful; Dashboard always shows an accessible cached-report refresh error with manual Retry (error precedence), shows 'Refreshing results...' for queued/in-flight reads, 'Results may be out of date.' with manual Refresh for stale-not-fetching, and keeps cached charts/Text visible; initial no-cache loading/error recovery retained; no automatic retry loop; R10 max-one-in-flight/trailing/cancel, lazy visibility, Dashboard/HR/ended behavior, English/self-paced UI unchanged. No backend/migration/redesign and deferred PERF-PRODUCT-02 not added. Compile checks only: tsc exit 0 and web build exit 0. Runtime/tests/browser/probes/benchmarks NOT RUN under active no-tests authorization; no runtime PASS or speedup claim.",
+  "detail_path": "docs/results/WORKSHOP-PERF-01/R02/result.md",
+  "finding_ids": ["PERF-R01-UI-01"],
+  "preserved_commits": ["ad76c8d", "a90b2db", "d618e54"],
+  "changes": [
+    {"commit": "f887449", "path": "apps/web/src/builder.tsx", "summary": "reportFetching vs reportStale state split; cached-report error+Retry always visible with error precedence; equal-revision pending feedback; stale Refresh action; cached cards retained; initial recovery retained"}
+  ],
+  "checks": [
+    {"command": "bun x tsc --noEmit -p tsconfig.json", "exit_code": 0, "classification": "compile/typecheck only, not runtime verification"},
+    {"command": "bun run build:web", "exit_code": 0, "classification": "compile/build only, not runtime verification"}
+  ],
+  "not_run": ["automated tests/regressions", "browser scenarios/screenshots", "probes/benchmarks/load", "synthetic data or live API/DB/WS/cloud calls", "cached-error/Retry and equal-revision pending runtime behavior", "performance/speedup verification"],
+  "deferred_not_added": ["PERF-PRODUCT-02 draft navigation", "inherited initial workspace recovery"],
+  "changed_paths": ["apps/web/src/builder.tsx", "docs/results/WORKSHOP-PERF-01/R02/result.md", "docs/results/WORKSHOP-PERF-01/R02/result.json", "docs/results/INDEX.md"],
+  "blockers": ["runtime/test/browser/benchmark execution not authorized in this run"],
+  "limitations": ["no runtime correctness PASS", "no measured speedup", "manual static review only"],
+  "next_gate": "Independent review of the targeted fix; later user-authorized focused checks/browser verification. No push/deploy.",
+  "published": false
+}

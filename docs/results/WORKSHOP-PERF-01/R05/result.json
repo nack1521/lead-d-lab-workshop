@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "task_id": "WORKSHOP-PERF-01",
+  "run_id": "R05",
+  "reported_at": "2026-11-16T16:03:33+07:00",
+  "producer": "DeepSeek Harness (sole user-operated coding writer)",
+  "authoring_tool": "DeepSeek Harness",
+  "model": "deepseek-v4.1-flash-1017",
+  "model_provenance": "runtime-reported/unverified",
+  "source_kind": "direct",
+  "baseline_commit": "fda8a26",
+  "tests_baseline_commit": "45c7f89",
+  "app_source_commit": "8f5ed0f",
+  "observed_head": "de5fd90",
+  "branch": "main",
+  "work_kind": "tests_only_strengthening",
+  "status": "READY_FOR_REVIEW",
+  "summary": "Test-only R05 addressing PERF-R04-QA-01 and Product coverage qualifications: moved final-value capture/assertion out of swallowed coalescer callbacks into the outer awaited runner (with an actual temporary negative control that exited 1); added deterministic A-success + latched-B-starts + B-rejection sequence with one-active-read, event, bounded-run and post-settlement assertions; renamed/retained accurate single-read rejection coverage; strengthened mounted cached-report case to hold A rejection with B latched, show error+Retry precedence while B pending with cached text retained, then B rejection, manual Retry recovery and bounded request count; replaced fixed 80ms final-text delay with a deferred gate and bounded condition waits while retaining final/stale/request-bound assertions. Focused isolated executions: 11 pass (lifecycle/r10/r09), 19 pass (findings), 23 pass (builder/self-paced/views), total 53 pass/0 fail/0 skip; typecheck exit 0 (compile only). No app/API/coalescer/migration/config/UI changes. HR/ended, room-switch/unmount, full suite, browser, load/timing, cloud NOT RUN; no speedup or whole-app PASS.",
+  "detail_path": "docs/results/WORKSHOP-PERF-01/R05/result.md",
+  "gap_mapping": [
+    {"gap": "outer assertion reliability", "change": "capture latest observed at run start; assert [1,2] after settlement outside run callback; concurrency/busy retained", "negative_check": "temporary external test with wrong captured value exited 1, 0 pass/1 fail; removed"},
+    {"gap": "mislabeled single-read B failure", "change": "renamed accurate single-read rejection test; added real A success -> latched B starts -> B rejects sequence with external assertions and 100ms bounded post-settlement observation"},
+    {"gap": "mounted cached error precedence while B pending", "change": "hold A rejection with B latched, hold B; assert error+Retry visible while pending, cached text retained, no pending/stale override; reject B; manual Retry bounded at 4 reads and 200ms post-settlement observation"},
+    {"gap": "fixed 80ms final-text ordering", "change": "deferred test-controlled gate for A response; bounded condition waits; retained initial/final text, stale exclusion and request bound"}
+  ],
+  "commands": [
+    {"command": "API_HOST=127.0.0.1 bun test tests/r04-coalesce-lifecycle.test.ts tests/r10-coalesce.test.ts tests/r09-regressions.test.ts", "exit_code": 0, "result": "11 pass / 0 fail / 0 skip, 42 expects, 3 files"},
+    {"command": "API_HOST=127.0.0.1 bun test tests/findings-client.test.tsx", "exit_code": 0, "result": "19 pass / 0 fail / 0 skip, 80 expects, 1 file"},
+    {"command": "API_HOST=127.0.0.1 bun test tests/builder.test.ts tests/self-paced.test.ts tests/builder-views-r03.test.tsx", "exit_code": 0, "result": "23 pass / 0 fail / 0 skip, 167 expects, 3 files"},
+    {"command": "bun run typecheck", "exit_code": 0, "result": "compile/typecheck only, not runtime evidence"},
+    {"command": "temporary negative control test (not committed)", "exit_code": 1, "result": "0 pass / 1 fail, outer awaited assertion caught deliberately wrong captured value"}
+  ],
+  "totals": {"pass": 53, "fail": 0, "skip": 0, "files": 8},
+  "not_run": ["HR/ended variants", "mounted room-switch/unmount", "full/whole suite", "browser/physical device", "load/benchmarks/action timing", "cloud/deploy", "initial workspace recovery/draft navigation", "cross-session Text batching/tie/query-count and unlocked-Save serializer breadth"],
+  "environment": {"db_loopback": true, "db_url_host": "127.0.0.1:5433", "api_host": "127.0.0.1", "test_db_pattern": "unique c1_test_* by existing helpers", "production_data_calls": false, "known_db_reset": false, "cleanup_hooks": "helpers stop API/close SQL/drop own DBs", "independent_cleanup_verification": "not performed; individual DB absence not catalog-verified; base container/volume left running"},
+  "changed_paths": ["tests/r04-coalesce-lifecycle.test.ts", "tests/findings-client.test.tsx", "docs/results/WORKSHOP-PERF-01/R05/result.md", "docs/results/WORKSHOP-PERF-01/R05/result.json", "docs/results/INDEX.md"],
+  "code_changes": false,
+  "limitations": ["focused scope only", "no whole-app PASS", "no speedup claim", "independent fresh rerun still required"],
+  "next_gate": "Coordinator requests independent QA rerun and Product static coverage review on the same revision; user owns acceptance. No push/deploy.",
+  "published": false
+}

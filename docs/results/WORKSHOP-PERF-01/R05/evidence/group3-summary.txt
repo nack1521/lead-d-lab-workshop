@@ -1,0 +1,5 @@
+sanitized aggregate only
+(pass) WORKSHOP-BUILDER-02 admin authoring and real data flow > wrong passphrase is rejected; valid admin and HR scopes are issued [3.09ms]
+ 23 pass
+ 0 fail
+Ran 23 tests across 3 files. [764.00ms]

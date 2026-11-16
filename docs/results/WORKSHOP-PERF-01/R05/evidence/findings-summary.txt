@@ -1,0 +1,5 @@
+sanitized aggregate only
+(pass) R04 mounted report pending/error and editor inactivity > uncached initial failure shows error+Retry and manual retry recovers [743.75ms]
+ 19 pass
+ 0 fail
+Ran 19 tests across 1 file. [11.10s]

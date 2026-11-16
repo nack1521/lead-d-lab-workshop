@@ -1,0 +1,5 @@
+sanitized aggregate only
+(pass) R04 coalescer busy lifecycle > A failure with latched B: busy stays true, B runs, rejection is swallowed and no retry loop occurs [22.12ms]
+ 11 pass
+ 0 fail
+Ran 11 tests across 3 files. [920.00ms]

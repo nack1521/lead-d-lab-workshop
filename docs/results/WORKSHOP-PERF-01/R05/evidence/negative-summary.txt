@@ -1,0 +1,6 @@
+sanitized aggregate only
+Expected: 2
+Received: 1
+(fail) negative control: an incorrect captured final value must fail the outer awaited runner [15.31ms]
+ 0 pass
+ 1 fail

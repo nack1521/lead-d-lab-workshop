@@ -251,7 +251,9 @@ function Workspace({ mode, token, room, onBack }: { mode: 'admin' | 'hr'; token:
 
   const scheduleReport = () => {
     if (!reportRefreshRef.current) return;
-    setReportState((previous) => (previous === 'ready' ? 'ready' : 'loading'));
+    // A cached report still shows truthful pending feedback while a queued or
+    // in-flight read is outstanding, even at an equal snapshot revision.
+    setReportState('loading');
     setReportError(null);
     reportRefreshRef.current.schedule();
   };
@@ -446,7 +448,7 @@ function Workspace({ mode, token, room, onBack }: { mode: 'admin' | 'hr'; token:
           />
         ) : (
           <Dashboard
-            readOnly={readOnly} ended={ended} questions={questions} report={mergeReportWithSnapshot(report, snapshot)} snapshot={snapshot} answerMode={currentRoom.answer_mode} reportLoading={reportState === 'loading' || (report !== null && snapshot !== null && snapshot.revision > report.room.revision)} reportError={reportState === 'error' ? reportError : null} onRetryReport={scheduleReport}
+            readOnly={readOnly} ended={ended} questions={questions} report={mergeReportWithSnapshot(report, snapshot)} snapshot={snapshot} answerMode={currentRoom.answer_mode} reportFetching={reportState === 'loading'} reportStale={report !== null && snapshot !== null && snapshot.revision > report.room.revision} reportError={reportState === 'error' ? reportError : null} onRetryReport={scheduleReport}
             onOpen={(questionId) => void mutate(`/questions/${questionId}/open`)}
             onClose={(questionId) => void mutate(`/questions/${questionId}/close`)}
             expanded={expanded}
@@ -595,7 +597,7 @@ function ParticipantPreview({ question }: { question: QuestionRow | null }) {
 
 function Dashboard(props: {
   readOnly: boolean; ended: boolean; questions: QuestionRow[]; report: Report | null; snapshot: Snapshot | null;
-  reportLoading?: boolean; reportError?: string | null; onRetryReport?: () => void;
+  reportFetching?: boolean; reportStale?: boolean; reportError?: string | null; onRetryReport?: () => void;
   onOpen: (id: string) => void; onClose: (id: string) => void; answerMode: 'facilitator' | 'self_paced';
   expanded: ExpandedText | null; onViewAdditional: (id: string, cursor: string | null) => void; onLoadMore: (id: string) => void; onCloseExpanded: () => void;
 }) {
@@ -603,15 +605,22 @@ function Dashboard(props: {
   return (
     <section className="dashboard">
       {props.ended ? <p className="report-status" role="status">Session ended — showing saved results without changing any data.</p> : null}
-      {props.reportLoading && props.report ? <p className="muted" role="status">Updating results…</p> : null}
-      {!props.report && props.reportLoading ? <p className="empty-note" role="status">Loading results…</p> : null}
-      {!props.report && !props.reportLoading && props.reportError ? (
+      {props.reportError ? (
         <div role="alert" className="inline-error">
-          <p>{props.reportError}</p>
+          <p>{props.reportError}{props.report ? ' Showing the last loaded results.' : ''}</p>
           {props.onRetryReport ? <button type="button" className="secondary" onClick={props.onRetryReport}>Retry results</button> : null}
         </div>
+      ) : !props.report && props.reportFetching ? (
+        <p className="empty-note" role="status">Loading results...</p>
+      ) : props.report && props.reportFetching ? (
+        <p className="muted" role="status">Refreshing results...</p>
+      ) : props.report && props.reportStale ? (
+        <p className="muted" role="status">
+          Results may be out of date.{' '}
+          {props.onRetryReport ? <button type="button" className="ghost" onClick={props.onRetryReport}>Refresh results</button> : null}
+        </p>
       ) : null}
-      {props.questions.length > 0 && (props.report || (!props.reportLoading && !props.reportError)) ? (
+      {props.questions.length > 0 && (props.report || (!props.reportFetching && !props.reportError)) ? (
         <nav className="report-nav" aria-label="Jump to question results">
           <span className="muted">Results:</span>
           {props.questions.map((question) => (
@@ -619,7 +628,7 @@ function Dashboard(props: {
           ))}
         </nav>
       ) : props.questions.length === 0 ? <p className="empty-note">No questions yet — add questions before opening responses.</p> : null}
-      {(props.report || (!props.reportLoading && !props.reportError)) ? props.questions.map((question) => (
+      {(props.report || (!props.reportFetching && !props.reportError)) ? props.questions.map((question) => (
         <ReportCard
           key={question.id}
           question={question}

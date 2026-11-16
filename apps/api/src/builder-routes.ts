@@ -139,9 +139,11 @@ export function createBuilderRoutes(deps: { sql: Sql; config: Config; hub: Build
       const id = crypto.randomUUID();
       const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
       const code = Array.from(crypto.getRandomValues(new Uint8Array(5))).map((b) => alphabet[b % alphabet.length]).join('');
-      await sql`insert into sessions (id, join_code, title, published, active_question_id, answer_mode) values (${id}, ${code}, ${title}, false, null, 'self_paced')`;
-      const created = await room(id);
-      return J({ status: 'ok', room: roomJson(created as Room) }, 201);
+      const [created] = await sql<Room[]>`
+        insert into sessions (id, join_code, title, published, active_question_id, answer_mode)
+        values (${id}, ${code}, ${title}, false, null, 'self_paced')
+        returning id, title, join_code, status, published, revision, active_question_id, created_at, ended_at, answer_mode`;
+      return J({ status: 'ok', room: roomJson(created) }, 201);
     })
     .get('/api/admin/rooms/:roomId', async ({ request, params }) => {
       const a = await auth(request); if (!a.ok) return a.response;
@@ -164,10 +166,12 @@ export function createBuilderRoutes(deps: { sql: Sql; config: Config; hub: Build
       const [maxRow] = await sql<{ max: number | null }[]>`select max(seq) as max from questions where session_id = ${found.id}`;
       const id = crypto.randomUUID();
       const q = parsed.value;
-      await sql`insert into questions (id, session_id, seq, type, label, help_text, options, rating_min, rating_max, receiving)
+      const [created] = await sql<Question[]>`
+        insert into questions (id, session_id, seq, type, label, help_text, options, rating_min, rating_max, receiving)
         values (${id}, ${found.id}, ${(maxRow?.max ?? 0) + 1}, ${q.type}, ${q.label}, ${q.help_text},
-          ${q.options ? sql.json(q.options) : null}, ${q.rating_min}, ${q.rating_max}, false)`;
-      return J({ status: 'ok', question: questionJson((await question(id)) as Question) }, 201);
+          ${q.options ? sql.json(q.options) : null}, ${q.rating_min}, ${q.rating_max}, false)
+        returning id, session_id, seq, type, label, help_text, options, rating_min, rating_max, receiving, closed_at`;
+      return J({ status: 'ok', question: questionJson(created) }, 201);
     })
     .patch('/api/admin/rooms/:roomId/questions/:questionId', async ({ request, params }) => {
       const a = await auth(request); if (!a.ok) return a.response;
@@ -196,9 +200,12 @@ export function createBuilderRoutes(deps: { sql: Sql; config: Config; hub: Build
       const parsed = parseQuestion({ ...q, ...body, type: body.type ?? q.type } as Record<string, unknown>);
       if (!parsed.ok) return R('VALIDATION_FAILED', parsed.message, 422);
       const v = parsed.value;
-      await sql`update questions set type = ${v.type}, label = ${v.label}, help_text = ${v.help_text},
-        options = ${v.options ? sql.json(v.options) : null}, rating_min = ${v.rating_min}, rating_max = ${v.rating_max} where id = ${q.id}`;
-      return J({ status: 'ok', question: questionJson((await question(q.id)) as Question, responses) });
+      const [updated] = await sql<Question[]>`
+        update questions set type = ${v.type}, label = ${v.label}, help_text = ${v.help_text},
+          options = ${v.options ? sql.json(v.options) : null}, rating_min = ${v.rating_min}, rating_max = ${v.rating_max}
+        where id = ${q.id}
+        returning id, session_id, seq, type, label, help_text, options, rating_min, rating_max, receiving, closed_at`;
+      return J({ status: 'ok', question: questionJson(updated, responses) });
     })
     .delete('/api/admin/rooms/:roomId/questions/:questionId', async ({ request, params }) => {
       const a = await auth(request); if (!a.ok) return a.response;

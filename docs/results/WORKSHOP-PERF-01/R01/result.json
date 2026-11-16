@@ -1,0 +1,41 @@
+{
+  "schema_version": 1,
+  "task_id": "WORKSHOP-PERF-01",
+  "run_id": "R01",
+  "reported_at": "2026-11-16T13:16:23+07:00",
+  "producer": "DeepSeek Harness (sole user-operated coding writer)",
+  "authoring_tool": "DeepSeek Harness",
+  "model": "deepseek-v4.1-flash-1017",
+  "model_provenance": "runtime-reported/unverified",
+  "source_kind": "direct",
+  "baseline_commit": "d438ba9",
+  "observed_head": "d618e54",
+  "branch": "main",
+  "work_kind": "performance_implementation_no_runtime_verification",
+  "status": "READY_FOR_REVIEW",
+  "delivery_commits": ["ad76c8d", "a90b2db", "d618e54"],
+  "summary": "Implemented three approved performance slices without tests/benchmarks/browser/probes/synthetic data. (1) Room/question create and unlocked save use RETURNING projections, removing redundant post-write reads while preserving auth, HR scope, locks, validation, receipts and self-paced semantics; structural statements room 3->2, add question 5->4, unlocked save 6->5. (2) Builder editor renders from workspace immediately; report loads only for visible Dashboard/HR/ended results, with no per-frame report request while editing, R10 max-one-in-flight plus dirty/trailing latch, monotonic report-revision guard, loading/stale/error/retry UI, and deduplicated room-list load per token. (3) Latest text answers are fetched with one set-based row_number(rn<=3) query per room instead of per-text-question N+1, preserving score/poll aggregates, n, latest-3 ordering, cursor/has_more and full View-all semantics. Existing indexes inspected; separate index proposal recorded with no migration. Compile checks only: tsc exit 0, web build exit 0, API Bun compile exit 0. No runtime tests/benchmarks/browser/DB/cloud evidence; no speedup claim.",
+  "detail_path": "docs/results/WORKSHOP-PERF-01/R01/result.md",
+  "context_limits": {
+    "region": "user-confirmed API/PostgreSQL same region; not the target",
+    "observed_endpoint_baselines_seconds": {"health_median": 0.513913, "ready_median": 0.8557335, "samples": 4, "scope": "user-provided non-mutating persistent-connection endpoint reads; not authenticated action/DB/cloud timing or speedup evidence"}
+  },
+  "changes": [
+    {"slice": 1, "commit": "ad76c8d", "kind": "api", "summary": "RETURNING projections for create room/add question/unlocked save", "statements": {"create_room": {"before": 3, "after": 2}, "add_question": {"before": 5, "after": 4}, "unlocked_save": {"before": 6, "after": 5}}},
+    {"slice": 2, "commit": "d618e54", "kind": "web", "summary": "workspace-first editor, lazy/coalesced report for visible results, repair states, room-list dedupe"},
+    {"slice": 3, "commit": "a90b2db", "kind": "api", "summary": "single set-based latest-3 text query per room; N+1 removed", "queries": {"text_questions_K": {"before": "K", "after": "1 (0 if none)"}}}
+  ],
+  "checks": [
+    {"command": "bun x tsc --noEmit -p tsconfig.json", "exit_code": 0, "classification": "compile/typecheck only"},
+    {"command": "bun run build:web", "exit_code": 0, "classification": "compile/build only"},
+    {"command": "bun build apps/api/src/index.ts --target=bun --outfile=/tmp/workshop-api-perf.js", "exit_code": 0, "classification": "compile/build only"}
+  ],
+  "not_run": ["automated tests/regressions", "browser scenarios/screenshots", "benchmarks/load/probes", "synthetic data or authenticated live API/DB/WS calls", "DB query timing and cloud/action latency", "runtime contract/UI/ordering verification"],
+  "proposed_checks_for_later_authorization": ["builder API RETURNING/guards/self-paced tests", "report batch ordering/cursor/full-view/session tests", "mounted frontend editor/lazy-report/coalescing/stale/cancel tests", "permissioned authenticated Add/Save/Dashboard timing and DB timing", "separate index proposal benchmark"],
+  "index_proposal": {"status": "PROPOSED_ONLY_NO_MIGRATION", "existing": ["responses(question_id)", "grants(session_id)", "participants(session_id)"], "candidate": "responses(question_id, accepted_at desc, id desc) or session-leading variant", "requires": "approval + measured evidence before schema change"},
+  "changed_paths": ["apps/api/src/builder-routes.ts", "apps/web/src/builder.tsx", "docs/results/WORKSHOP-PERF-01/R01/result.md", "docs/results/WORKSHOP-PERF-01/R01/result.json", "docs/results/INDEX.md"],
+  "blockers": ["runtime/test/benchmark execution not authorized"],
+  "limitations": ["no speedup/latency claim", "no runtime verification of contracts/UI", "no browser/cloud/device evidence"],
+  "next_gate": "User authorizes focused tests/benchmarks; independent review of structural changes before release decisions.",
+  "published": false
+}

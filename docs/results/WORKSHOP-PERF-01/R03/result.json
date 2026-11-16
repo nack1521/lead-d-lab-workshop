@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "task_id": "WORKSHOP-PERF-01",
+  "run_id": "R03",
+  "reported_at": "2026-11-16T13:58:59+07:00",
+  "producer": "DeepSeek Harness (sole user-operated coding writer)",
+  "authoring_tool": "DeepSeek Harness",
+  "model": "deepseek-v4.1-flash-1017",
+  "model_provenance": "runtime-reported/unverified",
+  "source_kind": "direct",
+  "baseline_commit": "2f28c6a",
+  "source_baseline_commit": "f887449",
+  "observed_head": "8f5ed0f",
+  "branch": "main",
+  "work_kind": "perf_r02_qa_pending_lifecycle_fix",
+  "status": "READY_FOR_REVIEW",
+  "summary": "Fixed only PERF-R02-QA-01 (pending branch of PERF-R01-UI-01): createCoalescedTask now exposes an optional onBusyChange observer for idle<->busy transitions of the real queued/in-flight/dirty/trailing lifecycle; busy is true from first schedule and remains true across the interval where A succeeds and the helper queues/runs trailing B, including equal snapshot revisions. Builder keeps report outcome/error independent: reportState is idle/ready/error only and reportPending comes from the coalescer, so cached/queued/trailing work shows truthful pending without another scheduleReport call; initial no-cache pending shows Loading; cached/uncached error+Retry and error precedence persist (manual Retry clears error, automatic follow-ups do not); max-one-in-flight, bounded trailing, cancellation/unmount/no-old-room guards, lazy visibility, cached cards, HR/ended/self-paced/English UI and R01 contracts preserved. No backend/schema/design/dependency change. Compile checks only: tsc exit 0, web build exit 0. Runtime/tests/browser/probes/benchmarks/API/DB/cloud NOT RUN under active no-tests authorization; no runtime PASS or speedup claim.",
+  "detail_path": "docs/results/WORKSHOP-PERF-01/R03/result.md",
+  "finding_ids": ["PERF-R02-QA-01"],
+  "preserved_commits": ["ad76c8d", "a90b2db", "d618e54", "f887449", "2f28c6a"],
+  "changes": [
+    {"commit": "8f5ed0f", "path": "apps/web/src/coalesce.ts", "summary": "optional onBusyChange observer on real lifecycle transitions (queued/in-flight/dirty/trailing), backward-compatible signature"},
+    {"commit": "8f5ed0f", "path": "apps/web/src/builder.tsx", "summary": "report outcome/error independent from coalescer-driven reportPending; pending covers equal-revision queued/trailing interval; error precedence and manual retry preserved"}
+  ],
+  "checks": [
+    {"command": "bun x tsc --noEmit -p tsconfig.json", "exit_code": 0, "classification": "compile/typecheck only, not runtime verification"},
+    {"command": "bun run build:web", "exit_code": 0, "classification": "compile/build only, not runtime verification"}
+  ],
+  "not_run": ["automated tests/regressions", "browser scenarios/screenshots", "probes/benchmarks/load", "synthetic data or live API/DB/WS/cloud calls", "A->dirty B->A success/failure->B queued/running->settlement/cancel cases", "runtime pending/error precedence verification", "performance/speedup verification"],
+  "deferred_not_reopened": ["PERF-PRODUCT-02 draft navigation", "inherited initial workspace recovery"],
+  "changed_paths": ["apps/web/src/coalesce.ts", "apps/web/src/builder.tsx", "docs/results/WORKSHOP-PERF-01/R03/result.md", "docs/results/WORKSHOP-PERF-01/R03/result.json", "docs/results/INDEX.md"],
+  "blockers": ["runtime/test/browser/benchmark execution not authorized in this run"],
+  "limitations": ["no runtime correctness PASS", "no measured speedup", "static source sequence only"],
+  "next_gate": "Product/QA recheck of the delivered revision; later user-authorized controlled runtime checks. No push/deploy.",
+  "published": false
+}

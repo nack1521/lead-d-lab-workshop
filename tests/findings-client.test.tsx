@@ -47,6 +47,16 @@ async function tick(times = 8): Promise<void> {
   }
 }
 
+/** Bounded condition-based wait for asynchronous mounted UI (no fixed sleeps). */
+async function waitFor(condition: () => boolean, timeoutMs = 3000, intervalMs = 10): Promise<void> {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    if (condition()) return;
+    await new Promise((resolve) => setTimeout(resolve, intervalMs));
+  }
+  throw new Error('condition not reached in time');
+}
+
 function text(): string {
   return document.body.textContent ?? '';
 }
@@ -671,24 +681,144 @@ describe('R10 coalesced final text update mounted workspace', () => {
       return json({ status: 'ok' });
     };
     await mount('/facilitator');
-    await tick(8);
+    await waitFor(() => document.querySelector('#demo-pass') !== null);
     fill('#demo-pass', 'admin');
     clickButton('Sign in');
-    await tick(12);
+    await waitFor(() => text().includes('Synthetic final text room'));
     clickButton('Synthetic final text room');
-    await tick(16);
+    await waitFor(() => text().includes('Final text question'));
     clickButton('Dashboard');
-    await tick(12);
-    expect(text()).toContain('Initial text');
+    await waitFor(() => text().includes('Initial text'));
     const socket = FakeWebSocket.instances.at(-1)!;
     expect(socket).toBeDefined();
     socket.emit('open');
     socket.emit('message', { data: JSON.stringify({ type: 'snapshot', snapshot: snapshot(6) }) });
-    await tick(170); // coalesced read 2 has started and is delayed
+    // Controlled read starts after the coalescer delay; wait for the request to
+    // actually be in flight instead of sleeping a fixed number of turns.
+    await waitFor(() => reportReads >= 2);
+    expect(text()).toContain('Refreshing results...');
     socket.emit('message', { data: JSON.stringify({ type: 'snapshot', snapshot: snapshot(7) }) });
-    await tick(320); // trailing read 3 completes with final text
-    expect(text()).toContain('Latest final text');
+    await waitFor(() => text().includes('Latest final text'));
     expect(text()).not.toContain('Stale in-flight text');
     expect(reportReads).toBeLessThanOrEqual(4);
+  });
+});
+
+describe('R04 mounted report pending/error and editor inactivity', () => {
+  const r04Question = {
+    id: 'q1', seq: 1, type: 'text', label: 'Final text question', help_text: null, options: null,
+    rating_min: null, rating_max: null, receiving: false, closed_at: null, response_count: 1, locked: true,
+  };
+  const r04Room = {
+    id: 'r1', title: 'Synthetic R04 room', join_code: 'R0401', status: 'active', phase: 'open',
+    published: true, revision: 5, active_question_id: null, answer_mode: 'self_paced',
+    created_at: '2026-01-01T00:00:00.000Z', ended_at: null, counts: { questions: 1, participants: 1, responses: 1 },
+  };
+  const r04Snapshot = (revision: number) => ({ session_id: 'r1', revision, session_status: 'active', active_question_id: null, participant_count: 1, questions: [] });
+  const r04Report = (revision: number, text: string) => ({
+    status: 'ok', room: { ...r04Room, revision }, joined_base: 1,
+    questions: [{ ...r04Question, n: 1, joined_base: 1, unanswered: 0, coverage_ratio: 1, text: { total: 1, latest: [{ id: `t-${revision}-${text}`, text, created_at: '2026-01-01T00:00:00.000Z' }], page: 1, limit: 3, has_more: false, next_cursor: null } }],
+    generated_at: '2026-01-01T00:00:00.000Z',
+  });
+  const baseHandler = async (url: string, init: RequestInit, reportRead: (read: number) => Promise<Response> | Response) => {
+    const method = init.method ?? 'GET';
+    if (url.includes('/api/admin/login')) return json({ status: 'ok', admin_token: 'admin-token', scope: 'admin', expires_in_seconds: 1 });
+    if (url.endsWith('/api/admin/rooms') && method === 'GET') return json({ status: 'ok', rooms: [r04Room] });
+    if (url.endsWith('/api/admin/rooms/r1/workspace')) return json({ status: 'ok', room: r04Room, questions: [r04Question], snapshot: r04Snapshot(5), realtime_grant: 'fac-fixture' });
+    if (url.endsWith('/api/admin/rooms/r1/report')) return reportRead(reportReads + 1);
+    return json({ status: 'ok' });
+  };
+  let reportReads = 0;
+
+  async function openRoomForReport(): Promise<FakeWebSocket> {
+    await mount('/facilitator');
+    await waitFor(() => document.querySelector('#demo-pass') !== null);
+    fill('#demo-pass', 'admin');
+    clickButton('Sign in');
+    await waitFor(() => text().includes('Synthetic R04 room'));
+    clickButton('Synthetic R04 room');
+    await waitFor(() => text().includes('Final text question'));
+    return FakeWebSocket.instances.at(-1)!;
+  }
+
+  test('cached equal-revision report shows truthful pending during the queued/in-flight interval', async () => {
+    reportReads = 0;
+    let releaseRead2!: () => void;
+    const read2Gate = new Promise<void>((resolve) => { releaseRead2 = resolve; });
+    handler = (url, init) => baseHandler(url, init, async (read) => {
+      reportReads += 1;
+      if (read === 1) return json(r04Report(5, 'Initial equal text'));
+      await read2Gate;
+      return json(r04Report(5, 'Latest equal text'));
+    });
+    const socket = await openRoomForReport();
+    clickButton('Dashboard');
+    await waitFor(() => text().includes('Initial equal text'));
+    const readsBefore = reportReads;
+    socket.emit('message', { data: JSON.stringify({ type: 'snapshot', snapshot: r04Snapshot(5) }) });
+    await waitFor(() => reportReads > readsBefore);
+    expect(text()).toContain('Refreshing results...');
+    releaseRead2();
+    await waitFor(() => text().includes('Latest equal text'));
+    expect(reportReads).toBe(2);
+  });
+
+  test('cached failure shows error+Retry with error precedence over pending/stale copy and keeps cached cards', async () => {
+    reportReads = 0;
+    let failNext = true;
+    handler = (url, init) => baseHandler(url, init, (read) => {
+      reportReads += 1;
+      if (read === 1) return json(r04Report(5, 'Initial cached text'));
+      if (read === 2 && failNext) { failNext = false; throw new Error('synthetic report failure'); }
+      return json(r04Report(6, 'Recovered text'));
+    });
+    const socket = await openRoomForReport();
+    clickButton('Dashboard');
+    await waitFor(() => text().includes('Initial cached text'));
+    socket.emit('message', { data: JSON.stringify({ type: 'snapshot', snapshot: r04Snapshot(6) }) });
+    await waitFor(() => text().includes('synthetic report failure'));
+    expect(text()).toContain('Retry results');
+    expect(text()).toContain('Initial cached text');
+    expect(text()).not.toContain('Refreshing results...');
+    expect(text()).not.toContain('Results may be out of date.');
+    clickButton('Retry results');
+    await waitFor(() => text().includes('Recovered text'));
+    expect(text()).not.toContain('synthetic report failure');
+  });
+
+  test('uncached initial failure shows error+Retry and manual retry recovers', async () => {
+    reportReads = 0;
+    handler = (url, init) => baseHandler(url, init, (read) => {
+      reportReads += 1;
+      if (read === 1) throw new Error('synthetic initial failure');
+      return json(r04Report(5, 'Recovered initial text'));
+    });
+    const socket = await openRoomForReport();
+    expect(socket).toBeDefined();
+    clickButton('Dashboard');
+    await waitFor(() => text().includes('synthetic initial failure'));
+    expect(text()).toContain('Retry results');
+    expect(text()).not.toContain('Initial cached text');
+    clickButton('Retry results');
+    await waitFor(() => text().includes('Recovered initial text'));
+    expect(reportReads).toBe(2);
+  });
+
+  test('WS frames while editing Questions do not request the full report; Dashboard does', async () => {
+    reportReads = 0;
+    handler = (url, init) => baseHandler(url, init, (read) => {
+      reportReads += 1;
+      return json(r04Report(5, `Editor report ${read}`));
+    });
+    const socket = await openRoomForReport();
+    expect(reportReads).toBe(0); // lazy editor: workspace only
+    socket.emit('message', { data: JSON.stringify({ type: 'snapshot', snapshot: r04Snapshot(6) }) });
+    // Bounded observation window for a negative assertion: longer than the
+    // coalescer delay so a wrongly scheduled report would be observed.
+    await new Promise((resolve) => setTimeout(resolve, 220));
+    expect(reportReads).toBe(0);
+    clickButton('Dashboard');
+    await waitFor(() => reportReads >= 1);
+    await waitFor(() => text().includes('Editor report 1'));
   });
 });

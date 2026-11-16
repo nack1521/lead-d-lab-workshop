@@ -326,6 +326,27 @@ export function createBuilderRoutes(deps: { sql: Sql; config: Config; hub: Build
       }
       const [participantRow] = await sql<{ count: number }[]>`select count(*)::int as count from participants where session_id = ${found.id}`;
       const joinedBase = participantRow.count;
+      // One set-based query for the latest THREE text answers of every eligible
+      // text question in this room (bounded by rn <= 3), instead of one query per
+      // text question inside the loop.
+      const textQuestionIds = questions.filter((question) => question.type === 'text').map((question) => question.id);
+      const latestTextRows = textQuestionIds.length === 0
+        ? []
+        : await sql<{ question_id: string; id: string; text_value: string; accepted_at: Date }[]>`
+            select question_id, id, text_value, accepted_at from (
+              select question_id, id, text_value, accepted_at,
+                row_number() over (partition by question_id order by accepted_at desc, id desc) as rn
+              from responses
+              where session_id = ${found.id} and question_id in ${sql(textQuestionIds)}
+            ) ranked
+            where rn <= 3
+            order by question_id asc, accepted_at desc, id desc`;
+      const latestTextByQuestion = new Map<string, { id: string; text_value: string; accepted_at: Date }[]>();
+      for (const row of latestTextRows) {
+        const list = latestTextByQuestion.get(row.question_id) ?? [];
+        list.push({ id: row.id, text_value: row.text_value, accepted_at: row.accepted_at });
+        latestTextByQuestion.set(row.question_id, list);
+      }
       const reportQuestions = [];
       for (const q of questions) {
         const counts = byQuestion.get(q.id) ?? {};
@@ -338,11 +359,9 @@ export function createBuilderRoutes(deps: { sql: Sql; config: Config; hub: Build
           const options = (q.options ?? []).map((option) => ({ ...option, count: counts[option.id] ?? 0, share: n > 0 ? Math.round(((counts[option.id] ?? 0) / n) * 10000) / 10000 : null }));
           reportQuestions.push({ ...base, counts, options: options.sort((a, b) => b.count - a.count || a.label.localeCompare(b.label)) });
         } else {
-          // Latest THREE responses (newest first). Additional older answers are a
-          // distinct paginated feed starting strictly before the third answer.
-          const latest = await sql<{ id: string; text_value: string; accepted_at: Date }[]>`
-            select id, text_value, accepted_at from responses where question_id = ${q.id}
-            order by accepted_at desc, id desc limit 3`;
+          // Latest THREE responses (newest first), read once for all text
+          // questions above; older answers use the distinct paginated feed.
+          const latest = latestTextByQuestion.get(q.id) ?? [];
           const cursorRow = latest.length === 3 ? latest[2] : latest[latest.length - 1] ?? null;
           reportQuestions.push({ ...base, text: { total: n, latest: latest.map((row) => ({ id: row.id, text: row.text_value, created_at: iso(row.accepted_at) })), page: 1, limit: 3, has_more: n > latest.length, next_cursor: n > latest.length && cursorRow ? encodeCursor(cursorRow) : null } });
         }

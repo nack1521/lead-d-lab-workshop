@@ -69,8 +69,8 @@ export function App() {
     return () => window.removeEventListener('popstate', onPop);
   }, []);
   if (route === 'room' && roomSession) return <RoomPage />;
-  if (route === 'facilitator') return <BuilderApp mode="admin" />;
-  if (route === 'hr') return <BuilderApp mode="hr" />;
+  if (route === 'facilitator') return <BuilderApp key="admin" mode="admin" />;
+  if (route === 'hr') return <BuilderApp key="hr" mode="hr" />;
   return <JoinPage />;
 }
 

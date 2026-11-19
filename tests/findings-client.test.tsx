@@ -200,6 +200,7 @@ afterEach(async () => {
   FakeWebSocket.instances = [];
   sockets = [];
   requests.length = 0;
+  try { window.sessionStorage.clear(); } catch { /* storage unavailable in emulator */ }
   handler = async () => json({ status: 'error' }, 500);
 });
 
@@ -624,8 +625,8 @@ describe('R09 actual WS wire and builder delete reconciliation', () => {
     let deleted = false;
     handler = async (url, init) => {
       const method = init.method ?? 'GET';
-      if (url.includes('/api/admin/login')) return json({ status: 'ok', admin_token: 'admin-token', scope: 'admin', expires_in_seconds: 1 });
-      if (url.endsWith('/api/admin/rooms') && method === 'GET') return json({ status: 'ok', rooms: [builderRoom] });
+      if (url.includes('/api/admin/login')) return json({ status: 'ok', admin_token: 'admin-token', scope: 'admin', expires_in_seconds: 3600 });
+      if (url.endsWith('/api/admin/rooms') && method === 'GET') return json({ status: 'ok', scope: 'admin', rooms: [builderRoom] });
       if (url.endsWith('/api/admin/rooms/r1/workspace')) return json({ status: 'ok', room: builderRoom, questions: deleted ? [] : [draftQuestion], snapshot: emptySnapshot, realtime_grant: 'fac-fixture' });
       if (url.endsWith('/api/admin/rooms/r1/report')) return json({ status: 'ok', room: builderRoom, joined_base: 0, questions: deleted ? [] : [{ ...draftQuestion, n: 0, joined_base: 0, unanswered: 0, coverage_ratio: null }], generated_at: '2026-01-01T00:00:00.000Z' });
       if (url.endsWith('/questions/q1') && method === 'DELETE') { requests.push({ url, method, body: null }); deleted = true; return json({ status: 'ok', deleted: 'q1' }); }
@@ -668,8 +669,8 @@ describe('R10 coalesced final text update mounted workspace', () => {
     const inflightGate = new Promise<void>((resolve) => { releaseInFlight = resolve; });
     handler = async (url, init) => {
       const method = init.method ?? 'GET';
-      if (url.includes('/api/admin/login')) return json({ status: 'ok', admin_token: 'admin-token', scope: 'admin', expires_in_seconds: 1 });
-      if (url.endsWith('/api/admin/rooms') && method === 'GET') return json({ status: 'ok', rooms: [builderRoom] });
+      if (url.includes('/api/admin/login')) return json({ status: 'ok', admin_token: 'admin-token', scope: 'admin', expires_in_seconds: 3600 });
+      if (url.endsWith('/api/admin/rooms') && method === 'GET') return json({ status: 'ok', scope: 'admin', rooms: [builderRoom] });
       if (url.endsWith('/api/admin/rooms/r1/workspace')) return json({ status: 'ok', room: builderRoom, questions: [textQuestion], snapshot: snapshot(5), realtime_grant: 'fac-fixture' });
       if (url.endsWith('/api/admin/rooms/r1/report')) {
         reportReads += 1;
@@ -726,8 +727,8 @@ describe('R04 mounted report pending/error and editor inactivity', () => {
   });
   const baseHandler = async (url: string, init: RequestInit, reportRead: (read: number) => Promise<Response> | Response) => {
     const method = init.method ?? 'GET';
-    if (url.includes('/api/admin/login')) return json({ status: 'ok', admin_token: 'admin-token', scope: 'admin', expires_in_seconds: 1 });
-    if (url.endsWith('/api/admin/rooms') && method === 'GET') return json({ status: 'ok', rooms: [r04Room] });
+    if (url.includes('/api/admin/login')) return json({ status: 'ok', admin_token: 'admin-token', scope: 'admin', expires_in_seconds: 3600 });
+    if (url.endsWith('/api/admin/rooms') && method === 'GET') return json({ status: 'ok', scope: 'admin', rooms: [r04Room] });
     if (url.endsWith('/api/admin/rooms/r1/workspace')) return json({ status: 'ok', room: r04Room, questions: [r04Question], snapshot: r04Snapshot(5), realtime_grant: 'fac-fixture' });
     if (url.endsWith('/api/admin/rooms/r1/report')) return reportRead(reportReads + 1);
     return json({ status: 'ok' });
@@ -839,5 +840,184 @@ describe('R04 mounted report pending/error and editor inactivity', () => {
     clickButton('Dashboard');
     await waitFor(() => reportReads >= 1);
     await waitFor(() => text().includes('Editor report 1'));
+  });
+});
+
+describe('PERF02 restore, role isolation and sign-out races', () => {
+  const keyFor = (role: 'admin' | 'hr') => `lead-d-lab.perf02.admin-session.v1.${role}`;
+  const room = {
+    id: 'r1', title: 'Restored room', join_code: 'RST01', status: 'active', phase: 'draft',
+    published: false, revision: 1, active_question_id: null, answer_mode: 'self_paced',
+    created_at: '2026-01-01T00:00:00.000Z', ended_at: null, counts: { questions: 1, participants: 0, responses: 0 },
+  };
+  const setSession = (role: 'admin' | 'hr', overrides: Record<string, unknown> = {}) => {
+    window.sessionStorage.setItem(keyFor(role), JSON.stringify({
+      v: 1, token: `token-${role}`, scope: role, expiresAt: Date.now() + 60_000, apiBase: 'http://127.0.0.1:3000', ...overrides,
+    }));
+  };
+  const roomsResponse = (scope: 'admin' | 'hr' = 'admin') => json({ status: 'ok', scope, rooms: [room] });
+
+  test('valid stored admin restores through protected rooms and never shows the login form', async () => {
+    setSession('admin');
+    let roomsCalls = 0;
+    handler = async (url) => {
+      if (url.endsWith('/api/admin/rooms')) { roomsCalls += 1; return roomsResponse('admin'); }
+      return json({ status: 'ok' });
+    };
+    await mount('/facilitator');
+    await waitFor(() => text().includes('Restored room'));
+    expect(roomsCalls).toBe(1);
+    expect(document.querySelector('#demo-pass')).toBeNull();
+    expect(window.sessionStorage.getItem(keyFor('admin'))).toContain('token-admin');
+  });
+
+  test('restore 401 clears only the current role record and returns login with reason', async () => {
+    setSession('admin');
+    handler = async (url) => (url.endsWith('/api/admin/rooms') ? json({ status: 'rejected', code: 'UNAUTHORIZED' }, 401) : json({ status: 'ok' }));
+    await mount('/facilitator');
+    await waitFor(() => text().includes('Your session is no longer valid. Sign in again.'));
+    expect(window.sessionStorage.getItem(keyFor('admin'))).toBeNull();
+  });
+
+  test('restore transient 503 preserves candidate and offers a single manual Retry', async () => {
+    setSession('admin');
+    let calls = 0;
+    handler = async (url) => {
+      if (url.endsWith('/api/admin/rooms')) {
+        calls += 1;
+        return calls === 1 ? json({ status: 'rejected', code: 'INTERNAL_ERROR' }, 503) : roomsResponse('admin');
+      }
+      return json({ status: 'ok' });
+    };
+    await mount('/facilitator');
+    await waitFor(() => text().includes('Could not check your session'));
+    expect(text()).not.toContain('No rooms yet');
+    expect(window.sessionStorage.getItem(keyFor('admin'))).toContain('token-admin');
+    clickButton('Retry');
+    await waitFor(() => text().includes('Restored room'));
+    expect(calls).toBe(2);
+  });
+
+  test('restore scope mismatch never activates the role from storage metadata', async () => {
+    setSession('admin');
+    handler = async (url) => (url.endsWith('/api/admin/rooms') ? roomsResponse('hr') : json({ status: 'ok' }));
+    await mount('/facilitator');
+    await waitFor(() => text().includes('Your saved session is not valid for this role'));
+    expect(text()).not.toContain('Restored room');
+  });
+
+  test('restore 403 stays access-denied, preserves the stored candidate and does not claim expiry', async () => {
+    setSession('admin');
+    handler = async (url) => (url.endsWith('/api/admin/rooms') ? json({ status: 'rejected', code: 'FORBIDDEN' }, 403) : json({ status: 'ok' }));
+    await mount('/facilitator');
+    await waitFor(() => text().includes('You do not have permission for this action.'));
+    expect(text()).not.toContain('Your session is no longer valid');
+    expect(window.sessionStorage.getItem(keyFor('admin'))).toContain('token-admin');
+  });
+
+  test('local expiry ends active access and blocks the workspace without claiming server rollback', async () => {
+    setSession('admin', { expiresAt: Date.now() + 350 });
+    handler = async (url) => {
+      if (url.endsWith('/api/admin/rooms')) return roomsResponse('admin');
+      return json({ status: 'ok' });
+    };
+    await mount('/facilitator');
+    await waitFor(() => text().includes('Restored room'));
+    await waitFor(() => text().includes('Your session has expired. Sign in again.'), 2500);
+    expect(document.querySelector('#demo-pass')).not.toBeNull();
+    expect(text()).not.toContain('Restored room');
+  });
+
+  test('sign out during restore blocks the old response from repopulating or clearing newer state; other role survives', async () => {
+    setSession('admin');
+    setSession('hr');
+    let release!: () => void;
+    const gate = new Promise<void>((resolve) => { release = resolve; });
+    handler = async (url) => {
+      if (url.endsWith('/api/admin/rooms')) { await gate; return roomsResponse('admin'); }
+      return json({ status: 'ok' });
+    };
+    await mount('/facilitator');
+    await waitFor(() => text().includes('Checking session'));
+    clickButton('Sign out');
+    await waitFor(() => text().includes('Sign in to the workshop'));
+    release();
+    await new Promise((resolve) => setTimeout(resolve, 120)); // bounded post-response observation
+    expect(text()).not.toContain('Restored room');
+    expect(window.sessionStorage.getItem(keyFor('admin'))).toBeNull();
+    expect(window.sessionStorage.getItem(keyFor('hr'))).toContain('token-hr');
+  });
+
+  test('storage write failure keeps the valid login usable in memory with an explicit warning', async () => {
+    const realStorage = window.sessionStorage;
+    const throwingStorage = {
+      getItem: (key: string) => realStorage.getItem(key),
+      setItem: (_key: string, _value: string) => { throw new Error('quota'); },
+      removeItem: (key: string) => realStorage.removeItem(key),
+      clear: () => realStorage.clear(),
+      key: (index: number) => realStorage.key(index),
+      get length() { return realStorage.length; },
+    } as unknown as Storage;
+    Object.defineProperty(window, 'sessionStorage', { value: throwingStorage, configurable: true });
+    handler = async (url, init) => {
+      const method = init.method ?? 'GET';
+      if (url.includes('/api/admin/login')) return json({ status: 'ok', admin_token: 'memory-token', scope: 'admin', expires_in_seconds: 3600 });
+      if (url.endsWith('/api/admin/rooms') && method === 'GET') return roomsResponse('admin');
+      return json({ status: 'ok' });
+    };
+    try {
+      await mount('/facilitator');
+      await waitFor(() => document.querySelector('#demo-pass') !== null);
+      fill('#demo-pass', 'admin');
+      clickButton('Sign in');
+      await waitFor(() => text().includes('Restored room'));
+      expect(text()).toContain('Session could not be saved');
+      expect(document.querySelector('#demo-pass')).toBeNull();
+    } finally {
+      Object.defineProperty(window, 'sessionStorage', { value: realStorage, configurable: true });
+    }
+  });
+});
+
+
+describe('PERF02 Add pending and uncertain write outcome', () => {
+  const addQuestion = {
+    id: 'q1', seq: 1, type: 'text', label: 'Existing question', help_text: null, options: null,
+    rating_min: null, rating_max: null, receiving: false, closed_at: null, response_count: 0, locked: false,
+  };
+  const addRoom = {
+    id: 'r1', title: 'Add outcome room', join_code: 'ADD01', status: 'active', phase: 'draft',
+    published: false, revision: 1, active_question_id: null, answer_mode: 'self_paced',
+    created_at: '2026-01-01T00:00:00.000Z', ended_at: null, counts: { questions: 1, participants: 0, responses: 0 },
+  };
+  test('network-unknown Add shows a check-before-retry message, no fabricated question and no automatic POST retry', async () => {
+    let addPosts = 0;
+    let rejectAdd!: (error: Error) => void;
+    const addGate = new Promise<Response>((_resolve, reject) => { rejectAdd = reject; });
+    handler = async (url, init) => {
+      const method = init.method ?? 'GET';
+      if (url.includes('/api/admin/login')) return json({ status: 'ok', admin_token: 'admin-token', scope: 'admin', expires_in_seconds: 3600 });
+      if (url.endsWith('/api/admin/rooms') && method === 'GET') return json({ status: 'ok', scope: 'admin', rooms: [addRoom] });
+      if (url.endsWith('/api/admin/rooms/r1/workspace')) return json({ status: 'ok', room: addRoom, questions: [addQuestion], snapshot: { session_id: 'r1', revision: 1, session_status: 'active', active_question_id: null, participant_count: 0, questions: [] }, realtime_grant: 'fac-fixture' });
+      if (url.endsWith('/api/admin/rooms/r1/report')) return json({ status: 'ok', room: addRoom, joined_base: 0, questions: [{ ...addQuestion, n: 0, joined_base: 0, unanswered: 0, coverage_ratio: null }], generated_at: '2026-01-01T00:00:00.000Z' });
+      if (url.endsWith('/questions') && method === 'POST') { addPosts += 1; return addGate; }
+      return json({ status: 'ok' });
+    };
+    await mount('/facilitator');
+    await waitFor(() => document.querySelector('#demo-pass') !== null);
+    fill('#demo-pass', 'admin');
+    clickButton('Sign in');
+    await waitFor(() => text().includes('Add outcome room'));
+    clickButton('Add outcome room');
+    await waitFor(() => text().includes('Existing question'));
+    clickButton('Score');
+    await waitFor(() => text().includes('Adding question...'));
+    rejectAdd(new TypeError('network lost after dispatch'));
+    await waitFor(() => text().includes('Could not confirm whether the question was added. Check questions before adding again.'));
+    expect(text()).toContain('Check questions');
+    expect(addPosts).toBe(1);
+    await new Promise((resolve) => setTimeout(resolve, 120)); // bounded: no automatic retry
+    expect(addPosts).toBe(1);
+    expect(text()).not.toContain('New score question');
   });
 });

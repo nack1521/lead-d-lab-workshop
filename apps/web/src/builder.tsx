@@ -4,6 +4,8 @@ import { API_BASE, connectSocket } from './api.ts';
 import { readJsonBody } from './api-base.ts';
 import { createCoalescedTask, type CoalescedTask } from './coalesce.ts';
 import { mergeReportWithSnapshot, reconcileDeletedQuestion } from './report-merge.ts';
+import { buildAdminSession, readAdminSession, removeAdminSession, tombstoneAdminSession, writeAdminSession, type AdminSessionRecord } from './admin-session.ts';
+import { startAction, type ActionTrace } from './perf-diag.ts';
 
 /**
  * WORKSHOP-BUILDER-02 R03 admin/HR workspace.
@@ -37,11 +39,13 @@ interface SnapshotQuestion { question_id: string; seq: number; type: 'rating' | 
 interface Snapshot { revision: number; session_status: 'active' | 'ended'; active_question_id: string | null; participant_count: number; questions: SnapshotQuestion[] }
 interface ExpandedText { questionId: string; items: TextItem[]; cursor: string | null; hasMore: boolean; loading: boolean; error: string | null }
 
-async function api<T>(path: string, token: string | null, init: RequestInit = {}): Promise<T> {
+async function api<T>(path: string, token: string | null, init: RequestInit = {}, trace?: ActionTrace): Promise<T> {
   const headers = new Headers(init.headers);
   if (init.body) headers.set('content-type', 'application/json');
   if (token) headers.set('authorization', `Bearer ${token}`);
+  trace?.requestStart();
   const response = await fetch(`${API_BASE}${path}`, { ...init, headers });
+  trace?.response(response.status, response.headers);
   let body: any = null;
   try { body = await readJsonBody(response); } catch (err) { body = null; if (response.ok) throw err as Error; }
   if (!response.ok) {
@@ -55,7 +59,7 @@ async function api<T>(path: string, token: string | null, init: RequestInit = {}
 const phaseLabel = (phase: Phase) => (phase === 'draft' ? 'Draft' : phase === 'open' ? 'Open' : 'Ended');
 const typeLabel = (type: QType) => (type === 'rating' ? 'Score' : type === 'poll' ? 'Multiple choice' : 'Text response');
 
-function Shell({ mode, subtitle, children }: { mode: 'admin' | 'hr'; subtitle: string; children: React.ReactNode }) {
+function Shell({ mode, subtitle, children, onSignOut }: { mode: 'admin' | 'hr'; subtitle: string; children: React.ReactNode; onSignOut?: () => void }) {
   return (
     <div className="app-shell">
       <header className="topbar">
@@ -64,14 +68,14 @@ function Shell({ mode, subtitle, children }: { mode: 'admin' | 'hr'; subtitle: s
           <span className="brand-name">Lead+D Lab</span>
           <span className="brand-suffix">{mode === 'hr' ? 'HR report' : 'Workshop builder'}</span>
         </div>
-        <div className="topbar-actions"><span className="topbar-note">{subtitle}</span></div>
+        <div className="topbar-actions">{onSignOut ? <button type="button" className="ghost" onClick={onSignOut}>Sign out</button> : null}<span className="topbar-note">{subtitle}</span></div>
       </header>
       <main className="content">{children}</main>
     </div>
   );
 }
 
-function LoginView({ mode, error, pending, onLogin }: { mode: 'admin' | 'hr'; error: string | null; pending: boolean; onLogin: (passphrase: string) => Promise<boolean> }) {
+function LoginView({ mode, error, notice, pending, onLogin }: { mode: 'admin' | 'hr'; error: string | null; notice?: string | null; pending: boolean; onLogin: (passphrase: string) => Promise<boolean> }) {
   const [passphrase, setPassphrase] = useState('');
   return (
     <div className="login-wrap">
@@ -84,6 +88,7 @@ function LoginView({ mode, error, pending, onLogin }: { mode: 'admin' | 'hr'; er
       </header>
       <main className="login-card">
         <h1>{mode === 'hr' ? 'Sign in to reports' : 'Sign in to the workshop'}</h1>
+        {notice ? <p className="notice" role="status">{notice}</p> : null}
         <p className="muted">Local demo: enter <code>admin</code> to continue. There are no accounts.</p>
         <form onSubmit={(event) => { event.preventDefault(); void onLogin(passphrase); }}>
           <label htmlFor="demo-pass">Demo passphrase</label>
@@ -96,9 +101,15 @@ function LoginView({ mode, error, pending, onLogin }: { mode: 'admin' | 'hr'; er
   );
 }
 
+type BuilderPhase = 'checking' | 'login' | 'rooms' | 'restore-error' | 'access-denied';
+
 export function BuilderApp({ mode }: { mode: 'admin' | 'hr' }) {
+  const [phase, setPhase] = useState<BuilderPhase>('checking');
   const [token, setToken] = useState<string | null>(null);
+  const [sessionExpiry, setSessionExpiry] = useState<number | null>(null);
   const [loginError, setLoginError] = useState<string | null>(null);
+  const [authReason, setAuthReason] = useState<string | null>(null);
+  const [storageWarning, setStorageWarning] = useState<string | null>(null);
   const [loginPending, setLoginPending] = useState(false);
   const [rooms, setRooms] = useState<RoomRow[]>([]);
   const [room, setRoom] = useState<RoomRow | null>(null);
@@ -106,35 +117,213 @@ export function BuilderApp({ mode }: { mode: 'admin' | 'hr' }) {
   const [roomsError, setRoomsError] = useState<string | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
   const [creating, setCreating] = useState(false);
-  const loadedTokenRef = useRef<string | null>(null);
+  const authGen = useRef(0);
+  const candidateRef = useRef<AdminSessionRecord | null>(null);
+  const owns = (generation: number) => authGen.current === generation;
 
-  const login = async (passphrase: string) => {
-    setLoginPending(true); setLoginError(null);
-    try {
-      const result = await api<{ admin_token: string }>('/api/admin/login', null, { method: 'POST', body: JSON.stringify({ passphrase, scope: mode === 'hr' ? 'hr' : 'admin' }) });
-      setToken(result.admin_token);
-      return true;
-    } catch (err) {
-      setLoginError(err instanceof Error ? err.message : 'Sign-in failed');
-      return false;
-    } finally { setLoginPending(false); }
+  const removeStoredBestEffort = () => {
+    const removed = removeAdminSession(mode);
+    if (removed.ok) return null;
+    const tombstoned = tombstoneAdminSession(mode);
+    if (tombstoned.ok) {
+      return 'Signed out of this view. Saved session may not have been fully removed; refreshing may require sign-in.';
+    }
+    return 'Signed out of this view. Saved session could not be removed. Clear this site\'s saved data on a shared device.';
   };
 
-  const loadRooms = async (activeToken: string) => {
+  const invalidateSession = (reason: string) => {
+    authGen.current += 1;
+    const storageNote = removeStoredBestEffort();
+    candidateRef.current = null;
+    setToken(null);
+    setSessionExpiry(null);
+    setRooms([]);
+    setRoom(null);
+    setRoomsError(null);
+    setRoomsLoading(false);
+    setLoginPending(false);
+    setAuthReason(reason);
+    setStorageWarning(storageNote);
+    setPhase('login');
+  };
+
+  const signOut = () => {
+    authGen.current += 1;
+    const storageNote = removeStoredBestEffort();
+    candidateRef.current = null;
+    setToken(null);
+    setSessionExpiry(null);
+    setRooms([]);
+    setRoom(null);
+    setRoomsError(null);
+    setRoomsLoading(false);
+    setLoginPending(false);
+    setLoginError(null);
+    setAuthReason(null);
+    setStorageWarning(storageNote ?? 'Signed out of this tab.');
+    setPhase('login');
+  };
+
+  const loadRoomsFor = async (activeToken: string, generation: number, expiresAt: number, restore = false) => {
+    if (!owns(generation)) return;
+    if (Date.now() >= expiresAt) { invalidateSession('Your session has expired. Sign in again.'); return; }
+    const trace = startAction('rooms');
+    trace.pending();
     setRoomsLoading(true); setRoomsError(null);
-    try { setRooms((await api<{ rooms: RoomRow[] }>('/api/admin/rooms', activeToken)).rooms); }
-    catch (err) { setRoomsError(err instanceof Error ? err.message : 'Could not load rooms'); }
-    finally { setRoomsLoading(false); }
+    try {
+      const result = await api<{ scope: 'admin' | 'hr'; rooms: RoomRow[] }>('/api/admin/rooms', activeToken, {}, trace);
+      if (!owns(generation)) return;
+      if (result.scope !== mode) { invalidateSession('Your saved session is not valid for this role. Sign in again.'); return; }
+      setRooms(result.rooms);
+      setRoomsError(null);
+      setRoomsLoading(false);
+      setPhase('rooms');
+      trace.applied();
+      trace.finish('success');
+    } catch (err) {
+      if (!owns(generation)) { trace.finish('superseded'); return; }
+      trace.finish('error');
+      const status = err instanceof Error ? (err as Error & { status?: number }).status : undefined;
+      const message = err instanceof Error ? err.message : 'Could not load rooms';
+      if (status === 401) { invalidateSession('Your session is no longer valid. Sign in again.'); return; }
+      if (status === 403) {
+        setRoomsLoading(false);
+        setAuthReason('You do not have permission for this action.');
+        setPhase('access-denied');
+        return;
+      }
+      setRoomsLoading(false);
+      setRoomsError(message);
+      setPhase(restore ? 'restore-error' : 'rooms');
+    }
+  };
+
+  const validateRestore = async (record: AdminSessionRecord, generation: number) => {
+    setToken(record.token);
+    setSessionExpiry(record.expiresAt);
+    setPhase('checking');
+    await loadRoomsFor(record.token, generation, record.expiresAt, true);
+    if (!owns(generation)) return;
+    if (Date.now() >= record.expiresAt) invalidateSession('Your session has expired. Sign in again.');
   };
 
   useEffect(() => {
-    if (!token || loadedTokenRef.current === token) return;
-    loadedTokenRef.current = token;
-    void loadRooms(token);
-  }, [token]);
+    const generation = ++authGen.current;
+    setToken(null); setRooms([]); setRoom(null); setRoomsError(null); setRoomsLoading(false); setLoginPending(false);
+    setLoginError(null); setAuthReason(null); setStorageWarning(null);
+    const stored = readAdminSession(mode, API_BASE);
+    if (stored.state === 'found') {
+      candidateRef.current = stored.record;
+      setSessionExpiry(stored.record.expiresAt);
+      setPhase('checking');
+      void validateRestore(stored.record, generation);
+    } else if (stored.state === 'expired') {
+      setAuthReason('Your session has expired. Sign in again.');
+      setPhase('login');
+    } else {
+      setPhase('login');
+    }
+    return () => { authGen.current += 1; };
+    // Component is remounted per role (key in route container); mode is immutable here.
+  }, []);
+
+  // Local deadline is advisory; server 401 remains authoritative.
+  useEffect(() => {
+    if (!token || !sessionExpiry) return;
+    const check = () => {
+      if (Date.now() >= sessionExpiry) invalidateSession('Your session has expired. Sign in again.');
+    };
+    const timer = setTimeout(check, Math.max(0, sessionExpiry - Date.now()));
+    const onFocus = () => check();
+    const onVisibility = () => { if (document.visibilityState === 'visible') check(); };
+    window.addEventListener('focus', onFocus);
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('focus', onFocus);
+      document.removeEventListener('visibilitychange', onVisibility);
+    };
+  }, [token, sessionExpiry]);
+
+  const login = async (passphrase: string) => {
+    const generation = ++authGen.current;
+    const trace = startAction('signin');
+    trace.pending();
+    const requestStartedAt = Date.now(); // wall clock for absolute session expiry
+    setLoginPending(true); setLoginError(null); setAuthReason(null); setStorageWarning(null);
+    try {
+      const result = await api<{ admin_token?: unknown; scope?: unknown; expires_in_seconds?: unknown }>('/api/admin/login', null, {
+        method: 'POST',
+        body: JSON.stringify({ passphrase, scope: mode }),
+      }, trace);
+      if (!owns(generation)) return false;
+      const record = buildAdminSession({
+        token: typeof result.admin_token === 'string' ? result.admin_token : '',
+        scope: result.scope === 'admin' || result.scope === 'hr' ? result.scope : mode,
+        ttlSeconds: typeof result.expires_in_seconds === 'number' ? result.expires_in_seconds : NaN,
+        requestStartedAt,
+        apiBase: API_BASE,
+      });
+      if (!record || result.scope !== mode) {
+        setLoginError('Sign-in could not be completed for this role.');
+        setLoginPending(false);
+        return false;
+      }
+      const saved = writeAdminSession(record);
+      if (!saved.ok) setStorageWarning('Session could not be saved. Refreshing may require sign-in.');
+      candidateRef.current = record;
+      setToken(record.token);
+      setSessionExpiry(record.expiresAt);
+      setLoginPending(false);
+      setPhase('rooms');
+      await loadRoomsFor(record.token, generation, record.expiresAt);
+      trace.applied();
+      trace.finish('success');
+      return true;
+    } catch (err) {
+      if (!owns(generation)) { trace.finish('superseded'); return false; }
+      trace.finish('error');
+      setLoginPending(false);
+      if (err instanceof Error) {
+        const status = (err as Error & { status?: number }).status;
+        // INVALID_PASSPHRASE / any login failure stays a form error; it never
+        // invalidates another role's or an already-validated session.
+        setLoginError(status === 401 ? 'The demo passphrase is incorrect.' : err.message || 'Sign-in failed');
+      } else setLoginError('Sign-in failed');
+      return false;
+    }
+  };
+
+  const retryRestore = () => {
+    const stored = readAdminSession(mode, API_BASE);
+    if (stored.state === 'found') {
+      candidateRef.current = stored.record;
+      setSessionExpiry(stored.record.expiresAt);
+      setPhase('checking');
+      void validateRestore(stored.record, authGen.current);
+    } else if (stored.state === 'expired') {
+      setAuthReason('Your session has expired. Sign in again.');
+      setPhase('login');
+    } else {
+      setPhase('login');
+    }
+  };
+
+  const ensureFresh = (): boolean => {
+    if (sessionExpiry !== null && Date.now() >= sessionExpiry) {
+      invalidateSession('Your session has expired. Sign in again.');
+      return false;
+    }
+    return Boolean(token);
+  };
+
+  const loadRooms = async () => {
+    if (!token || sessionExpiry === null || !ensureFresh()) return;
+    await loadRoomsFor(token, authGen.current, sessionExpiry);
+  };
 
   const createRoom = async (title: string) => {
-    if (!token || creating) return;
+    if (!token || creating || !ensureFresh()) return;
     setCreating(true);
     try {
       const created = await api<{ room: RoomRow }>('/api/admin/rooms', token, { method: 'POST', body: JSON.stringify({ title: title.trim() }) });
@@ -142,28 +331,74 @@ export function BuilderApp({ mode }: { mode: 'admin' | 'hr' }) {
       setRooms((previous) => [{ ...created.room, counts: { questions: 0, participants: 0, responses: 0 } }, ...previous]);
       setRoom(created.room);
     } catch (err) {
-      setRoomsError(err instanceof Error ? err.message : 'Could not create the room');
+      const status = err instanceof Error ? (err as Error & { status?: number }).status : undefined;
+      if (status === 401) invalidateSession('Your session is no longer valid. Sign in again.');
+      else if (status === 403) { setAuthReason('You do not have permission for this action.'); setPhase('access-denied'); }
+      else setRoomsError(err instanceof Error ? err.message : 'Could not create the room');
     } finally { setCreating(false); }
   };
 
-  if (!token) return <LoginView mode={mode} error={loginError} pending={loginPending} onLogin={login} />;
+  if (phase === 'checking') {
+    return (
+      <Shell mode={mode} subtitle={mode === 'hr' ? 'Read-only room reports' : 'Workshop rooms'} onSignOut={signOut}>
+        <section className="room-list" aria-busy="true">
+          <p className="muted" role="status">Checking session...</p>
+          {storageWarning ? <p className="notice">{storageWarning}</p> : null}
+        </section>
+      </Shell>
+    );
+  }
+  if (phase === 'restore-error') {
+    return (
+      <Shell mode={mode} subtitle={mode === 'hr' ? 'Read-only room reports' : 'Workshop rooms'} onSignOut={signOut}>
+        <section className="room-list">
+          <p className="inline-error" role="alert">Could not check your session. Retry.</p>
+          <div className="dialog-actions">
+            <button type="button" className="secondary" onClick={retryRestore}>Retry</button>
+            <button type="button" className="ghost" onClick={signOut}>Sign out</button>
+          </div>
+        </section>
+      </Shell>
+    );
+  }
+  if (phase === 'access-denied') {
+    return (
+      <Shell mode={mode} subtitle={mode === 'hr' ? 'Read-only room reports' : 'Workshop rooms'} onSignOut={signOut}>
+        <section className="room-list">
+          <p className="inline-error" role="alert">{authReason ?? 'You do not have permission for this action.'}</p>
+          <button type="button" className="ghost" onClick={signOut}>Sign out</button>
+        </section>
+      </Shell>
+    );
+  }
+  if (phase === 'login' || !token) {
+    return <LoginView mode={mode} error={loginError ?? authReason} notice={storageWarning} pending={loginPending} onLogin={login} />;
+  }
 
   if (!room) {
     const visible = mode === 'hr' ? [...rooms].sort((a, b) => Number(b.status === 'ended') - Number(a.status === 'ended')) : rooms;
     return (
-      <Shell mode={mode} subtitle={mode === 'hr' ? 'Read-only room reports' : 'Workshop rooms'}>
+      <Shell mode={mode} subtitle={mode === 'hr' ? 'Read-only room reports' : 'Workshop rooms'} onSignOut={signOut}>
         <section className="room-list">
           <div className="section-head">
             <h2>Rooms</h2>
-            {mode === 'admin' ? <button type="button" className="primary create-room" onClick={() => setCreateOpen(true)}>Create room</button> : null}
+            {mode === 'admin' ? <button type="button" className="primary create-room" onClick={() => setCreateOpen(true)} disabled={roomsLoading}>Create room</button> : null}
           </div>
-          {roomsError ? <p className="inline-error" role="alert">{roomsError}</p> : null}
-          {roomsLoading && visible.length === 0 ? <p className="muted">Loading rooms…</p> : null}
-          {visible.length === 0 && !roomsLoading ? <p className="empty-note">No rooms yet — start with “Create room”.</p> : null}
+          {storageWarning ? <p className="notice" role="status">{storageWarning}</p> : null}
+          {roomsError ? (
+            <div role="alert" className="inline-error">
+              <p>{roomsError}</p>
+              <button type="button" className="secondary" onClick={() => void loadRooms()}>Retry</button>
+            </div>
+          ) : null}
+          {roomsLoading && visible.length === 0 ? <p className="muted" role="status">Loading rooms...</p> : null}
+          {!roomsLoading && !roomsError && visible.length === 0 ? (
+            <p className="empty-note">{mode === 'hr' ? 'No rooms to report yet.' : 'No rooms yet — start with “Create room”.'}</p>
+          ) : null}
           <ul className="room-rows">
             {visible.map((row) => (
               <li key={row.id}>
-                <button type="button" className="room-row" onClick={() => setRoom(row)}>
+                <button type="button" className="room-row" onClick={() => { if (ensureFresh()) setRoom(row); }}>
                   <span className="room-main">
                     <strong>{row.title}</strong>
                     <span className="room-meta">Room code {row.join_code} · {row.counts?.questions ?? 0} questions · {row.counts?.participants ?? 0} participants</span>
@@ -180,7 +415,20 @@ export function BuilderApp({ mode }: { mode: 'admin' | 'hr' }) {
     );
   }
 
-  return <Workspace mode={mode} token={token} room={room} onBack={() => { setRoom(null); if (token) void loadRooms(token); }} />;
+  return (
+    <Workspace
+      mode={mode}
+      token={token}
+      room={room}
+      sessionExpiry={sessionExpiry}
+      generation={authGen.current}
+      onSignOut={signOut}
+      onUnauthorized={(generation, reason) => {
+        if (generation === authGen.current) invalidateSession(reason);
+      }}
+      onBack={() => { setRoom(null); void loadRooms(); }}
+    />
+  );
 }
 
 export function CreateRoomDialog({ pending, onCancel, onConfirm }: { pending: boolean; onCancel: () => void; onConfirm: (title: string) => void }) {
@@ -220,7 +468,10 @@ export function ConfirmEndDialog({ roomTitle, pending, onCancel, onConfirm }: { 
   );
 }
 
-function Workspace({ mode, token, room, onBack }: { mode: 'admin' | 'hr'; token: string; room: RoomRow; onBack: () => void }) {
+function Workspace({ mode, token, room, sessionExpiry, generation, onSignOut, onUnauthorized, onBack }: {
+  mode: 'admin' | 'hr'; token: string; room: RoomRow; sessionExpiry: number | null; generation: number;
+  onSignOut: () => void; onUnauthorized: (generation: number, reason: string) => void; onBack: () => void;
+}) {
   const readOnly = mode === 'hr';
   const [currentRoom, setCurrentRoom] = useState<RoomRow>(room);
   const [tab, setTab] = useState<'questions' | 'dashboard'>(readOnly ? 'dashboard' : 'questions');
@@ -236,7 +487,14 @@ function Workspace({ mode, token, room, onBack }: { mode: 'admin' | 'hr'; token:
   const [connected, setConnected] = useState(false);
   const [confirmEnd, setConfirmEnd] = useState(false);
   const [busy, setBusy] = useState<string | null>(null);
+  const [addSlow, setAddSlow] = useState(false);
+  const [uncertainAdd, setUncertainAdd] = useState(false);
   const [ending, setEnding] = useState(false);
+  useEffect(() => {
+    if (busy !== '/questions') { setAddSlow(false); return; }
+    const timer = setTimeout(() => setAddSlow(true), 10000);
+    return () => { clearTimeout(timer); setAddSlow(false); };
+  }, [busy]);
   const [expanded, setExpanded] = useState<ExpandedText | null>(null);
   const wsRef = useRef<{ close: () => void } | null>(null);
   const reportRefreshRef = useRef<CoalescedTask | null>(null);
@@ -266,16 +524,29 @@ function Workspace({ mode, token, room, onBack }: { mode: 'admin' | 'hr'; token:
     scheduleReport();
   };
 
+  const ensureActive = (): boolean => {
+    if (sessionExpiry !== null && Date.now() >= sessionExpiry) {
+      onUnauthorized(generation, 'Your session has expired. Sign in again.');
+      return false;
+    }
+    return true;
+  };
+
   const refresh = async () => {
+    if (!ensureActive()) return;
+    const workspaceTrace = startAction('workspace');
     try {
       // Editor readiness must not wait for the full report. Apply the workspace
       // as soon as it arrives, then load results only when they are visible.
-      const workspace = await api<{ room: RoomRow; questions: QuestionRow[]; snapshot: Snapshot; realtime_grant: string }>(`/api/admin/rooms/${currentRoom.id}/workspace`, token);
+      workspaceTrace.pending();
+      const workspace = await api<{ room: RoomRow; questions: QuestionRow[]; snapshot: Snapshot; realtime_grant: string }>(`/api/admin/rooms/${currentRoom.id}/workspace`, token, {}, workspaceTrace);
       if (!mountedRef.current) return;
       setCurrentRoom(workspace.room);
       setQuestions(workspace.questions);
       setSnapshot(workspace.snapshot);
       setLastUpdated(new Date());
+      workspaceTrace.applied();
+      workspaceTrace.finish('success');
       if (!selectedId && workspace.questions.length > 0) setSelectedId(workspace.questions[0].id);
       if (!reportRefreshRef.current) {
         const roomIdAtCreation = currentRoom.id;
@@ -292,6 +563,8 @@ function Workspace({ mode, token, room, onBack }: { mode: 'admin' | 'hr'; token:
             setReportError(null);
           } catch (err) {
             if (!mountedRef.current) return;
+            const status = err instanceof Error ? (err as Error & { status?: number }).status : undefined;
+            if (status === 401) { onUnauthorized(generation, 'Your session is no longer valid. Sign in again.'); return; }
             setReportState('error');
             setReportError(err instanceof Error ? err.message : 'Could not refresh results');
           }
@@ -317,7 +590,12 @@ function Workspace({ mode, token, room, onBack }: { mode: 'admin' | 'hr'; token:
         });
       }
       if (resultsVisibleRef.current) scheduleReport();
-    } catch (err) { setStatus(err instanceof Error ? err.message : 'Could not load the room'); }
+    } catch (err) {
+      workspaceTrace.finish('error');
+      const status = err instanceof Error ? (err as Error & { status?: number }).status : undefined;
+      if (status === 401) onUnauthorized(generation, 'Your session is no longer valid. Sign in again.');
+      else setStatus(err instanceof Error ? err.message : 'Could not load the room');
+    }
   };
 
   useEffect(() => {
@@ -338,11 +616,13 @@ function Workspace({ mode, token, room, onBack }: { mode: 'admin' | 'hr'; token:
   const refreshReport = () => scheduleReport();
 
   const mutate = async (path: string, body?: unknown, method = 'POST') => {
-    if (!canMutate || busy) return;
+    if (!canMutate || busy || !ensureActive()) return;
     setBusy(path);
+    const mutationTrace = path === '/questions' ? startAction('add') : null;
     try {
       setStatus(null);
-      const result = await api<Record<string, any>>(`/api/admin/rooms/${currentRoom.id}${path}`, token, { method, ...(body === undefined ? {} : { body: JSON.stringify(body) }) });
+      mutationTrace?.pending();
+      const result = await api<Record<string, any>>(`/api/admin/rooms/${currentRoom.id}${path}`, token, { method, ...(body === undefined ? {} : { body: JSON.stringify(body) }) }, mutationTrace ?? undefined);
       // Use the authoritative mutation result instead of a second workspace read
       // (which also used to issue a fresh realtime grant and refetch the report).
       if (result?.question) {
@@ -366,13 +646,26 @@ function Workspace({ mode, token, room, onBack }: { mode: 'admin' | 'hr'; token:
           return result.order.map((id: string) => byId.get(id)).filter(Boolean) as QuestionRow[];
         });
       }
+      if (path === '/questions') { setUncertainAdd(false); mutationTrace?.applied(); mutationTrace?.finish('success'); }
       if (path === '/end' || path === '/publish') {
         if (result?.room) setCurrentRoom(result.room);
         if (path === '/end') setTab('dashboard');
       }
       if (tab === 'dashboard') refreshReport();
-    } catch (err) { setStatus(err instanceof Error ? err.message : 'That action failed'); }
-    finally { setBusy(null); }
+    } catch (err) {
+      const status = err instanceof Error ? (err as Error & { status?: number }).status : undefined;
+      if (path === '/questions') {
+        if (status === undefined || status >= 500) {
+          mutationTrace?.finish('unknown');
+          setUncertainAdd(true);
+          setStatus('Could not confirm whether the question was added. Check questions before adding again.');
+        } else {
+          mutationTrace?.finish('error');
+        }
+      }
+      if (status === 401) onUnauthorized(generation, 'Your session is no longer valid. Sign in again.');
+      else if (!(path === '/questions' && (status === undefined || (status ?? 0) >= 500))) setStatus(err instanceof Error ? err.message : 'That action failed');
+    } finally { setBusy(null); }
   };
 
   const loadAdditionalText = async (questionId: string, cursor: string | null, append = false) => {
@@ -397,7 +690,7 @@ function Workspace({ mode, token, room, onBack }: { mode: 'admin' | 'hr'; token:
   const selected = questions.find((question) => question.id === selectedId) ?? null;
 
   return (
-    <Shell mode={mode} subtitle={readOnly ? 'Read-only room reports' : 'Workshop room'}>
+    <Shell mode={mode} subtitle={readOnly ? 'Read-only room reports' : 'Workshop room'} onSignOut={onSignOut}>
     <div className="workspace">
       <aside className="sidebar">
         <button type="button" className="back" onClick={onBack}>‹ Rooms</button>
@@ -437,7 +730,12 @@ function Workspace({ mode, token, room, onBack }: { mode: 'admin' | 'hr'; token:
             {lastUpdated ? <span className="muted"> · Last updated {lastUpdated.toLocaleTimeString('en-GB')}</span> : null}
           </div>
         </div>
-        {status ? <p className="inline-error" role="alert">{status}</p> : null}
+        {status ? (
+          <div className="inline-error" role="alert">
+            <p>{status}</p>
+            {uncertainAdd ? <button type="button" className="secondary" onClick={async () => { try { const detail = await api<{ questions: QuestionRow[] }>(`/api/admin/rooms/${currentRoom.id}`, token); setQuestions(detail.questions); setUncertainAdd(false); setStatus(null); } catch { /* keep unknown */ } }}>Check questions</button> : null}
+          </div>
+        ) : null}
         {tab === 'questions' && !readOnly ? (
           <QuestionsTab
             questions={questions} selected={selected} selectedId={selectedId} onSelect={setSelectedId}
@@ -457,6 +755,7 @@ function Workspace({ mode, token, room, onBack }: { mode: 'admin' | 'hr'; token:
             answerMode={currentRoom.answer_mode}
             structureLocked={currentRoom.answer_mode === 'self_paced' && currentRoom.published}
             busy={busy}
+            addSlow={addSlow}
           />
         ) : (
           <Dashboard
@@ -500,11 +799,12 @@ function QuestionsTab(props: {
   questions: QuestionRow[]; selected: QuestionRow | null; selectedId: string | null; onSelect: (id: string) => void;
   onCreate: (type: QType) => void; onSave: (id: string, body: Record<string, unknown>) => void; onDelete: (id: string) => void;
   onMove: (id: string, direction: 'up' | 'down') => void; onOpen: (id: string) => void; onClose: (id: string) => void;
-  answerMode: 'facilitator' | 'self_paced'; structureLocked: boolean; busy: string | null;
+  answerMode: 'facilitator' | 'self_paced'; structureLocked: boolean; busy: string | null; addSlow?: boolean;
 }) {
   const { questions, selected } = props;
   return (
     <>
+      {props.busy === '/questions' ? <p className="muted" role="status">{props.addSlow ? 'Still adding question...' : 'Adding question...'}</p> : null}
       {props.structureLocked ? (
         <p className="lock-note">This room is open. Questions, order, types and options are locked; wording and help text can still be edited.</p>
       ) : (

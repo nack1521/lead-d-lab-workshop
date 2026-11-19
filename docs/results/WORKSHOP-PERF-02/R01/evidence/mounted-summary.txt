@@ -1,0 +1,11 @@
+sanitized aggregate only
+(pass) PERF02 restore, role isolation and sign-out races > restore transient 503 preserves candidate and offers a single manual Retry [422.29ms]
+(pass) PERF02 restore, role isolation and sign-out races > restore scope mismatch never activates the role from storage metadata [415.80ms]
+(pass) PERF02 restore, role isolation and sign-out races > restore 403 stays access-denied, preserves the stored candidate and does not claim expiry [411.04ms]
+(pass) PERF02 restore, role isolation and sign-out races > local expiry ends active access and blocks the workspace without claiming server rollback [757.25ms]
+(pass) PERF02 restore, role isolation and sign-out races > sign out during restore blocks the old response from repopulating or clearing newer state; other role survives [548.01ms]
+(pass) PERF02 restore, role isolation and sign-out races > storage write failure keeps the valid login usable in memory with an explicit warning [425.57ms]
+(pass) PERF02 Add pending and uncertain write outcome > network-unknown Add shows a check-before-retry message, no fabricated question and no automatic POST retry [581.61ms]
+ 28 pass
+ 0 fail
+Ran 28 tests across 1 file. [15.43s]

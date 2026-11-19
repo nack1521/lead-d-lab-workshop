@@ -1,0 +1,11 @@
+sanitized aggregate only
+(pass) PERF02 session storage contract > other role and unrelated keys are untouched by read/write/remove [0.05ms]
+(pass) PERF02 session storage contract > storage access/get/set/remove failures are contained; tombstone is best-effort [0.14ms]
+(pass) PERF02 session storage contract > missing window/storage reports unavailable instead of throwing [0.02ms]
+(pass) PERF02 diagnostics contract > enabled login/rooms expose opaque ID, route template, status and named DB steps only [13.64ms]
+(pass) PERF02 diagnostics contract > workspace and Add emit their own named DB steps and preserve behavior [16.24ms]
+(pass) PERF02 diagnostics contract > disabled diagnostics emit no diagnostic headers; CORS preflight exposes the allowlist [2.86ms]
+(pass) PERF02 diagnostics contract > diagnostic output does not echo marker secrets from passphrase/body/query; HR scope remains authoritative [1.46ms]
+ 10 pass
+ 0 fail
+Ran 10 tests across 3 files. [399.00ms]

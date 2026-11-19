@@ -1,0 +1,39 @@
+{
+  "schema_version": 1,
+  "task_id": "WORKSHOP-PERF-02",
+  "run_id": "R01",
+  "reported_at": "2026-11-19T13:34:57+07:00",
+  "producer": "DeepSeek Harness (sole user-operated coding writer)",
+  "authoring_tool": "DeepSeek Harness",
+  "model": "deepseek-v4.1-flash-1017",
+  "model_provenance": "runtime-reported/unverified",
+  "source_kind": "direct",
+  "baseline_commit": "9fb38df",
+  "observed_head": "15851f8",
+  "branch": "main",
+  "work_kind": "session_persistence_and_action_diagnostics",
+  "status": "READY_FOR_REVIEW",
+  "commits": {"session_client": "a7236a6", "server_diagnostics_api_scope": "15851f8"},
+  "summary": "Implemented two narrow slices. Session: versioned per-role sessionStorage (token/scope/finite expiry from login start/API-base), restore only via authenticated rooms read + additive server scope match, no role/audience borrowing, local expiry/focus/pre-dispatch blocking, 401 scoped invalidation vs 403 preservation vs 5xx manual Retry, local-only sign-out with best-effort remove/tombstone and explicit limitation, generation guards for old completions, sign-out controls, storage exception handling, Add pending/10s/uncertain check-before-retry. Diagnostics: default-OFF PERF_DIAGNOSTICS server headers (opaque ID, route template/method/status, request duration, named db_* call-await steps) with CORS expose allowlist and no secrets; default-OFF client VITE_PERF_DIAGNOSTICS bounded in-memory events. Focused local tests 72 pass/0 fail/0 skip plus typecheck/build 0; no actual action timing sample collected, so latency attribution UNKNOWN/NOT RUN and no speedup/root-cause claim. Many actor/race/a11y cases listed NOT RUN; production/cloud/load/browser not run.",
+  "detail_path": "docs/results/WORKSHOP-PERF-02/R01/result.md",
+  "commands": [
+    {"command": "API_HOST=127.0.0.1 bun test tests/perf02-session.test.ts tests/perf02-diagnostics.test.ts tests/perf02-client-diag.test.ts", "exit_code": 0, "result": "10 pass / 0 fail / 0 skip, 74 expects"},
+    {"command": "API_HOST=127.0.0.1 bun test tests/findings-client.test.tsx", "exit_code": 0, "result": "28 pass / 0 fail / 0 skip, 101 expects"},
+    {"command": "API_HOST=127.0.0.1 bun test tests/r04-coalesce-lifecycle.test.ts tests/r10-coalesce.test.ts tests/r09-regressions.test.ts", "exit_code": 0, "result": "11 pass / 0 fail / 0 skip, 42 expects"},
+    {"command": "API_HOST=127.0.0.1 bun test tests/builder.test.ts tests/self-paced.test.ts tests/builder-views-r03.test.tsx", "exit_code": 0, "result": "23 pass / 0 fail / 0 skip, 167 expects"},
+    {"command": "bun x tsc --noEmit -p tsconfig.json", "exit_code": 0, "result": "compile/typecheck only"},
+    {"command": "bun run build:web", "exit_code": 0, "result": "compile/build only"}
+  ],
+  "totals": {"pass": 72, "fail": 0, "skip": 0},
+  "case_coverage": {
+    "covered": ["AC01 valid admin restore (no login form, no TTL renewal asserted)", "AC02 scope mismatch/other role record preserved", "AC03 malformed/expired/audience/read-write-remove failure unit; mounted storage-write warning", "AC04 restore 401/403/503 manual Retry; no false empty", "AC05 sign-out during restore old response blocked; other role preserved", "AC06 tombstone/removal failure unit; mounted removal failure NOT RUN", "AC07 local expiry ends access; server 401", "AC08 distinct pending/rooms/workspace/Add basics; pending Add", "AC09 uncertain Add check-before-retry/no auto-retry; 10s copy NOT RUN", "API rooms scope", "diagnostics enabled/disabled/privacy", "existing PERF-01/R09/R10/self-paced regressions"],
+    "partial": ["AC01 HR mounted restore", "AC02 role flash/remount", "AC04 invalid successful restore body", "AC05 login/workspace/Add/report old completions", "AC07 pending-action expiry", "AC08 sign-in/restore timing sequence", "AC10 actual timing sample", "AC11 accessibility", "AC12 broader surface parity", "QA S06/S08 full matrix"],
+    "not_run": ["controlled actual login/rooms/workspace/Add timing, DB cold/warm, browser Resource Timing/paint", "production measurement/log access", "full suite/browser/mobile/a11y", "cloud/load/push/deploy"]
+  },
+  "diagnostics": {"server_env": "PERF_DIAGNOSTICS=1 (default off)", "client_env": "VITE_PERF_DIAGNOSTICS=1 (default off)", "retention": "per-response headers; client bounded in-memory 100 events; no external analytics", "db_semantics": "db_* is client-call await elapsed (pool/connection/wire/execution where applicable); pure query execution UNKNOWN", "actual_sample": "NOT RUN"},
+  "environment": {"db_loopback": true, "db_url_host": "127.0.0.1:5433", "api_host": "127.0.0.1", "base_db_started_existing_volume": true, "known_db_reset": false, "production_calls": false, "cleanup_hooks": "helpers stop API/close SQL/drop own c1_test_* DBs", "independent_cleanup_verification": "not performed"},
+  "changed_paths": ["apps/web/src/admin-session.ts", "apps/web/src/perf-diag.ts", "apps/web/src/builder.tsx", "apps/web/src/containers.tsx", "apps/api/src/diagnostics.ts", "apps/api/src/env.ts", "apps/api/src/server.ts", "apps/api/src/builder-routes.ts", "tests/perf02-session.test.ts", "tests/perf02-diagnostics.test.ts", "tests/perf02-client-diag.test.ts", "tests/findings-client.test.tsx", "docs/results/WORKSHOP-PERF-02/R01/result.md", "docs/results/WORKSHOP-PERF-02/R01/result.json", "docs/results/INDEX.md"],
+  "limitations": ["no whole-app/runtime PASS", "no actual timing sample or speedup/root-cause claim", "many actor/race/a11y/production cases NOT RUN", "sessionStorage not secure storage; local-only logout"],
+  "next_gate": "Coordinator/Product/QA review same revision; separately approved local controlled timing sample and production measurement remain future gates. No push/deploy.",
+  "published": false
+}

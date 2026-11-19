@@ -1,0 +1,11 @@
+sanitized aggregate only
+(pass) R04 coalescer busy lifecycle > cancel during A prevents a latched B from starting; busy clears after A settles [16.60ms]
+(pass) R10 coalesced task trailing latch (WB2-R09-COALESCE-01) > invalidation arriving while run1 is in flight is not lost and runs once afterwards [138.79ms]
+(pass) R10 coalesced task trailing latch (WB2-R09-COALESCE-01) > ten updates during run1 coalesce into one bounded trailing run with final state [157.27ms]
+(pass) R10 coalesced task trailing latch (WB2-R09-COALESCE-01) > cancel prevents trailing reads and rejection does not retry forever [102.32ms]
+(pass) R09 bounded report refresh and delete reconciliation > bursts of WS frames coalesce to at most one report read [142.31ms]
+(pass) R09 bounded report refresh and delete reconciliation > live snapshot updates charts only when strictly newer; text waits for report [0.86ms]
+(pass) R09 bounded report refresh and delete reconciliation > DELETE result reconciles list and selection without stale editor target [0.27ms]
+ 11 pass
+ 0 fail
+Ran 11 tests across 3 files. [921.00ms]

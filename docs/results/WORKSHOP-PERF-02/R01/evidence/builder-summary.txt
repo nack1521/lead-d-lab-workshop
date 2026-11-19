@@ -1,0 +1,11 @@
+sanitized aggregate only
+(pass) WORKSHOP-BUILDER-02 admin authoring and real data flow > rejects invalid input and supports reorder while no answers exist [7.12ms]
+(pass) WORKSHOP-BUILDER-02 admin authoring and real data flow > participant joins only an open room, answers, gets saved acknowledgement [22.62ms]
+(pass) WORKSHOP-BUILDER-02 admin authoring and real data flow > facilitator live snapshot matches DB and report for score [11.51ms]
+(pass) WORKSHOP-BUILDER-02 admin authoring and real data flow > room-level answering: out-of-sequence rejected and structure locks while open [9.56ms]
+(pass) WORKSHOP-BUILDER-02 admin authoring and real data flow > choice and text answers in sequence, latest three + full pagination [223.12ms]
+(pass) WORKSHOP-BUILDER-02 admin authoring and real data flow > HR scope is read-only at the server boundary [3.34ms]
+(pass) WORKSHOP-BUILDER-02 admin authoring and real data flow > ending the room persists answers and blocks further mutation [6.81ms]
+ 23 pass
+ 0 fail
+Ran 23 tests across 3 files. [752.00ms]

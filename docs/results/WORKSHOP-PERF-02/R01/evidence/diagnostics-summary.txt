@@ -1,0 +1,8 @@
+sanitized aggregate only
+(pass) PERF02 diagnostics contract > enabled login/rooms expose opaque ID, route template, status and named DB steps only [9.68ms]
+(pass) PERF02 diagnostics contract > workspace and Add emit their own named DB steps and preserve behavior [11.51ms]
+(pass) PERF02 diagnostics contract > disabled diagnostics emit no diagnostic headers; CORS preflight exposes the allowlist [2.53ms]
+(pass) PERF02 diagnostics contract > diagnostic output does not echo marker secrets from passphrase/body/query; HR scope remains authoritative [1.65ms]
+ 4 pass
+ 0 fail
+Ran 4 tests across 1 file. [347.00ms]

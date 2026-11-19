@@ -4,6 +4,7 @@ import type { Config } from './env.ts';
 import { issueGrant } from './grants.ts';
 import { buildSnapshot } from './snapshot.ts';
 import { graphemeCount, hashToken, newToken, normalizeOptionalText } from './text.ts';
+import { withDbStep } from './diagnostics.ts';
 
 /** WORKSHOP-BUILDER-02 admin/room authoring API. Demo passphrase `admin` is
  * intentionally weak (no signup, not production auth); rooms/questions/answers
@@ -116,18 +117,21 @@ export function createBuilderRoutes(deps: { sql: Sql; config: Config; hub: Build
       if (typeof body.passphrase !== 'string' || body.passphrase.trim() !== 'admin') return R('INVALID_PASSPHRASE', 'รหัสผู้ดูแลไม่ถูกต้อง', 401);
       const scope = body.scope === 'hr' ? 'hr' : 'admin';
       const token = newToken();
-      await sql`insert into admin_grants (token_hash, scope, expires_at) values (${hashToken(token)}, ${scope}, now() + ${ADMIN_TTL_SECONDS + ' seconds'}::interval)`;
+      await withDbStep('login.grant_insert', () => sql`insert into admin_grants (token_hash, scope, expires_at) values (${hashToken(token)}, ${scope}, now() + ${ADMIN_TTL_SECONDS + ' seconds'}::interval)`);
       return J({ status: 'ok', admin_token: token, scope, expires_in_seconds: ADMIN_TTL_SECONDS });
     })
     .get('/api/admin/rooms', async ({ request }) => {
-      const a = await auth(request); if (!a.ok) return a.response;
-      const rooms = await sql<(Room & { questions: number; participants: number; responses: number })[]>`
+      const a = await withDbStep('rooms.auth', () => auth(request)); if (!a.ok) return a.response;
+      const rooms = await withDbStep('rooms.list', () => sql<(Room & { questions: number; participants: number; responses: number })[]>`
         select s.id, s.title, s.join_code, s.status, s.published, s.revision, s.active_question_id, s.created_at, s.ended_at, s.answer_mode,
           (select count(*)::int from questions q where q.session_id = s.id) as questions,
           (select count(*)::int from participants p where p.session_id = s.id) as participants,
           (select count(*)::int from responses r where r.session_id = s.id) as responses
-        from sessions s order by s.created_at desc limit 100`;
-      return J({ status: 'ok', rooms: rooms.map((row) => ({ ...roomJson(row as Room), counts: { questions: row.questions, participants: row.participants, responses: row.responses } })) });
+        from sessions s order by s.created_at desc limit 100`);
+      // Additive authoritative scope from the already validated grant. Clients
+      // must still enforce server mutation authorization; storage role alone is
+      // never permission.
+      return J({ status: 'ok', scope: a.scope, rooms: rooms.map((row) => ({ ...roomJson(row as Room), counts: { questions: row.questions, participants: row.participants, responses: row.responses } })) });
     })
     .post('/api/admin/rooms', async ({ request }) => {
       const a = await auth(request); if (!a.ok) return a.response;
@@ -153,9 +157,9 @@ export function createBuilderRoutes(deps: { sql: Sql; config: Config; hub: Build
       return J({ status: 'ok', room: roomJson(found), questions: await questionList(found.id), counts: { participants: participants.count } });
     })
     .post('/api/admin/rooms/:roomId/questions', async ({ request, params }) => {
-      const a = await auth(request); if (!a.ok) return a.response;
+      const a = await withDbStep('add.auth', () => auth(request)); if (!a.ok) return a.response;
       const denied = adminOnly(a.scope); if (denied) return denied;
-      const found = await room(String(params.roomId));
+      const found = await withDbStep('add.room', () => room(String(params.roomId)));
       if (!found) return R('ROOM_NOT_FOUND', 'ไม่พบห้องนี้', 404);
       if (found.status === 'ended') return R('ROOM_ENDED', 'ห้องนี้จบแล้ว', 409);
       if (found.answer_mode === 'self_paced' && found.published) return R('ROOM_OPEN_STRUCTURE_LOCKED', 'ห้องเปิดแล้ว จึงเพิ่มคําถามไม่ได้', 409);
@@ -163,14 +167,14 @@ export function createBuilderRoutes(deps: { sql: Sql; config: Config; hub: Build
       try { body = (await request.json()) as Record<string, unknown>; } catch { return R('INVALID_JSON', 'ข้อมูลคําขอไม่ถูกต้อง', 400); }
       const parsed = parseQuestion(body);
       if (!parsed.ok) return R('VALIDATION_FAILED', parsed.message, 422);
-      const [maxRow] = await sql<{ max: number | null }[]>`select max(seq) as max from questions where session_id = ${found.id}`;
+      const [maxRow] = await withDbStep('add.max_seq', () => sql<{ max: number | null }[]>`select max(seq) as max from questions where session_id = ${found.id}`);
       const id = crypto.randomUUID();
       const q = parsed.value;
-      const [created] = await sql<Question[]>`
+      const [created] = await withDbStep('add.insert', () => sql<Question[]>`
         insert into questions (id, session_id, seq, type, label, help_text, options, rating_min, rating_max, receiving)
         values (${id}, ${found.id}, ${(maxRow?.max ?? 0) + 1}, ${q.type}, ${q.label}, ${q.help_text},
           ${q.options ? sql.json(q.options) : null}, ${q.rating_min}, ${q.rating_max}, false)
-        returning id, session_id, seq, type, label, help_text, options, rating_min, rating_max, receiving, closed_at`;
+        returning id, session_id, seq, type, label, help_text, options, rating_min, rating_max, receiving, closed_at`);
       return J({ status: 'ok', question: questionJson(created) }, 201);
     })
     .patch('/api/admin/rooms/:roomId/questions/:questionId', async ({ request, params }) => {
@@ -305,11 +309,13 @@ export function createBuilderRoutes(deps: { sql: Sql; config: Config; hub: Build
       return J({ status: 'ok', room: roomJson((await room(found.id)) as Room) });
     })
     .get('/api/admin/rooms/:roomId/workspace', async ({ request, params }) => {
-      const a = await auth(request); if (!a.ok) return a.response;
-      const found = await room(String(params.roomId));
+      const a = await withDbStep('workspace.auth', () => auth(request)); if (!a.ok) return a.response;
+      const found = await withDbStep('workspace.room', () => room(String(params.roomId)));
       if (!found) return R('ROOM_NOT_FOUND', 'ไม่พบห้องนี้', 404);
-      const realtimeGrant = await issueGrant(sql, { sessionId: found.id, role: 'facilitator', ttlSeconds: config.facilitatorGrantTtlSeconds });
-      return J({ status: 'ok', room: roomJson(found), questions: await questionList(found.id), snapshot: await buildSnapshot(sql, found.id), realtime_grant: realtimeGrant });
+      const realtimeGrant = await withDbStep('workspace.grant_issue', () => issueGrant(sql, { sessionId: found.id, role: 'facilitator', ttlSeconds: config.facilitatorGrantTtlSeconds }));
+      const questions = await withDbStep('workspace.questions', () => questionList(found.id));
+      const snapshot = await withDbStep('workspace.snapshot', () => buildSnapshot(sql, found.id));
+      return J({ status: 'ok', room: roomJson(found), questions, snapshot, realtime_grant: realtimeGrant });
     })
     .get('/api/admin/rooms/:roomId/report', async ({ request, params }) => {
       const a = await auth(request); if (!a.ok) return a.response;

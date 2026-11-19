@@ -1,6 +1,7 @@
 export interface Config {
   databaseUrl: string;
   apiHost: string;
+  perfDiagnostics: boolean;
   apiPort: number;
   allowedOrigins: string[];
   participantGrantTtlSeconds: number;
@@ -51,6 +52,7 @@ export function loadConfig(env: Record<string, string | undefined> = process.env
   return {
     databaseUrl,
     apiHost,
+    perfDiagnostics: env.PERF_DIAGNOSTICS === '1',
     apiPort,
     allowedOrigins,
     participantGrantTtlSeconds: num(env, 'GRANT_TTL_PARTICIPANT_SECONDS', 14400),

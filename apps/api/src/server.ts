@@ -3,6 +3,7 @@ import { createApp } from './app.ts';
 import type { Sql } from './db.ts';
 import type { Config } from './env.ts';
 import { createHub, handleUpgrade, type Hub, type HubTestHooks, type SocketData } from './ws.ts';
+import { diagnosticHeaders, newDiagnosticState, runWithDiagnostics } from './diagnostics.ts';
 
 export interface RunningServer {
   server: Server<SocketData>;
@@ -46,6 +47,7 @@ export function startServer(config: Config, sql: Sql, hooks?: HubTestHooks): Run
             'access-control-allow-origin': origin,
             'access-control-allow-methods': 'GET, POST, PATCH, DELETE, OPTIONS',
             'access-control-allow-headers': 'authorization, content-type',
+            'access-control-expose-headers': 'x-request-id, server-timing, x-perf-route, x-perf-method, x-perf-status',
             'access-control-max-age': '600',
             vary: 'Origin',
           },
@@ -54,11 +56,13 @@ export function startServer(config: Config, sql: Sql, hooks?: HubTestHooks): Run
       if (origin !== null && !allowed) {
         return corsRejection('ORIGIN_DENIED', 'Origin ไม่ได้รับอนุญาต');
       }
-      const response = await app.handle(req);
+      const diag = newDiagnosticState(config.perfDiagnostics, req.method, url.pathname);
+      const response = await runWithDiagnostics(diag, () => app.handle(req));
       if (!allowed) return response;
       const headers = new Headers(response.headers);
       headers.set('access-control-allow-origin', origin);
       headers.set('vary', 'Origin');
+      for (const [name, value] of diagnosticHeaders(diag, response.status)) headers.set(name, value);
       return new Response(response.body, { status: response.status, headers });
     },
     websocket: hub.handlers,
